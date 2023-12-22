@@ -1,6 +1,6 @@
 const { DATE_ISO_FORMAT } = require("../constants.js");
 const { parse } = require("date-fns/parse");
-const toString = require("./toString");
+const isInstanceOf = require("../helpers/isInstanceOf");
 
 // ------------------------------------------------------------------------------------------------
 
@@ -11,8 +11,25 @@ const toString = require("./toString");
  * @param {Date} defaultDate - the default date in case it fails
  * @returns {Date} - Returns a new date object from string provided
  */
-function stringToDate(stringDate, stringFormat = DATE_ISO_FORMAT, defaultDate = new Date()) {
-  return parse(toString(stringDate), stringFormat, defaultDate);
+function stringToDate(
+  stringDate,
+  stringFormat = DATE_ISO_FORMAT,
+  defaultDate = new Date()
+) {
+  try {
+    if (typeof stringDate !== "string") {
+      return defaultDate
+    }
+
+    let date = parse(stringDate, stringFormat, defaultDate);
+    if (!isInstanceOf(date, Date) || isNaN(date.getTime())) {
+      if (!defaultDate) return false;
+      date = defaultDate;
+    }
+
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);;
+  } catch (_) {}
+  return false;
 }
 
 // ------------------------------------------------------------------------------------------------

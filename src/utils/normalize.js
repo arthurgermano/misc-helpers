@@ -1,4 +1,4 @@
-const toString = require("./toString.js");
+const isNumber = require("../helpers/isNumber");
 
 // ------------------------------------------------------------------------------------------------
 
@@ -8,8 +8,10 @@ const toString = require("./toString.js");
  * @returns {String} - The text normalized
  */
 function normalize(text = "") {
-  text = toString(text);
-  return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  if (isNumber(text) || typeof text == "string") {
+    return text.toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  }
+  return "";
 }
 
 // ------------------------------------------------------------------------------------------------

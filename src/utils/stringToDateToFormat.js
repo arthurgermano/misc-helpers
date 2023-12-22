@@ -16,7 +16,11 @@ function stringToDateToFormat(
   fromFormat = DATE_ISO_FORMAT,
   toFormat
 ) {
-  return dateToFormat(stringToDate(stringDate, fromFormat), toFormat);
+  try {
+    return dateToFormat(stringToDate(stringDate, fromFormat), toFormat);
+  } catch (_) {
+    return false;
+  }
 }
 
 // ------------------------------------------------------------------------------------------------

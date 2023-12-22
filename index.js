@@ -35,7 +35,7 @@ module.exports = {
     normalize: require("./src/utils/normalize.js"),
     regexDigitsOnly: require("./src/utils/regexDigitsOnly.js"),
     regexReplaceTrim: require("./src/utils/regexReplaceTrim.js"),
-    regexTextOnly: require("./src/utils/regexTextOnly.js"),
+    regexLettersOnly: require("./src/utils/regexLettersOnly.js"),
     removeDuplicatedStrings: require("./src/utils/removeDuplicatedStrings.js"),
     stringToDate: require("./src/utils/stringToDate.js"),
     stringToDateToFormat: require("./src/utils/stringToDateToFormat.js"),

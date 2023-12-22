@@ -1,7 +1,8 @@
 module.exports = {
   // ----------------------------------------------------------------------------------------------
 
-  DATE_ISO_FORMAT: `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`,
+  DATE_ISO_FORMAT_TZ: `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`,
+  DATE_ISO_FORMAT: `yyyy-MM-dd'T'HH:mm:ss.SSS`,
 
   // ----------------------------------------------------------------------------------------------
   // Brazilian Formats 

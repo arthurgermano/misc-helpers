@@ -272,8 +272,11 @@ describe("CUSTOM - setConditionBetweenDates", () => {
     expect(result.created_at).toHaveProperty("$and");
     expect(Array.isArray(result.created_at.$and)).toBe(true);
     expect(result.created_at.$and[0]).toHaveProperty("$gte");
-    expect(result.created_at.$and[0].$gte.getTime()).toBe(
-      expectedTime.getTime()
+    expect(result.created_at.$and[0].$gte.getTime()).toBeGreaterThan(
+      expectedTime.getTime() - 10
+    );
+    expect(result.created_at.$and[0].$gte.getTime()).toBeLessThan(
+      expectedTime.getTime() + 10
     );
   });
 

@@ -5,7 +5,7 @@ const toString = require("./toString.js");
 /**
  * @summary. Return a string with the regex replaced by the replacement informed
  * @param {String} text - String with the values to be replaced
- * @param {String} regex - The regex to search and replace in the string
+ * @param {String} regex - The regex to should be kept
  * @param {String} replacement - The string that will replace in the regex
  * @returns {String} - Returns a string from the object provided
  */

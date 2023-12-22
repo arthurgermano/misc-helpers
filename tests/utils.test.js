@@ -1311,7 +1311,7 @@ describe("UTILS - removeDuplicatedStrings", () => {
 
 // ------------------------------------------------------------------------------------------------
 
-describe("UTILS - JSONTo", () => {
+describe("UTILS - stringToDate", () => {
   // ----------------------------------------------------------------------------------------------
 
   const stringToDate = utils.stringToDate;

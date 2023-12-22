@@ -1,4 +1,4 @@
-const { DATE_ISO_FORMAT } = require("../constants.js");
+const { DATE_ISO_FORMAT, DATE_ISO_FORMAT_TZ } = require("../constants.js");
 const { parse } = require("date-fns/parse");
 const isInstanceOf = require("../helpers/isInstanceOf");
 
@@ -18,16 +18,18 @@ function stringToDate(
 ) {
   try {
     if (typeof stringDate !== "string") {
-      return defaultDate
+      return defaultDate;
     }
 
-    let date = parse(stringDate, stringFormat, defaultDate);
+    let date = parse(stringDate, stringFormat, defaultDate || new Date());
     if (!isInstanceOf(date, Date) || isNaN(date.getTime())) {
-      if (!defaultDate) return false;
+      if (!defaultDate) {
+        return false;
+      }
       date = defaultDate;
     }
 
-    return new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);;
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
   } catch (_) {}
   return false;
 }

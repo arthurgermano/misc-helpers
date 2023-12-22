@@ -1345,6 +1345,15 @@ describe("UTILS - stringToDate", () => {
   });
   
   // ----------------------------------------------------------------------------------------------
+
+  it('stringToDate should parse a valid date string with custom incomplete format', () => {
+    const dateString = '12-07-2022';
+    const result = stringToDate(dateString, constants.DATE_BR_FORMAT_D);
+    expect(result instanceof Date).toBe(true);
+    expect(result.toGMTString()).toBe('Tue, 12 Jul 2022 00:00:00 GMT');
+  });
+  
+  // ----------------------------------------------------------------------------------------------
   
   it('stringToDate should return default date for an invalid date string with default format', () => {
     const invalidDateString = 'invalid-date';
@@ -1373,6 +1382,57 @@ describe("UTILS - stringToDate", () => {
       const result = stringToDate(invalidDateString, customFormat, false);
       expect(result).toBe(false);
     });
+
+  // ----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------
+
+describe("UTILS - stringToDateToFormat", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  const stringToDateToFormat = utils.stringToDateToFormat;
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should return a formatted date string in the default format', () => {
+    const inputDateString = '2022-01-15T12:34:56.789';
+    const result = stringToDateToFormat(inputDateString);
+    expect(result).toEqual("15-01-2022 12:34:56");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should return a formatted date string from a custom format', () => {
+    const inputDateString = '02-05-2021';
+    const result = stringToDateToFormat(inputDateString, constants.DATE_BR_FORMAT_D, constants.DATE_BR_MONTH_FORMAT_FS);
+    expect(result).toEqual('2021/05');
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should return a formatted date string in the specified format', () => {
+    const inputDateString = '2022-12-22T12:34:56.789';
+    const result = stringToDateToFormat(inputDateString, constants.DATE_ISO_FORMAT, constants.DATE_BR_FORMAT_D);
+    expect(result).toEqual('22-12-2022');
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should return false for an invalid date string', () => {
+    const invalidDateString = 'invalid-date-string';
+    const result = stringToDateToFormat(invalidDateString);
+    expect(result).toBe(false);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should return false for a valid date string but invalid format', () => {
+    const inputDateString = '2022-12-22T12:34:56.789Z';
+    const invalidFormat = 'invalid-format';
+    const result = stringToDateToFormat(inputDateString, constants.DATE_ISO_FORMAT, invalidFormat);
+    expect(result).toBe(false);
+  });
 
   // ----------------------------------------------------------------------------------------------
 });

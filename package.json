@@ -1,0 +1,29 @@
+{
+  "name": "miscellaneous",
+  "version": "1.0.0",
+  "author": "Arthur José Germano",
+  "license": "MIT",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "vitest --run --reporter verbose --globals"
+  },
+  "keywords": [
+    "functions",
+    "helpers",
+    "validators"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arthurgermano/miscellaneous"
+  },
+  "bugs": {
+    "url": "https://github.com/arthurgermano/miscellaneous/issues"
+  },
+  "dependencies": {
+    "date-fns": "^3.0.5",
+    "lodash.clonedeep": "^4.5.0"
+  },
+  "devDependencies": {
+    "vitest": "^1.1.0"
+  }
+}

@@ -7,7 +7,7 @@ A collection of utility functions and validators for common tasks.
 - [Utilities](#utilities)
 - [Validators](#validators)
 - [Helpers](#helpers)
-- [Custom][#custom]
+- [Custom](#custom)
 
 ## Utilities
 

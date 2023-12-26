@@ -47,4 +47,8 @@ module.exports = {
     validateCNPJ: require("./src/validators/validateCNPJ.js"),
     validateCPF: require("./src/validators/validateCPF.js"),
   },
+  ...require("./src/custom/db/sequelize"),
+  ...require("./src/helpers"),
+  ...require("./src/utils"),
+  ...require("./src/validators"),
 };

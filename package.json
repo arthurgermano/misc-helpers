@@ -1,5 +1,5 @@
 {
-  "name": "miscellaneous",
+  "name": "misc-helpers",
   "version": "1.0.0",
   "author": "Arthur José Germano",
   "license": "MIT",
@@ -14,10 +14,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/arthurgermano/miscellaneous.git"
+    "url": "git+https://github.com/arthurgermano/misc-helpers.git"
   },
   "bugs": {
-    "url": "https://github.com/arthurgermano/miscellaneous/issues"
+    "url": "https://github.com/arthurgermano/misc-helpers/issues"
   },
   "dependencies": {
     "date-fns": "^3.0.5",
@@ -26,7 +26,7 @@
   "devDependencies": {
     "vitest": "^1.1.0"
   },
-  "homepage": "https://github.com/arthurgermano/miscellaneous#readme",
+  "homepage": "https://github.com/arthurgermano/misc-helpers#readme",
   "description": "Several functions that are always needed in projects",
   "directories": {
     "test": "tests"

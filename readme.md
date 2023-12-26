@@ -4,10 +4,10 @@ A collection of utility functions and validators for common tasks.
 
 ## Table of Contents
 
-- [Custom][#custom]
 - [Utilities](#utilities)
 - [Validators](#validators)
 - [Helpers](#helpers)
+- [Custom][#custom]
 
 ## Utilities
 

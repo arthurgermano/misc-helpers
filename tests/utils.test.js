@@ -9,12 +9,6 @@ function deepEqual(obj1, obj2) {
 
 // ------------------------------------------------------------------------------------------------
 
-function isString(variable) {
-  return typeof variable === "string";
-}
-
-// ------------------------------------------------------------------------------------------------
-
 describe("UTILS - assign", () => {
   // ----------------------------------------------------------------------------------------------
 
@@ -177,10 +171,10 @@ describe("UTILS - base64To", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it("base64To should return the correct string for object input", () => {
+  it("base64To should return the correct JSON stringfied for object input", () => {
     const nonStringInput = {};
     const result = base64To(nonStringInput);
-    expect(result).toBe("W29iamVjdCBPYmplY3Rd");
+    expect(result).toBe("e30");
   });
 
   // ----------------------------------------------------------------------------------------------
@@ -1108,64 +1102,64 @@ describe("UTILS - regexReplaceTrim", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it('regexReplaceTrim should replace characters outside the specified regex with the replacement', () => {
-    const inputText = 'A1B2C3';
-    const result = regexReplaceTrim(inputText, 'A-Za-z0-9', '-');
-    expect(result).toBe('A1B2C3');
-  });
-  
-  // ----------------------------------------------------------------------------------------------
-  
-  it('regexReplaceTrim should trim the resulting string', () => {
-    const inputText = '   A B C   ';
-    const result = regexReplaceTrim(inputText, 'A-Z', '');
-    expect(result).toBe('ABC');
-  });
-  
-  // ----------------------------------------------------------------------------------------------
-  
-  it('regexReplaceTrim should handle an empty string input', () => {
-    const result = regexReplaceTrim('', 'A-Za-z0-9', '');
-    expect(result).toBe('');
-  });
-  
-  // ----------------------------------------------------------------------------------------------
-  
-  it('regexReplaceTrim should handle an undefined input', () => {
-    const result = regexReplaceTrim(undefined, 'A-Za-z0-9', '');
-    expect(result).toBe('');
+  it("regexReplaceTrim should replace characters outside the specified regex with the replacement", () => {
+    const inputText = "A1B2C3";
+    const result = regexReplaceTrim(inputText, "A-Za-z0-9", "-");
+    expect(result).toBe("A1B2C3");
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('regexReplaceTrim should correctly replace characters outside the specified regex with the replacement', () => {
-    const inputText = 'Hello! @123 World 456';
-    const result = regexReplaceTrim(inputText, 'A-Za-z0-9', '*');
-    expect(result).toBe('Hello***123*World*456');
+  it("regexReplaceTrim should trim the resulting string", () => {
+    const inputText = "   A B C   ";
+    const result = regexReplaceTrim(inputText, "A-Z", "");
+    expect(result).toBe("ABC");
   });
-  
-  // ----------------------------------------------------------------------------------------------
-  
-  it('regexReplaceTrim should handle special characters in the regex', () => {
-    const inputText = 'Alpha!@Beta?Gamma#$Delta';
-    const result = regexReplaceTrim(inputText, '!@#$%', '');
-    expect(result).toBe('!@#$');
-  });
-  
-  // ----------------------------------------------------------------------------------------------
-  
-  it('regexReplaceTrim should handle multi-word strings', () => {
-    const inputText = '  One Two Three   ';
-    const result = regexReplaceTrim(inputText, 'A-Za-z', '_');
-    expect(result).toBe('__One_Two_Three___');
-  });
-  
+
   // ----------------------------------------------------------------------------------------------
 
-  it('regexReplaceTrim should handle a complex regex pattern', () => {
-    const inputText = '123-abc_456-xyz@789';
-    const result = regexReplaceTrim(inputText, 'a-z@', '');
-    expect(result).toBe('abcxyz@');
+  it("regexReplaceTrim should handle an empty string input", () => {
+    const result = regexReplaceTrim("", "A-Za-z0-9", "");
+    expect(result).toBe("");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("regexReplaceTrim should handle an undefined input", () => {
+    const result = regexReplaceTrim(undefined, "A-Za-z0-9", "");
+    expect(result).toBe("");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("regexReplaceTrim should correctly replace characters outside the specified regex with the replacement", () => {
+    const inputText = "Hello! @123 World 456";
+    const result = regexReplaceTrim(inputText, "A-Za-z0-9", "*");
+    expect(result).toBe("Hello***123*World*456");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("regexReplaceTrim should handle special characters in the regex", () => {
+    const inputText = "Alpha!@Beta?Gamma#$Delta";
+    const result = regexReplaceTrim(inputText, "!@#$%", "");
+    expect(result).toBe("!@#$");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("regexReplaceTrim should handle multi-word strings", () => {
+    const inputText = "  One Two Three   ";
+    const result = regexReplaceTrim(inputText, "A-Za-z", "_");
+    expect(result).toBe("__One_Two_Three___");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("regexReplaceTrim should handle a complex regex pattern", () => {
+    const inputText = "123-abc_456-xyz@789";
+    const result = regexReplaceTrim(inputText, "a-z@", "");
+    expect(result).toBe("abcxyz@");
   });
 
   // ----------------------------------------------------------------------------------------------
@@ -1180,42 +1174,42 @@ describe("UTILS - regexLettersOnly", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it('regexLettersOnly should remove non-letter characters', () => {
-    const inputText = 'Hello123 World!456';
+  it("regexLettersOnly should remove non-letter characters", () => {
+    const inputText = "Hello123 World!456";
     const result = regexLettersOnly(inputText);
-    expect(result).toBe('HelloWorld');
+    expect(result).toBe("HelloWorld");
   });
-  
+
   // ----------------------------------------------------------------------------------------------
-  
-  it('regexLettersOnly should handle special characters', () => {
-    const inputText = 'Alpha!@Beta?Gamma#$Delta';
+
+  it("regexLettersOnly should handle special characters", () => {
+    const inputText = "Alpha!@Beta?Gamma#$Delta";
     const result = regexLettersOnly(inputText);
-    expect(result).toBe('AlphaBetaGammaDelta');
+    expect(result).toBe("AlphaBetaGammaDelta");
   });
-  
+
   // ----------------------------------------------------------------------------------------------
-  
-  it('regexLettersOnly should handle multi-word strings', () => {
-    const inputText = '  One Two Three   ';
+
+  it("regexLettersOnly should handle multi-word strings", () => {
+    const inputText = "  One Two Three   ";
     const result = regexLettersOnly(inputText);
-    expect(result).toBe('OneTwoThree');
+    expect(result).toBe("OneTwoThree");
   });
-  
+
   // ----------------------------------------------------------------------------------------------
-  
-  it('regexLettersOnly should handle accented characters', () => {
-    const inputText = 'Café crème';
+
+  it("regexLettersOnly should handle accented characters", () => {
+    const inputText = "Café crème";
     const result = regexLettersOnly(inputText);
-    expect(result).toBe('Cafécrème');
+    expect(result).toBe("Cafécrème");
   });
-  
+
   // ----------------------------------------------------------------------------------------------
-  
-  it('regexLettersOnly should handle uppercase and lowercase letters', () => {
-    const inputText = 'AbC XyZ';
+
+  it("regexLettersOnly should handle uppercase and lowercase letters", () => {
+    const inputText = "AbC XyZ";
     const result = regexLettersOnly(inputText);
-    expect(result).toBe('AbCXyZ');
+    expect(result).toBe("AbCXyZ");
   });
 
   // ----------------------------------------------------------------------------------------------
@@ -1230,80 +1224,80 @@ describe("UTILS - removeDuplicatedStrings", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it('removeDuplicatedStrings should remove duplicated strings', () => {
-    const inputText = 'apple orange banana apple mango banana';
-    const result = removeDuplicatedStrings(inputText, ' ');
-    expect(result).toBe('apple orange banana mango');
+  it("removeDuplicatedStrings should remove duplicated strings", () => {
+    const inputText = "apple orange banana apple mango banana";
+    const result = removeDuplicatedStrings(inputText, " ");
+    expect(result).toBe("apple orange banana mango");
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('removeDuplicatedStrings should remove case-insensitive duplicated strings', () => {
-    const inputText = 'apple orange Banana apple Mango Banana';
-    const result = removeDuplicatedStrings(inputText, ' ', true);
-    expect(result).toBe('orange apple Mango Banana');
+  it("removeDuplicatedStrings should remove case-insensitive duplicated strings", () => {
+    const inputText = "apple orange Banana apple Mango Banana";
+    const result = removeDuplicatedStrings(inputText, " ", true);
+    expect(result).toBe("orange apple Mango Banana");
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('removeDuplicatedStrings should handle case-sensitive duplicated strings', () => {
-    const inputText = 'apple orange Banana apple Mango Banana';
-    const result = removeDuplicatedStrings(inputText, ' ', false);
-    expect(result).toBe('apple orange Banana Mango');
+  it("removeDuplicatedStrings should handle case-sensitive duplicated strings", () => {
+    const inputText = "apple orange Banana apple Mango Banana";
+    const result = removeDuplicatedStrings(inputText, " ", false);
+    expect(result).toBe("apple orange Banana Mango");
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('removeDuplicatedStrings should handle case-insensitivity with different split string characters', () => {
-    const inputText = 'Apple,Orange,Banana,apple,Mango,Banana';
-    const result = removeDuplicatedStrings(inputText, ',', true);
-    expect(result).toBe('Orange,apple,Mango,Banana');
-  });
-  
-  // ----------------------------------------------------------------------------------------------
-  
-  it('removeDuplicatedStrings should handle different split string characters', () => {
-    const inputText = 'apple,orange,banana,apple,mango,banana';
-    const result = removeDuplicatedStrings(inputText, ',');
-    expect(result).toBe('apple,orange,banana,mango');
-  });
-  
-  // ----------------------------------------------------------------------------------------------
-  
-  it('removeDuplicatedStrings should handle case-insensitivity', () => {
-    const inputText = 'Apple Orange apple ORANGE';
-    const result = removeDuplicatedStrings(inputText, ' ', true);
-    expect(result).toBe('apple ORANGE');
-  });
-  
-  // ----------------------------------------------------------------------------------------------
-  
-  it('removeDuplicatedStrings should handle leading and trailing spaces', () => {
-    const inputText = '   cat   dog   cat   ';
-    const result = removeDuplicatedStrings(inputText, ' ');
-    expect(result).toBe('cat dog');
-  });
-  
-  // ----------------------------------------------------------------------------------------------
-  
-  it('removeDuplicatedStrings should handle an empty string', () => {
-    const inputText = '';
-    const result = removeDuplicatedStrings(inputText, ',');
-    expect(result).toBe('');
-  });
-
-  // ----------------------------------------------------------------------------------------------
-  
-  it('removeDuplicatedStrings should handle an object string', () => {
-    const result = removeDuplicatedStrings({}, ',');
-    expect(result).toBe('');
+  it("removeDuplicatedStrings should handle case-insensitivity with different split string characters", () => {
+    const inputText = "Apple,Orange,Banana,apple,Mango,Banana";
+    const result = removeDuplicatedStrings(inputText, ",", true);
+    expect(result).toBe("Orange,apple,Mango,Banana");
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('removeDuplicatedStrings should handle an number', () => {
-    const result = removeDuplicatedStrings(123, ',');
-    expect(result).toBe('123');
+  it("removeDuplicatedStrings should handle different split string characters", () => {
+    const inputText = "apple,orange,banana,apple,mango,banana";
+    const result = removeDuplicatedStrings(inputText, ",");
+    expect(result).toBe("apple,orange,banana,mango");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("removeDuplicatedStrings should handle case-insensitivity", () => {
+    const inputText = "Apple Orange apple ORANGE";
+    const result = removeDuplicatedStrings(inputText, " ", true);
+    expect(result).toBe("apple ORANGE");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("removeDuplicatedStrings should handle leading and trailing spaces", () => {
+    const inputText = "   cat   dog   cat   ";
+    const result = removeDuplicatedStrings(inputText, " ");
+    expect(result).toBe("cat dog");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("removeDuplicatedStrings should handle an empty string", () => {
+    const inputText = "";
+    const result = removeDuplicatedStrings(inputText, ",");
+    expect(result).toBe("");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("removeDuplicatedStrings should handle an object string", () => {
+    const result = removeDuplicatedStrings({}, ",");
+    expect(result).toBe("");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("removeDuplicatedStrings should handle an number", () => {
+    const result = removeDuplicatedStrings(123, ",");
+    expect(result).toBe("123");
   });
 
   // ----------------------------------------------------------------------------------------------
@@ -1318,70 +1312,70 @@ describe("UTILS - stringToDate", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it('stringToDate should parse a valid date string with default format', () => {
-    const dateString = '2023-12-22T12:34:56.789';
+  it("stringToDate should parse a valid date string with default format", () => {
+    const dateString = "2023-12-22T12:34:56.789";
     const result = stringToDate(dateString);
     expect(result instanceof Date).toBe(true);
     expect(result.toGMTString()).toBe("Fri, 22 Dec 2023 12:34:56 GMT");
   });
-  
+
   // ----------------------------------------------------------------------------------------------
 
-  it('stringToDate should parse a valid date string with default format with timezone format', () => {
-    const dateString = '2023-12-22T12:34:56.789Z';
+  it("stringToDate should parse a valid date string with default format with timezone format", () => {
+    const dateString = "2023-12-22T12:34:56.789Z";
     const result = stringToDate(dateString, constants.DATE_ISO_FORMAT_TZ);
     expect(result instanceof Date).toBe(true);
     expect(result.toGMTString()).toBe("Fri, 22 Dec 2023 12:34:56 GMT");
   });
-  
-  // ----------------------------------------------------------------------------------------------
-  
-  it('stringToDate should parse a valid date string with custom format', () => {
-    const dateString = '22-12-2023';
-    const customFormat = 'dd-MM-yyyy';
-    const result = stringToDate(dateString, customFormat);
-    expect(result instanceof Date).toBe(true);
-    expect(result.toGMTString()).toBe('Fri, 22 Dec 2023 00:00:00 GMT');
-  });
-  
+
   // ----------------------------------------------------------------------------------------------
 
-  it('stringToDate should parse a valid date string with custom incomplete format', () => {
-    const dateString = '12-07-2022';
+  it("stringToDate should parse a valid date string with custom format", () => {
+    const dateString = "22-12-2023";
+    const customFormat = "dd-MM-yyyy";
+    const result = stringToDate(dateString, customFormat);
+    expect(result instanceof Date).toBe(true);
+    expect(result.toGMTString()).toBe("Fri, 22 Dec 2023 00:00:00 GMT");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("stringToDate should parse a valid date string with custom incomplete format", () => {
+    const dateString = "12-07-2022";
     const result = stringToDate(dateString, constants.DATE_BR_FORMAT_D);
     expect(result instanceof Date).toBe(true);
-    expect(result.toGMTString()).toBe('Tue, 12 Jul 2022 00:00:00 GMT');
+    expect(result.toGMTString()).toBe("Tue, 12 Jul 2022 00:00:00 GMT");
   });
-  
+
   // ----------------------------------------------------------------------------------------------
-  
-  it('stringToDate should return default date for an invalid date string with default format', () => {
-    const invalidDateString = 'invalid-date';
+
+  it("stringToDate should return default date for an invalid date string with default format", () => {
+    const invalidDateString = "invalid-date";
     const defaultDate = new Date(2022, 0, 1);
     const result = stringToDate(invalidDateString, undefined, defaultDate);
     expect(result instanceof Date).toBe(true);
     expect(result.toGMTString()).toBe("Sat, 01 Jan 2022 00:00:00 GMT");
   });
-  
+
   // ----------------------------------------------------------------------------------------------
-  
-  it('stringToDate should return default date for an invalid date string with custom format', () => {
-    const invalidDateString = 'invalid-date';
-    const customFormat = 'dd-MM-yyyy';
+
+  it("stringToDate should return default date for an invalid date string with custom format", () => {
+    const invalidDateString = "invalid-date";
+    const customFormat = "dd-MM-yyyy";
     const defaultDate = new Date(2022, 0, 1);
     const result = stringToDate(invalidDateString, customFormat, defaultDate);
     expect(result instanceof Date).toBe(true);
     expect(result.toGMTString()).toBe("Sat, 01 Jan 2022 00:00:00 GMT");
   });
 
-    // ----------------------------------------------------------------------------------------------
-  
-    it('stringToDate should return default date as false for an invalid date string with custom format', () => {
-      const invalidDateString = 'invalid-date';
-      const customFormat = 'dd-MM-yyyy';
-      const result = stringToDate(invalidDateString, customFormat, false);
-      expect(result).toBe(false);
-    });
+  // ----------------------------------------------------------------------------------------------
+
+  it("stringToDate should return default date as false for an invalid date string with custom format", () => {
+    const invalidDateString = "invalid-date";
+    const customFormat = "dd-MM-yyyy";
+    const result = stringToDate(invalidDateString, customFormat, false);
+    expect(result).toBe(false);
+  });
 
   // ----------------------------------------------------------------------------------------------
 });
@@ -1395,62 +1389,249 @@ describe("UTILS - stringToDateToFormat", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should return a formatted date string in the default format', () => {
-    const inputDateString = '2022-01-15T12:34:56.789';
+  it("should return a formatted date string in the default format", () => {
+    const inputDateString = "2022-01-15T12:34:56.789";
     const result = stringToDateToFormat(inputDateString);
     expect(result).toEqual("15-01-2022 12:34:56");
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should return a formatted date string from a custom format', () => {
-    const inputDateString = '02-05-2021';
-    const result = stringToDateToFormat(inputDateString, constants.DATE_BR_FORMAT_D, constants.DATE_BR_MONTH_FORMAT_FS);
-    expect(result).toEqual('2021/05');
+  it("should return a formatted date string from a custom format", () => {
+    const inputDateString = "02-05-2021";
+    const result = stringToDateToFormat(
+      inputDateString,
+      constants.DATE_BR_FORMAT_D,
+      constants.DATE_BR_MONTH_FORMAT_FS
+    );
+    expect(result).toEqual("2021/05");
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should return a formatted date string in the specified format', () => {
-    const inputDateString = '2022-12-22T12:34:56.789';
-    const result = stringToDateToFormat(inputDateString, constants.DATE_ISO_FORMAT, constants.DATE_BR_FORMAT_D);
-    expect(result).toEqual('22-12-2022');
+  it("should return a formatted date string in the specified format", () => {
+    const inputDateString = "2022-12-22T12:34:56.789";
+    const result = stringToDateToFormat(
+      inputDateString,
+      constants.DATE_ISO_FORMAT,
+      constants.DATE_BR_FORMAT_D
+    );
+    expect(result).toEqual("22-12-2022");
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should return false for an invalid date string', () => {
-    const invalidDateString = 'invalid-date-string';
+  it("should return false for an invalid date string", () => {
+    const invalidDateString = "invalid-date-string";
     const result = stringToDateToFormat(invalidDateString);
     expect(result).toBe(false);
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should return false for a valid date string but invalid format', () => {
-    const inputDateString = '2022-12-22T12:34:56.789Z';
-    const invalidFormat = 'invalid-format';
-    const result = stringToDateToFormat(inputDateString, constants.DATE_ISO_FORMAT, invalidFormat);
+  it("should return false for a valid date string but invalid format", () => {
+    const inputDateString = "2022-12-22T12:34:56.789Z";
+    const invalidFormat = "invalid-format";
+    const result = stringToDateToFormat(
+      inputDateString,
+      constants.DATE_ISO_FORMAT,
+      invalidFormat
+    );
     expect(result).toBe(false);
   });
 
   // ----------------------------------------------------------------------------------------------
 });
 
+// ------------------------------------------------------------------------------------------------
+
+describe("UTILS - stringToFormat", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  const stringToFormat = utils.stringToFormat;
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should return a formatted string with the default pattern", () => {
+    const inputText = "12345678901234";
+    const result = stringToFormat(inputText);
+    expect(result).toBe("12.345.678/9012-34");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should return a formatted string with the specified pattern", () => {
+    const inputText = "12345678901234";
+    const customPattern = "###-###-###";
+    const result = stringToFormat(inputText, customPattern);
+    expect(result).toBe("123-456-789");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should pad the input text with zeros if it is shorter than the pattern", () => {
+    const inputText = "123400";
+    const result = stringToFormat(inputText);
+    expect(result).toBe("00.000.000/1234-00");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should ignore extra digits if the input text is longer than the pattern", () => {
+    const inputText = "12345678901234567890";
+    const result = stringToFormat(inputText);
+    expect(result).toBe("12.345.678/9012-34");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should handle an empty input text", () => {
+    const result = stringToFormat("");
+    expect(result).toBe("00.000.000/0000-00");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should return a formatted string with the default pattern and options", () => {
+    const inputText = "12345678901234";
+    const result = stringToFormat(inputText);
+    expect(result).toBe("12.345.678/9012-34");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should return a formatted string with the specified pattern and options", () => {
+    const inputText = "12345678901234";
+    const customPattern = "###-###-###";
+    const options = { digitsOnly: true, paddingChar: "X" };
+    const result = stringToFormat(inputText, customPattern, options);
+    expect(result).toBe("123-456-789");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should pad the input text if it is shorter than the pattern and apply custom padding char", () => {
+    const inputText = "1234";
+    const options = { digitsOnly: true, paddingChar: "9" };
+    const result = stringToFormat(inputText, undefined, options);
+    expect(result).toBe("99.999.999/9912-34");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should handle an empty input text and apply custom padding char", () => {
+    const options = { digitsOnly: true, paddingChar: "7" };
+    const result = stringToFormat("", undefined, options);
+    expect(result).toBe("77.777.777/7777-77");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should handle a undefined text", () => {
+    const options = { digitsOnly: true, paddingChar: "X" };
+    const result = stringToFormat(undefined, 'XXX.XXX.XXX-XX', options);
+    expect(result).toBe("XXX.XXX.XXX-XX");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+});
 
 // ------------------------------------------------------------------------------------------------
 
+describe("UTILS - toString", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  const toString = utils.toString;
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should return an empty string for undefined input', () => {
+    const result = toString();
+    expect(result).toBe('');
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should return the same string for a string input', () => {
+    const inputText = 'Hello, World!';
+    const result = toString(inputText);
+    expect(result).toBe(inputText);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should convert a number to a string', () => {
+    const inputNumber = 42;
+    const result = toString(inputNumber);
+    expect(result).toBe('42');
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should convert a boolean to a string', () => {
+    const inputBoolean = true;
+    const result = toString(inputBoolean);
+    expect(result).toBe('true');
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should use toString method for custom objects', () => {
+    const customObject = {
+      toString: () => 'Custom Object',
+    };
+    const result = toString(customObject);
+    expect(result).toBe('Custom Object');
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should convert null to an empty string', () => {
+    const inputNull = null;
+    const result = toString(inputNull);
+    expect(result).toBe('');
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should convert undefined to an empty string', () => {
+    const inputUndefined = undefined;
+    const result = toString(inputUndefined);
+    expect(result).toBe('');
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should convert symbols to a string', () => {
+    const inputSymbol = Symbol('test');
+    const result = toString(inputSymbol);
+    expect(result).toBe('Symbol(test)');
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should use toString method for custom objects', () => {
+    const customObject = {
+      a: 2,
+      b: "text",
+      c: { x: "test"}
+    };
+    const result = toString(customObject);
+    expect(result).toBe('{"a":2,"b":"text","c":{"x":"test"}}');
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should use toString method for custom objects but not JSON stringfy it', () => {
+    const customObject = {
+      a: 2,
+      b: "text",
+      c: { x: "test"}
+    };
+    const result = toString(customObject, false);
+    expect(result).toBe('[object Object]');
+  });
+});
 
 // ------------------------------------------------------------------------------------------------
 
-// describe("UTILS - JSONTo", () => {
-//   // ----------------------------------------------------------------------------------------------
-
-//   const JSONTo = utils.JSONTo;
-
-//   // ----------------------------------------------------------------------------------------------
-
-  
-
-//   // ----------------------------------------------------------------------------------------------
-// });

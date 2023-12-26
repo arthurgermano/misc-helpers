@@ -4,6 +4,7 @@ A collection of utility functions and validators for common tasks.
 
 ## Table of Contents
 
+- [Custom][#custom]
 - [Utilities](#utilities)
 - [Validators](#validators)
 - [Helpers](#helpers)
@@ -80,7 +81,7 @@ A collection of utility functions and validators for common tasks.
 
 ### [isObject](https://github.com/arthurgermano/misc-helpers/blob/main/tests/helpers.test.js)
 
-## Custom Sequelize Functions
+## Custom
 
 ### [setConditionsBetweenDates](https://github.com/arthurgermano/misc-helpers/blob/main/tests/custom.test.js)
 

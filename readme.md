@@ -9,6 +9,8 @@ A collection of utility functions and validators for common tasks.
 - [Helpers](#helpers)
 - [Custom](#custom)
 
+<hr />
+
 ## Utilities
 
 ### [assign](https://github.com/arthurgermano/misc-helpers/blob/main/tests/utils.test.js)
@@ -59,6 +61,8 @@ A collection of utility functions and validators for common tasks.
 
 ### [toString](https://github.com/arthurgermano/misc-helpers/blob/main/tests/utils.test.js)
 
+<hr />
+
 ## Validators
 
 ### [validateCADICMSPR](https://github.com/arthurgermano/misc-helpers/blob/main/tests/validators.test.js)
@@ -66,6 +70,8 @@ A collection of utility functions and validators for common tasks.
 ### [validateCNPJ](https://github.com/arthurgermano/misc-helpers/blob/main/tests/validators.test.js)
 
 ### [validateCPF](https://github.com/arthurgermano/misc-helpers/blob/main/tests/validators.test.js)
+
+<hr />
 
 ## Helpers
 
@@ -81,8 +87,12 @@ A collection of utility functions and validators for common tasks.
 
 ### [isObject](https://github.com/arthurgermano/misc-helpers/blob/main/tests/helpers.test.js)
 
+<hr />
+
 ## Custom
 
 ### [setConditionsBetweenDates](https://github.com/arthurgermano/misc-helpers/blob/main/tests/custom.test.js)
 
 ### [setConditionsBetweenValues](https://github.com/arthurgermano/misc-helpers/blob/main/tests/custom.test.js)
+
+<hr />

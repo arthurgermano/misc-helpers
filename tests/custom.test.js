@@ -423,59 +423,143 @@ describe("CUSTOM - setConditionBetweenDates", () => {
     const inputObject = {
       size_after: 30,
     };
-  
-    const result = setConditionBetweenValues(inputObject, 'size', 'size_until', 'size_after');
-  
-    expect(result).toHaveProperty('size');
-    expect(result.size).toHaveProperty('$and');
+
+    const result = setConditionBetweenValues(
+      inputObject,
+      "size",
+      "size_until",
+      "size_after"
+    );
+
+    expect(result).toHaveProperty("size");
+    expect(result.size).toHaveProperty("$and");
     expect(Array.isArray(result.size.$and)).toBe(true);
-    expect(result.size.$and[0]).toHaveProperty('$gte');
+    expect(result.size.$and[0]).toHaveProperty("$gte");
     expect(result.size.$and[0].$gte).toBe(inputObject.size_after);
   });
 
   // ----------------------------------------------------------------------------------------------
-  
+
   it('setConditionBetweenValues should set the $lte condition when only "size_until" is provided', () => {
     const inputObject = {
       size_until: 50,
     };
-  
-    const result = setConditionBetweenValues(inputObject, 'size', 'size_until', 'size_after');
-  
-    expect(result).toHaveProperty('size');
-    expect(result.size).toHaveProperty('$and');
+
+    const result = setConditionBetweenValues(
+      inputObject,
+      "size",
+      "size_until",
+      "size_after"
+    );
+
+    expect(result).toHaveProperty("size");
+    expect(result.size).toHaveProperty("$and");
     expect(Array.isArray(result.size.$and)).toBe(true);
-    expect(result.size.$and[0]).toHaveProperty('$lte');
+    expect(result.size.$and[0]).toHaveProperty("$lte");
     expect(result.size.$and[0].$lte).toBe(inputObject.size_until);
   });
 
   // ----------------------------------------------------------------------------------------------
-  
+
   it('setConditionBetweenValues should set both $gte and $lte conditions when both "size_after" and "size_until" are provided', () => {
     const inputObject = {
       size_after: 30,
       size_until: 50,
     };
-  
-    const result = setConditionBetweenValues(inputObject, 'size', 'size_until', 'size_after');
-  
-    expect(result).toHaveProperty('size');
-    expect(result.size).toHaveProperty('$and');
+
+    const result = setConditionBetweenValues(
+      inputObject,
+      "size",
+      "size_until",
+      "size_after"
+    );
+
+    expect(result).toHaveProperty("size");
+    expect(result.size).toHaveProperty("$and");
     expect(Array.isArray(result.size.$and)).toBe(true);
-    expect(result.size.$and[0]).toHaveProperty('$gte');
+    expect(result.size.$and[0]).toHaveProperty("$gte");
     expect(result.size.$and[0].$gte).toBe(inputObject.size_after);
-    expect(result.size.$and[1]).toHaveProperty('$lte');
+    expect(result.size.$and[1]).toHaveProperty("$lte");
     expect(result.size.$and[1].$lte).toBe(inputObject.size_until);
   });
-  
+
   // ----------------------------------------------------------------------------------------------
 
   it('setConditionBetweenValues should not set any conditions when neither "size_after" nor "size_until" are provided', () => {
     const inputObject = {};
-  
-    const result = setConditionBetweenValues(inputObject, 'size', 'size_until', 'size_after');
-  
+
+    const result = setConditionBetweenValues(
+      inputObject,
+      "size",
+      "size_until",
+      "size_after"
+    );
+
     expect(result).toBeUndefined();
+  });
+
+  // ----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------
+
+describe("CUSTOM - setConditionStringLike", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  const setConditionStringLike = custom.db.sequelize.setConditionStringLike;
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("setConditionStringLike should set the %% when all values are passed correctly", () => {
+    const inputObject = {
+      some_text: "test",
+    };
+
+    setConditionStringLike(inputObject, "some_text");
+
+    expect(inputObject).toHaveProperty("some_text");
+    expect(inputObject.some_text).toHaveProperty("$iLike");
+    expect(inputObject.some_text.$iLike).toBe("%test%");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("setConditionStringLike should set the %% when all values are passed correctly with numbers", () => {
+    const inputObject = {
+      some_text: 1,
+    };
+
+    setConditionStringLike(inputObject, "some_text");
+    
+    expect(inputObject).toHaveProperty("some_text");
+    expect(inputObject.some_text).toHaveProperty("$iLike");
+    expect(inputObject.some_text.$iLike).toBe("%1%");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("setConditionStringLike should't change the object when the properties are not passed correctly", () => {
+    const inputObject = {
+      some_text: 1,
+    };
+
+    setConditionStringLike(inputObject, "xxx");
+    
+    expect(inputObject.some_text).toBe(1);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("setConditionStringLike should set the %% when all values are passed correctly and sensitive case", () => {
+    const inputObject = {
+      some_text: "test",
+    };
+
+    setConditionStringLike(inputObject, "some_text", false);
+
+    expect(inputObject).toHaveProperty("some_text");
+    expect(inputObject.some_text).toHaveProperty("$like");
+    expect(inputObject.some_text.$like).toBe("%test%");
   });
 
   // ----------------------------------------------------------------------------------------------

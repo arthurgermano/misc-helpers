@@ -1,4 +1,5 @@
 module.exports = {
-  setConditionBetweenDates: require("./setConditionsBetweenDates"),
-  setConditionBetweenValues: require("./setConditionsBetweenValues"),
+  setConditionBetweenDates: require("./setConditionsBetweenDates.js"),
+  setConditionBetweenValues: require("./setConditionsBetweenValues.js"),
+  setConditionStringLike: require("./setConditionStringLike.js"),
 };

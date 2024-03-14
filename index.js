@@ -3,8 +3,9 @@ module.exports = {
   custom: {
     db: {
       sequelize: {
-        setConditionBetweenDates: require("./src/custom/db/sequelize/setConditionsBetweenDates"),
-        setConditionBetweenValues: require("./src/custom/db/sequelize/setConditionsBetweenValues"),
+        setConditionBetweenDates: require("./src/custom/db/sequelize/setConditionsBetweenDates.js"),
+        setConditionBetweenValues: require("./src/custom/db/sequelize/setConditionsBetweenValues.js"),
+        setConditionStringLike: require("./src/custom/db/sequelize/setConditionStringLike.js"),
       },
     },
   },

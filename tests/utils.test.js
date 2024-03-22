@@ -621,67 +621,6 @@ describe("UTILS - deleteKeys", () => {
 
 // ------------------------------------------------------------------------------------------------
 
-describe("UTILS - generateHash", () => {
-  // ----------------------------------------------------------------------------------------------
-
-  const generateHash = utils.generateHash;
-
-  // ----------------------------------------------------------------------------------------------
-
-  it("generateHash should generate a hash with default parameters", () => {
-    const inputText = "Hello, World!";
-    const result = generateHash(inputText);
-    expect(result).toBe("3/1gIbsr1bCvZ2KQgJ7DpTGR3YHH9wpLKGiKNiGCmG8=");
-  });
-
-  // ----------------------------------------------------------------------------------------------
-
-  it("generateHash should generate a hash with custom encoding (hex)", () => {
-    const inputText = "Hello, World!";
-    const result = generateHash(inputText, "hex");
-    expect(result).toBe(
-      "dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f"
-    );
-  });
-
-  // ----------------------------------------------------------------------------------------------
-
-  it("generateHash should generate a hash with custom algorithm (sha512)", () => {
-    const inputText = "Hello, World!";
-    const result = generateHash(inputText, "base64", "sha512");
-    expect(result).toBe(
-      "N015SpXNz9izWZMYX++bo2jxYNja9DLQi6nx7R5avmzGkpHg+i/gAGpSVw7xjBne9OYXwzzlLvCm5fvjGMsDhw=="
-    );
-  });
-
-  // ----------------------------------------------------------------------------------------------
-
-  it("generateHash should return an empty string for empty text", () => {
-    const result = generateHash("");
-    expect(result).toBe(false);
-  });
-
-  // ----------------------------------------------------------------------------------------------
-
-  it("generateHash should return false when an invalid encode type is provided", () => {
-    const inputText = "Hello, World!";
-    const result = generateHash(inputText, "invalidEncode");
-    expect(result).toBe(false);
-  });
-
-  // ----------------------------------------------------------------------------------------------
-
-  it("generateHash should return false when an invalid algorithm type is provided", () => {
-    const inputText = "Hello, World!";
-    const result = generateHash(inputText, "base64", "invalidAlgorithm");
-    expect(result).toBe(false);
-  });
-
-  // ----------------------------------------------------------------------------------------------
-});
-
-// ------------------------------------------------------------------------------------------------
-
 describe("UTILS - generateRandomString", () => {
   // ----------------------------------------------------------------------------------------------
 

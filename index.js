@@ -28,7 +28,6 @@ module.exports = {
     dateFirstHourOfDay: require("./src/utils/dateFirstHourOfDay.js"),
     dateLastHourOfDay: require("./src/utils/dateLastHourOfDay.js"),
     deleteKeys: require("./src/utils/deleteKeys.js"),
-    generateHash: require("./src/utils/generateHash.js"),
     generateSimpleId: require("./src/utils/generateSimpleId.js"),
     generateRandomString: require("./src/utils/generateRandomString.js"),
     getExecutionTime: require("./src/utils/getExecutionTime.js"),

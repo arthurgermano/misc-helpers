@@ -1,7 +1,7 @@
 const { DATE_ISO_FORMAT, DATE_BR_HOUR_FORMAT_D } = require("../constants.js");
+const { parse } = require("date-fns/parse");
 const stringToDate = require("./stringToDate.js");
 const dateToFormat = require("./dateToFormat.js");
-const { parse } = require("date-fns/parse");
 // ------------------------------------------------------------------------------------------------
 
 /**

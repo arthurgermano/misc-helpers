@@ -9,7 +9,6 @@ module.exports = {
   dateFirstHourOfDay: require("./dateFirstHourOfDay.js"),
   dateLastHourOfDay: require("./dateLastHourOfDay.js"),
   deleteKeys: require("./deleteKeys.js"),
-  generateHash: require("./generateHash.js"),
   generateSimpleId: require("./generateSimpleId.js"),
   generateRandomString: require("./generateRandomString.js"),
   getExecutionTime: require("./getExecutionTime.js"),

@@ -2,5 +2,5 @@
 /src/
 CHANGELOG.md
 uglify.json
-index.js
+./index.js
 readme.md

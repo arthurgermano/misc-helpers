@@ -1,0 +1,1 @@
+const toString=require("./toString.js");function base64To(t="",r="utf8"){return Buffer.from(toString(t),r).toString("base64").replaceAll("=","")}module.exports=base64To;

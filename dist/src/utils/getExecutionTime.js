@@ -1,0 +1,1 @@
+function getExecutionTime(e=0){const t=process.hrtime(e);return(1e9*t[0]+1e-6*t[1]).toFixed(3)}module.exports=getExecutionTime;

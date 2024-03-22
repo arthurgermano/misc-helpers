@@ -1,0 +1,1 @@
+const{DATE_BR_FORMAT_D:DATE_BR_FORMAT_D}=require("../constants.js"),{format:format}=require("date-fns/format"),isInstanceOf=require("../helpers/isInstanceOf.js");function dateToFormat(e,t=DATE_BR_FORMAT_D){return isInstanceOf(e,Date)?format(e,t):"false"}module.exports=dateToFormat;

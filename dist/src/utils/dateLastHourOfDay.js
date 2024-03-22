@@ -1,0 +1,1 @@
+const isInstanceOf=require("../helpers/isInstanceOf.js");function dateLastHourOfDay(s){return!!isInstanceOf(s,Date)&&(s.setHours(23),s.setMinutes(59),s.setSeconds(59),s.setMilliseconds(999),s)}module.exports=dateLastHourOfDay;

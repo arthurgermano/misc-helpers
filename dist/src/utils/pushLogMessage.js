@@ -1,0 +1,1 @@
+function pushLogMessage(e,s,r){return Array.isArray(e)||(e=[]),e.push({time:(new Date).toISOString(),message:s,more_info:r}),e}module.exports=pushLogMessage;

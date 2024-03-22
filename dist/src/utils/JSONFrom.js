@@ -1,0 +1,1 @@
+function JSONFrom(r,t=!0){try{return JSON.parse(r)}catch(r){if(t)throw r}return null}module.exports=JSONFrom;

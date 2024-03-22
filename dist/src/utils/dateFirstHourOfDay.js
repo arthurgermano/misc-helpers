@@ -1,0 +1,1 @@
+const isInstanceOf=require("../helpers/isInstanceOf.js");function dateFirstHourOfDay(s){return!!isInstanceOf(s,Date)&&(s.setHours(0),s.setMinutes(0),s.setSeconds(0),s.setMilliseconds(0),s)}module.exports=dateFirstHourOfDay;

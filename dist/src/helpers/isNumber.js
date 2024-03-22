@@ -1,0 +1,1 @@
+function isNumber(e){return"number"==typeof e&&!isNaN(e)&&Number.isFinite(e)}module.exports=isNumber;

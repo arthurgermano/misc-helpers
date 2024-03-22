@@ -1,0 +1,1 @@
+function setConditionBetweenValues(e,n="value",t="value_until",u="value_from"){if(e&&(e[u]||e[t]))return e[u]&&(e[n]={$and:[{$gte:e[u]}]}),e[t]&&(e[n]?e[n].$and.push({$lte:e[t]}):e[n]={$and:[{$lte:e[t]}]}),e}module.exports=setConditionBetweenValues;

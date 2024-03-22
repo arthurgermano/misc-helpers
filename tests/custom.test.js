@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { custom, constants, utils } from "../index";
+import { custom, constants, utils } from "../dist/index.js";
 
 // ------------------------------------------------------------------------------------------------
 

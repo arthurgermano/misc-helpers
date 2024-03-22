@@ -1,0 +1,1 @@
+const toString=require("./toString"),base64To=require("./base64To");function base64URLEncode(e="",r="utf8"){return base64To(toString(e),r).replace(/\+/g,"-").replace(/\//g,"_").replace(/=/g,"")}module.exports=base64URLEncode;

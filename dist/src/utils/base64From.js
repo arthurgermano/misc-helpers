@@ -1,0 +1,1 @@
+function base64From(r=""){return"string"==typeof r&&r?Buffer.from(r,"base64").toString():""}module.exports=base64From;

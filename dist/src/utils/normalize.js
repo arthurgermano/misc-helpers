@@ -1,0 +1,1 @@
+const isNumber=require("../helpers/isNumber");function normalize(e=""){return isNumber(e)||"string"==typeof e?e.toString().normalize("NFD").replace(/[\u0300-\u036f]/g,""):""}module.exports=normalize;

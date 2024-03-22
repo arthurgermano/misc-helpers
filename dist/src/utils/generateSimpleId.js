@@ -1,0 +1,1 @@
+const toString=require("./toString");function generateSimpleId(t,e="_"){return(t=toString(t)+e)==e&&(t=""),t+=Date.now(),t+=e+Math.floor(9999999999999*Math.random()+1)}module.exports=generateSimpleId;

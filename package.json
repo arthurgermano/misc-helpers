@@ -1,6 +1,6 @@
 {
   "name": "misc-helpers",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "author": "Arthur José Germano",
   "license": "MIT",
   "main": "./dist/index.js",

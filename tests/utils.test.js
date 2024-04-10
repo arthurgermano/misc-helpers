@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { constants, utils } from "../dist/index.js";
 
 // ------------------------------------------------------------------------------------------------
@@ -541,6 +541,54 @@ describe("UTILS - dateToFormat", () => {
 });
 
 // ------------------------------------------------------------------------------------------------
+
+describe("UTILS - debouncer", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  const debouncer = utils.debouncer;
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("debounce delays function execution", async () => {
+    const mockCallback = vi.fn();
+    const debouncedCallback = debouncer(mockCallback, 1000);
+
+    debouncedCallback("argument1", "argument2");
+
+    // Assert that the callback is not called immediately
+    expect(mockCallback).not.toHaveBeenCalled();
+
+    // Wait for the debounce timeout
+    await new Promise((resolve) => setTimeout(resolve, 1100));
+
+    // Assert that the callback is called once with the arguments after the timeout
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledWith("argument1", "argument2");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("debounce cancels previous timeouts on subsequent calls", async () => {
+    const mockCallback = vi.fn();
+    const debouncedCallback = debouncer(mockCallback, 500);
+
+    debouncedCallback("argument1"); // Schedule first call
+
+    // Wait for a shorter duration to ensure first timeout isn't triggered
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    debouncedCallback("argument2"); // Schedule second call, canceling the first
+
+    // Wait for the longer timeout of the second call
+    await new Promise((resolve) => setTimeout(resolve, 600));
+
+    // Assert that the callback is called only once with the arguments from the second call
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledWith("argument2");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+});
 
 describe("UTILS - deleteKeys", () => {
   // ----------------------------------------------------------------------------------------------
@@ -1468,7 +1516,7 @@ describe("UTILS - stringToFormat", () => {
 
   it("should handle a undefined text", () => {
     const options = { digitsOnly: true, paddingChar: "X" };
-    const result = stringToFormat(undefined, 'XXX.XXX.XXX-XX', options);
+    const result = stringToFormat(undefined, "XXX.XXX.XXX-XX", options);
     expect(result).toBe("XXX.XXX.XXX-XX");
   });
 
@@ -1484,76 +1532,76 @@ describe("UTILS - toString", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should return an empty string for undefined input', () => {
+  it("should return an empty string for undefined input", () => {
     const result = toString();
-    expect(result).toBe('');
+    expect(result).toBe("");
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should return the same string for a string input', () => {
-    const inputText = 'Hello, World!';
+  it("should return the same string for a string input", () => {
+    const inputText = "Hello, World!";
     const result = toString(inputText);
     expect(result).toBe(inputText);
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should convert a number to a string', () => {
+  it("should convert a number to a string", () => {
     const inputNumber = 42;
     const result = toString(inputNumber);
-    expect(result).toBe('42');
+    expect(result).toBe("42");
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should convert a boolean to a string', () => {
+  it("should convert a boolean to a string", () => {
     const inputBoolean = true;
     const result = toString(inputBoolean);
-    expect(result).toBe('true');
+    expect(result).toBe("true");
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should use toString method for custom objects', () => {
+  it("should use toString method for custom objects", () => {
     const customObject = {
-      toString: () => 'Custom Object',
+      toString: () => "Custom Object",
     };
     const result = toString(customObject);
-    expect(result).toBe('Custom Object');
+    expect(result).toBe("Custom Object");
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should convert null to an empty string', () => {
+  it("should convert null to an empty string", () => {
     const inputNull = null;
     const result = toString(inputNull);
-    expect(result).toBe('');
+    expect(result).toBe("");
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should convert undefined to an empty string', () => {
+  it("should convert undefined to an empty string", () => {
     const inputUndefined = undefined;
     const result = toString(inputUndefined);
-    expect(result).toBe('');
+    expect(result).toBe("");
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should convert symbols to a string', () => {
-    const inputSymbol = Symbol('test');
+  it("should convert symbols to a string", () => {
+    const inputSymbol = Symbol("test");
     const result = toString(inputSymbol);
-    expect(result).toBe('Symbol(test)');
+    expect(result).toBe("Symbol(test)");
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should use toString method for custom objects', () => {
+  it("should use toString method for custom objects", () => {
     const customObject = {
       a: 2,
       b: "text",
-      c: { x: "test"}
+      c: { x: "test" },
     };
     const result = toString(customObject);
     expect(result).toBe('{"a":2,"b":"text","c":{"x":"test"}}');
@@ -1561,16 +1609,15 @@ describe("UTILS - toString", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should use toString method for custom objects but not JSON stringfy it', () => {
+  it("should use toString method for custom objects but not JSON stringfy it", () => {
     const customObject = {
       a: 2,
       b: "text",
-      c: { x: "test"}
+      c: { x: "test" },
     };
     const result = toString(customObject, false);
-    expect(result).toBe('[object Object]');
+    expect(result).toBe("[object Object]");
   });
 });
 
 // ------------------------------------------------------------------------------------------------
-

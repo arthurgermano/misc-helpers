@@ -1,12 +1,12 @@
 {
   "name": "misc-helpers",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": "Arthur José Germano",
   "license": "MIT",
   "main": "./dist/index.js",
   "scripts": {
     "test": "vitest --run --reporter verbose --globals",
-    "build": "rm -R ./dist && uglifyjs-folder --config-file './uglify.json' --no-annotations src -eo ./dist/src -x '.js' && uglifyjs --compress --mangle -o ./dist/index.js -- index.js" 
+    "build": "rm -R ./dist && uglifyjs-folder --config-file './uglify.json' --no-annotations src -eo ./dist/src -x '.js' && uglifyjs --compress --mangle -o ./dist/index.js -- index.js"
   },
   "keywords": [
     "functions",
@@ -27,8 +27,8 @@
   "devDependencies": {
     "uglify-js": "^3.17.4",
     "uglifyjs-folder": "^3.3.0",
-    "vite": "^5.2.3",
-    "vitest": "^1.1.0"
+    "vite": "^5.2.8",
+    "vitest": "^1.4.0"
   },
   "homepage": "https://github.com/arthurgermano/misc-helpers#readme",
   "description": "Several functions that are always needed in projects",

@@ -27,6 +27,7 @@ module.exports = {
     dateToFormat: require("./src/utils/dateToFormat.js"),
     dateFirstHourOfDay: require("./src/utils/dateFirstHourOfDay.js"),
     dateLastHourOfDay: require("./src/utils/dateLastHourOfDay.js"),
+    debouncer: require("./src/utils/debouncer.js"),
     deleteKeys: require("./src/utils/deleteKeys.js"),
     generateSimpleId: require("./src/utils/generateSimpleId.js"),
     generateRandomString: require("./src/utils/generateRandomString.js"),

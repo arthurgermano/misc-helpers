@@ -8,6 +8,7 @@ module.exports = {
   dateToFormat: require("./dateToFormat.js"),
   dateFirstHourOfDay: require("./dateFirstHourOfDay.js"),
   dateLastHourOfDay: require("./dateLastHourOfDay.js"),
+  debouncer: require("./debouncer.js"),
   deleteKeys: require("./deleteKeys.js"),
   generateSimpleId: require("./generateSimpleId.js"),
   generateRandomString: require("./generateRandomString.js"),

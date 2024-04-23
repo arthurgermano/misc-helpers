@@ -50,6 +50,7 @@ module.exports = {
     validateCADICMSPR: require("./src/validators/validateCADICMSPR.js"),
     validateCNPJ: require("./src/validators/validateCNPJ.js"),
     validateCPF: require("./src/validators/validateCPF.js"),
+    validateEmail: require("./src/validators/validateEmail.js"),
   },
   ...require("./src/custom/db/sequelize"),
   ...require("./src/helpers"),

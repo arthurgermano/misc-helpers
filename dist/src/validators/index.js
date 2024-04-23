@@ -1,1 +1,1 @@
-module.exports={validateCADICMSPR:require("./validateCADICMSPR.js"),validateCNPJ:require("./validateCNPJ.js"),validateCPF:require("./validateCPF.js")};
+module.exports={validateCADICMSPR:require("./validateCADICMSPR.js"),validateCNPJ:require("./validateCNPJ.js"),validateCPF:require("./validateCPF.js"),validateEmail:require("./validateEmail.js")};

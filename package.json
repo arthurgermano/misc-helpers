@@ -1,11 +1,11 @@
 {
   "name": "misc-helpers",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "author": "Arthur José Germano",
   "license": "MIT",
   "main": "./dist/index.js",
   "scripts": {
-    "test": "vitest --run --reporter verbose --globals",
+    "test": "npm run build && vitest --run --reporter verbose --globals",
     "build": "rm -R ./dist && uglifyjs-folder --config-file './uglify.json' --no-annotations src -eo ./dist/src -x '.js' && uglifyjs --compress --mangle -o ./dist/index.js -- index.js"
   },
   "keywords": [

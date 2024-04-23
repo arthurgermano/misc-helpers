@@ -229,5 +229,36 @@ describe("VALIDATORS - validateCADICMSPR", () => {
   // ----------------------------------------------------------------------------------------------
 });
 
+// ------------------------------------------------------------------------------------------------
+
+describe("VALIDATORS - validators.validateEmail", () => {
+  // ----------------------------------------------------------------------------------------------
+
+
+  it('validateEmail - Valid email formats', () => {
+    // Valid email addresses
+    expect(validators.validateEmail('test@example.com')).toBe(true);
+    expect(validators.validateEmail('john.doe@example.co.uk')).toBe(true);
+    expect(validators.validateEmail('user1234@test-mail.com')).toBe(true);
+  });
+  
+  it('validateEmail - Invalid email formats', () => {
+    // Invalid email addresses
+    expect(validators.validateEmail('notanemail')).toBe(false);
+    expect(validators.validateEmail('invalidemail@')).toBe(false);
+    expect(validators.validateEmail('invalid@@email.com')).toBe(false);
+    expect(validators.validateEmail('invalid.email.com')).toBe(false);
+    expect(validators.validateEmail('invalid@.com')).toBe(false);
+    expect(validators.validateEmail('')).toBe(false); // Empty string should return false
+  });
+  
+  it('validateEmail - Edge cases', () => {
+    // Edge cases
+    expect(validators.validateEmail()).toBe(false); // No argument provided should return false
+    expect(validators.validateEmail(null)).toBe(false); // Null should return false
+    expect(validators.validateEmail(123)).toBe(false); // Non-string input should return false
+  });
+
+});
 
 // ------------------------------------------------------------------------------------------------

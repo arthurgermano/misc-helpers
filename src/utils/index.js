@@ -22,8 +22,12 @@ module.exports = {
   regexLettersOnly: require("./regexLettersOnly.js"),
   removeDuplicatedStrings: require("./removeDuplicatedStrings.js"),
   split: require("./split"),
+  stringCompress: require("./stringCompress.js"),
+  stringDecompress: require("./stringDecompress.js"),
   stringToDate: require("./stringToDate.js"),
   stringToDateToFormat: require("./stringToDateToFormat.js"),
   stringToFormat: require("./stringToFormat.js"),
+  stringZLibCompress: require("./stringZLibCompress.js"),
+  stringZLibDecompress: require("./stringZLibDecompress.js"),
   toString: require("./toString.js"),
 };

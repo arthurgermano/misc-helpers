@@ -8,6 +8,7 @@ module.exports = {
         setConditionStringLike: require("./src/custom/db/sequelize/setConditionStringLike.js"),
       },
     },
+    waitPlugin: require("./src/custom/waitPlugin"),
   },
   helpers: {
     dateCompareAsc: require("./src/helpers/dateCompareAsc.js"),
@@ -41,9 +42,13 @@ module.exports = {
     regexLettersOnly: require("./src/utils/regexLettersOnly.js"),
     removeDuplicatedStrings: require("./src/utils/removeDuplicatedStrings.js"),
     split: require("./src/utils/split.js"),
+    stringCompress: require("./src/utils/stringCompress.js"),
+    stringDecompress: require("./src/utils/stringDecompress.js"),
     stringToDate: require("./src/utils/stringToDate.js"),
     stringToDateToFormat: require("./src/utils/stringToDateToFormat.js"),
     stringToFormat: require("./src/utils/stringToFormat.js"),
+    stringZLibCompress: require("./src/utils/stringZLibCompress.js"),
+    stringZLibDecompress: require("./src/utils/stringZLibDecompress.js"),
     toString: require("./src/utils/toString.js"),
   },
   validators: {

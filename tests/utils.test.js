@@ -1292,6 +1292,66 @@ describe("UTILS - removeDuplicatedStrings", () => {
 
 // ------------------------------------------------------------------------------------------------
 
+
+describe("UTILS - stringCompress", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  const stringCompress = utils.stringCompress;
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("stringCompress - should compress the text and return a Base64-encoded string by default", async () => {
+    const text = "Hello, World!";
+    const result = await stringCompress(text);
+    expect(result).to.be.a("string");
+    expect(result).to.not.be.empty;
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("stringCompress - should compress the text and return a raw zlib-encoded object when raw parameter is true", async () => {
+    const text = "Hello, World!";
+    const result = await stringCompress(text, true);
+    expect(result).to.be.a("Uint8Array");
+    expect(result).to.not.be.empty;
+  });
+
+  // ----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------
+
+describe('UTILS - stringDecompress', () => {
+
+  // ----------------------------------------------------------------------------------------------
+
+  const stringCompress = utils.stringCompress;
+  const stringDecompress = utils.stringDecompress;
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('stringDecompress - should decompress the gzipped text and return the original text by default', async () => {
+    const originalText = 'Hello, World!';
+    const gzippedText = await stringCompress(originalText);
+    const result = await stringDecompress(gzippedText);
+    expect(result).to.equal(originalText);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('stringDecompress - should decompress the gzipped text and return the raw zlib-encoded string when raw parameter is true', async () => {
+    const originalText = 'Hello, World!';
+    const gzippedText = await stringCompress(originalText, true);
+    const result = await stringDecompress(gzippedText, true);
+    expect(result).to.be.a('string');
+    expect(result).to.not.be.empty;
+  });
+
+  // ----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------
+
 describe("UTILS - stringToDate", () => {
   // ----------------------------------------------------------------------------------------------
 
@@ -1518,6 +1578,65 @@ describe("UTILS - stringToFormat", () => {
     const options = { digitsOnly: true, paddingChar: "X" };
     const result = stringToFormat(undefined, "XXX.XXX.XXX-XX", options);
     expect(result).toBe("XXX.XXX.XXX-XX");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------
+
+describe("UTILS - stringZLibCompress", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  const stringZLibCompress = utils.stringZLibCompress;
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("stringZLibCompress - should compress the text and return a Base64-encoded string by default", async () => {
+    const text = "Hello, World!";
+    const result = await stringZLibCompress(text);
+    expect(result).to.be.a("string");
+    expect(result).to.not.be.empty;
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("stringZLibCompress - should compress the text and return a raw zlib-encoded object when raw parameter is true", async () => {
+    const text = "Hello, World!";
+    const result = await stringZLibCompress(text, true);
+    expect(result).to.be.a("Uint8Array");
+    expect(result).to.not.be.empty;
+  });
+
+  // ----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------
+
+describe('UTILS - stringZLibDecompress', () => {
+
+  // ----------------------------------------------------------------------------------------------
+
+  const stringZLibCompress = utils.stringZLibCompress;
+  const stringZLibDecompress = utils.stringZLibDecompress;
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('stringZLibDecompress - should decompress the zlibbed text and return the original text by default', async () => {
+    const originalText = 'Hello, World!';
+    const zlibbedText = await stringZLibCompress(originalText);
+    const result = await stringZLibDecompress(zlibbedText);
+    expect(result).to.equal(originalText);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('stringZLibDecompress - should decompress the zlibbed text and return the raw zlib-encoded string when raw parameter is true', async () => {
+    const originalText = 'Hello, World!';
+    const zlibbedText = await stringZLibCompress(originalText, true);
+    const result = await stringZLibDecompress(zlibbedText, true);
+    expect(result).to.be.a('string');
+    expect(result).to.not.be.empty;
   });
 
   // ----------------------------------------------------------------------------------------------

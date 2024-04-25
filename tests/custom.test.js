@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { custom, constants, utils } from "../dist/index.js";
 
 // ------------------------------------------------------------------------------------------------
@@ -530,7 +530,7 @@ describe("CUSTOM - setConditionStringLike", () => {
     };
 
     setConditionStringLike(inputObject, "some_text");
-    
+
     expect(inputObject).toHaveProperty("some_text");
     expect(inputObject.some_text).toHaveProperty("$iLike");
     expect(inputObject.some_text.$iLike).toBe("%1%");
@@ -544,7 +544,7 @@ describe("CUSTOM - setConditionStringLike", () => {
     };
 
     setConditionStringLike(inputObject, "xxx");
-    
+
     expect(inputObject.some_text).toBe(1);
   });
 
@@ -564,3 +564,70 @@ describe("CUSTOM - setConditionStringLike", () => {
 
   // ----------------------------------------------------------------------------------------------
 });
+
+// ------------------------------------------------------------------------------------------------
+
+describe("WaitPlugin", () => {
+  const waitPlugin = custom.waitPlugin;
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("WaitPlugin - should add a promise to waitList", () => {
+    waitPlugin.startWait("testA");
+    expect(waitPlugin.waitList["testA"]).toBeDefined();
+    expect(waitPlugin.waitList["testA"].promise).toBeInstanceOf(Promise);
+    waitPlugin.finishWait("testA", true)
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("WaitPlugin - should not add a promise if one with the same name already exists", () => {
+    waitPlugin.startWait("testB");
+    const initialPromise = waitPlugin.waitList["testB"].promise;
+    waitPlugin.startWait("testB");
+    expect(waitPlugin.waitList["testB"].promise).toBe(initialPromise);
+    waitPlugin.finishWait("testB", true)
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("WaitPlugin - should resolve the promise if successful", async () => {
+    const promise = waitPlugin.startWait("testC");
+    setTimeout(() => waitPlugin.finishWait("testC", true), 25);
+    await expect(promise).resolves.toBe(true);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("WaitPlugin - should reject the promise if not successful", async () => {
+    const promise = waitPlugin.startWait("testD");
+    setTimeout(() => waitPlugin.finishWait("testD", false), 25);
+    await expect(promise).rejects.toBe(false);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("WaitPlugin - should return false if the waitList item does not exist", () => {
+    expect(waitPlugin.finishWait("nonExistent")).toBe(false);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("WaitPlugin - should call finishWait for each item in waitList", () => {
+    waitPlugin.startWait("test1");
+    waitPlugin.startWait("test2");
+    waitPlugin.startWait("test3");
+    const finishWaitMock = vi.spyOn(waitPlugin, "finishWait");
+    console.log("BF")
+    waitPlugin.finishAll(true);
+    console.log("AFF")
+    expect(finishWaitMock).toHaveBeenCalledTimes(3);
+    expect(finishWaitMock).toHaveBeenCalledWith("test1", true, undefined);
+    expect(finishWaitMock).toHaveBeenCalledWith("test2", true, undefined);
+    expect(finishWaitMock).toHaveBeenCalledWith("test3", true, undefined);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 {
   "name": "misc-helpers",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "author": "Arthur José Germano",
   "license": "MIT",
   "main": "./dist/index.js",
@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "date-fns": "^3.6.0",
+    "fflate": "^0.8.2",
     "lodash.clonedeep": "^4.5.0"
   },
   "devDependencies": {

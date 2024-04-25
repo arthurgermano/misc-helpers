@@ -18,15 +18,15 @@ function stringDecompress(gzipped, raw = false) {
       }
       let decoded = gzipped;
       if (!raw) {
+        let decoded;
         if (typeof window === "undefined") {
-          decoded = Buffer.from(decoded, "base64");
-          decoded = new Uint8Array(decoded);
+          decoded = Buffer.from(gzipped, "base64").toString();
         } else {
-          decoded = atob(decoded);
-          decoded = strToU8(decoded, true);
+          decoded = atob(gzipped);
         }
+        uint8Array = new Uint8Array(decoded.split(","));
       }
-      const decompressedString = decompressSync(decoded);
+      const decompressedString = decompressSync(uint8Array);
       resolve(strFromU8(decompressedString));
     } catch (error) {
       reject(error);

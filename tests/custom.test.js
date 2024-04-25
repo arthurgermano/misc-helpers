@@ -618,9 +618,7 @@ describe("WaitPlugin", () => {
     waitPlugin.startWait("test2");
     waitPlugin.startWait("test3");
     const finishWaitMock = vi.spyOn(waitPlugin, "finishWait");
-    console.log("BF")
     waitPlugin.finishAll(true);
-    console.log("AFF")
     expect(finishWaitMock).toHaveBeenCalledTimes(3);
     expect(finishWaitMock).toHaveBeenCalledWith("test1", true, undefined);
     expect(finishWaitMock).toHaveBeenCalledWith("test2", true, undefined);

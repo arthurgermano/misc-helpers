@@ -10,23 +10,23 @@ const base64From = require("./base64From");
  * @returns {String} - The text decompresses
  */
 
-function stringDecompress(zlibbed, raw = false) {
+function stringZLibDecompress(zlibbed, raw = false) {
   return new Promise((resolve, reject) => {
     try {
       if (!zlibbed) {
         return resolve("");
       }
-      let decoded = zlibbed;
+      let uint8Array = zlibbed;
       if (!raw) {
-        if (typeof window === 'undefined') {
-          decoded = Buffer.from(decoded, 'base64');
-          decoded = new Uint8Array(decoded);
+        let decoded;
+        if (typeof window === "undefined") {
+          decoded = Buffer.from(zlibbed, "base64").toString();
         } else {
-          decoded = atob(decoded);
-          decoded = strToU8(decoded, true);
+          decoded = atob(zlibbed);
         }
+        uint8Array = new Uint8Array(decoded.split(","));
       }
-      const decompressedString = unzlibSync(decoded);
+      const decompressedString = unzlibSync(uint8Array);
       resolve(strFromU8(decompressedString));
     } catch (error) {
       reject(error);
@@ -35,4 +35,4 @@ function stringDecompress(zlibbed, raw = false) {
 }
 // ------------------------------------------------------------------------------------------------
 
-module.exports = stringDecompress;
+module.exports = stringZLibDecompress;

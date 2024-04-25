@@ -12,20 +12,24 @@ const base64To = require("./base64To");
  * @returns {String} - The text gzipped
  */
 
-function stringZLibCompress(text, raw = false, level = 9, mem = 4) {
+function stringZLibCompress(text, raw = false, options = {}) {
   return new Promise((resolve, reject) => {
     try {
       if (!text) {
         return resolve("");
       }
       const buffer = strToU8(text);
-      const compressedData = zlibSync(buffer, { level, mem });
+      const compressedData = zlibSync(buffer, {
+        level: options.level,
+        mem: options.mem,
+      });
       if (!raw) {
-        if (typeof window === 'undefined') {
-          return resolve(Buffer.from(compressedData).toString('base64'));
+        const uintJoin = compressedData.join(",");
+        if (typeof window === "undefined") {
+          return resolve(Buffer.from(uintJoin).toString("base64"));
         }
-        const binaryString = strFromU8(compressedData, true);
-        return resolve(btoa(binaryString));
+
+        return resolve(btoa(uintJoin));
       }
       resolve(compressedData);
     } catch (error) {

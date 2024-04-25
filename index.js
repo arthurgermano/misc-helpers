@@ -61,4 +61,5 @@ module.exports = {
   ...require("./src/helpers"),
   ...require("./src/utils"),
   ...require("./src/validators"),
+  waitPlugin: require("./src/custom/waitPlugin"),
 };

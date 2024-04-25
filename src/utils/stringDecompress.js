@@ -16,7 +16,7 @@ function stringDecompress(gzipped, raw = false) {
       if (!gzipped) {
         return resolve("");
       }
-      let decoded = gzipped;
+      let uint8Array = gzipped;
       if (!raw) {
         let decoded;
         if (typeof window === "undefined") {

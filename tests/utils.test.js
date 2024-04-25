@@ -1623,7 +1623,7 @@ describe('UTILS - stringZLibDecompress', () => {
   // ----------------------------------------------------------------------------------------------
 
   it('stringZLibDecompress - should decompress the zlibbed text and return the original text by default', async () => {
-    const originalText = 'HELLO FUCKING WORLD!!!';
+    const originalText = 'HELLO WORLD!!!';
     const zlibbedText = await stringZLibCompress(originalText);
     const result = await stringZLibDecompress(zlibbedText);
     expect(result).to.equal(originalText);

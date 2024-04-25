@@ -21,7 +21,11 @@ function stringCompress(text, raw = false, level = 9, mem = 4) {
       const buffer = strToU8(text);
       const compressedData = compressSync(buffer, { level, mem });
       if (!raw) {
-        return resolve(Buffer.from(compressedData).toString("base64"));
+        if (typeof window === "undefined") {
+          return resolve(Buffer.from(compressedData).toString("base64"));
+        }
+        const binaryString = strFromU8(compressedData, true);
+        return resolve(btoa(binaryString));
       }
       resolve(compressedData);
     } catch (error) {

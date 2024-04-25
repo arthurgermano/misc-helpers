@@ -10,9 +10,12 @@ const toString = require("./toString.js");
  */
 
 function base64To(text = "", fromFormat = "utf8") {
-  return Buffer.from(toString(text), fromFormat)
-    .toString("base64")
-    .replaceAll("=", "");
+  if (typeof window === "undefined") {
+    return Buffer.from(toString(text), fromFormat)
+      .toString("base64")
+      .replaceAll("=", "");
+  }
+  return btoa(text);
 }
 
 // ------------------------------------------------------------------------------------------------

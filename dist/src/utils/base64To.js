@@ -1,1 +1,1 @@
-const toString=require("./toString.js");function base64To(t="",r="utf8"){return Buffer.from(toString(t),r).toString("base64").replaceAll("=","")}module.exports=base64To;
+const toString=require("./toString.js");function base64To(t="",e="utf8"){return"undefined"==typeof window?Buffer.from(toString(t),e).toString("base64").replaceAll("=",""):btoa(t)}module.exports=base64To;

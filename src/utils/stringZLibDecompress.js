@@ -18,8 +18,13 @@ function stringDecompress(zlibbed, raw = false) {
       }
       let decoded = zlibbed;
       if (!raw) {
-        const buffer = Buffer.from(decoded, "base64");
-        decoded = new Uint8Array(buffer);
+        if (typeof window === 'undefined') {
+          decoded = Buffer.from(decoded, 'base64');
+          decoded = new Uint8Array(decoded);
+        } else {
+          decoded = atob(decoded);
+          decoded = strToU8(decoded, true);
+        }
       }
       const decompressedString = unzlibSync(decoded);
       resolve(strFromU8(decompressedString));

@@ -1,4 +1,4 @@
-const { decompressSync, strToU8, strFromU8 } = require("fflate");
+const { decompressSync, strFromU8, strToU8 } = require("fflate");
 const base64From = require("./base64From");
 
 // ------------------------------------------------------------------------------------------------
@@ -18,8 +18,13 @@ function stringDecompress(gzipped, raw = false) {
       }
       let decoded = gzipped;
       if (!raw) {
-        const buffer = Buffer.from(decoded, "base64");
-        decoded = new Uint8Array(buffer);
+        if (typeof window === "undefined") {
+          decoded = Buffer.from(decoded, "base64");
+          decoded = new Uint8Array(decoded);
+        } else {
+          decoded = atob(decoded);
+          decoded = strToU8(decoded, true);
+        }
       }
       const decompressedString = decompressSync(decoded);
       resolve(strFromU8(decompressedString));

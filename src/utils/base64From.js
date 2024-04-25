@@ -11,7 +11,10 @@ function base64From(text = "") {
   if (typeof text != "string" || !text) {
     return "";
   }
-  return Buffer.from(text, "base64").toString();
+  if (typeof window === 'undefined') {
+    return Buffer.from(text, "base64").toString();
+  }
+  return atob(text);
 }
 
 // ------------------------------------------------------------------------------------------------

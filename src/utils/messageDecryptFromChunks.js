@@ -22,7 +22,7 @@ function messageDecryptFromChunks(messageChunks, privateKey) {
     !privateKey.includes("-----BEGIN PRIVATE KEY-----") ||
     !privateKey.includes("-----END PRIVATE KEY-----")
   ) {
-    throw new Error("Public Key is not well PEM formatted");
+    throw new Error("Private Key is not well PEM formatted");
   }
 
   const PK = NF.pki.privateKeyFromPem(privateKey);
@@ -30,9 +30,7 @@ function messageDecryptFromChunks(messageChunks, privateKey) {
   const message = [];
   for (let chunk of messageChunks) {
     message.push(
-      PK.decrypt(base64From(chunk), "RSA-OAEP", {
-        md: NF.md.sha256.create(),
-      })
+      PK.decrypt(base64From(chunk), "RSA-OAEP")
     );
   }
 

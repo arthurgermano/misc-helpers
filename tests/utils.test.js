@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { constants, utils } from "../dist/index.js";
 import fs from "fs";
+import jsonTest from "./testContent.js";
 
 // ------------------------------------------------------------------------------------------------
 
@@ -1096,7 +1097,7 @@ describe("UTILS - messageDecryptFromChunks", () => {
   test("messageDecryptFromChunks - Throws error for invalid private key format", () => {
     expect(() => {
       messageDecryptFromChunks(["chunk1", "chunk2"], "invalid_private_key");
-    }).toThrow("Public Key is not well PEM formatted");
+    }).toThrow("Private Key is not well PEM formatted");
   });
 
   // ----------------------------------------------------------------------------------------------
@@ -1125,6 +1126,31 @@ describe("UTILS - messageDecryptFromChunks", () => {
     } catch (error) {
       expect(error.message).toBe("Invalid RSAES-OAEP padding.");
     }
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  test("messageDecryptFromChunks - Encrypt a long message", () => {
+    const encryptedChunks = messageEncryptToChunks(jsonTest, PUBLIC_KEY);
+    try {
+      const decrypted = messageDecryptFromChunks(
+        encryptedChunks.split(","),
+        PRIVATE_KEY
+      );
+    } catch (error) {
+      expect(error.message).toBe("Invalid RSAES-OAEP padding.");
+    }
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  test("messageDecryptFromChunks - Encrypt a long message with chunk size greater than allowed to not throw any errors", () => {
+    const encryptedChunks = messageEncryptToChunks(jsonTest, PUBLIC_KEY, 215);
+
+    const decrypted = messageDecryptFromChunks(
+      encryptedChunks.split(","),
+      PRIVATE_KEY
+    );
   });
 
   // ----------------------------------------------------------------------------------------------

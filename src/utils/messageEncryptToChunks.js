@@ -20,17 +20,21 @@ function messageEncryptToChunks(message, publicKey, chunkSize = 200) {
   ) {
     throw new Error("Public Key is not well PEM formatted");
   }
+  if (chunkSize < 0 || !chunkSize) {
+    chunkSize = 200;
+  } else if (chunkSize > 214) {
+    chunkSize = 214;
+    console.warn(
+      "MiscHelpers: NodeForge - Encription with public key the maximum chunk size is 214!"
+    );
+  }
 
   const chunks = [];
   const PK = NF.pki.publicKeyFromPem(publicKey);
 
   for (let i = 0; i < message.length; i += chunkSize) {
     chunks.push(
-      base64To(
-        PK.encrypt(message.substring(i, i + chunkSize), "RSA-OAEP", {
-          md: NF.md.sha256.create(),
-        })
-      )
+      base64To(PK.encrypt(message.substring(i, i + chunkSize), "RSA-OAEP"))
     );
   }
 

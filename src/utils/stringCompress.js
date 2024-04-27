@@ -1,4 +1,4 @@
-const { compressSync, strToU8, strFromU8 } = require("fflate");
+const { compressSync, strToU8 } = require("fflate");
 const base64To = require("./base64To");
 
 // ------------------------------------------------------------------------------------------------
@@ -24,12 +24,7 @@ function stringCompress(text, raw = false, options = {}) {
         mem: options.men,
       });
       if (!raw) {
-        const uintJoin = compressedData.join(",");
-        if (typeof window === "undefined") {
-          return resolve(Buffer.from(uintJoin).toString("base64"));
-        }
-
-        return resolve(btoa(uintJoin));
+        return resolve(base64To(compressedData.join(",")));
       }
       resolve(compressedData);
     } catch (error) {

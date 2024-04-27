@@ -35,6 +35,8 @@ module.exports = {
     getExecutionTime: require("./src/utils/getExecutionTime.js"),
     JSONFrom: require("./src/utils/JSONFrom.js"),
     JSONTo: require("./src/utils/JSONTo.js"),
+    messageEncryptToChunks: require("./src/utils/messageEncryptToChunks.js"),
+    messageDecryptFromChunks: require("./src/utils/messageDecryptFromChunks.js"),
     normalize: require("./src/utils/normalize.js"),
     pushLogMessage: require("./src/utils/pushLogMessage.js"),
     regexDigitsOnly: require("./src/utils/regexDigitsOnly.js"),

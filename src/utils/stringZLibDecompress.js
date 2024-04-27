@@ -1,4 +1,4 @@
-const { unzlibSync, strToU8, strFromU8 } = require("fflate");
+const { unzlibSync, strFromU8 } = require("fflate");
 const base64From = require("./base64From");
 
 // ------------------------------------------------------------------------------------------------
@@ -18,12 +18,7 @@ function stringZLibDecompress(zlibbed, raw = false) {
       }
       let uint8Array = zlibbed;
       if (!raw) {
-        let decoded;
-        if (typeof window === "undefined") {
-          decoded = Buffer.from(zlibbed, "base64").toString();
-        } else {
-          decoded = atob(zlibbed);
-        }
+        const decoded = base64From(zlibbed);
         uint8Array = new Uint8Array(decoded.split(","));
       }
       const decompressedString = unzlibSync(uint8Array);

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { constants, utils } from "../dist/index.js";
+import fs from "fs";
 
 // ------------------------------------------------------------------------------------------------
 
@@ -590,6 +591,8 @@ describe("UTILS - debouncer", () => {
   // ----------------------------------------------------------------------------------------------
 });
 
+// ------------------------------------------------------------------------------------------------
+
 describe("UTILS - deleteKeys", () => {
   // ----------------------------------------------------------------------------------------------
 
@@ -1028,6 +1031,107 @@ describe("UTILS - normalize", () => {
 
 // ------------------------------------------------------------------------------------------------
 
+describe("UTILS - messageEncryptToChunks", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  const PUBLIC_KEY = fs.readFileSync("./keys/public_key.pem", "utf8");
+  const messageEncryptToChunks = utils.messageEncryptToChunks;
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("messageEncryptToChunks - Encrypts a short message with default chunk size", () => {
+    const message = "Hello, world!";
+    const encryptedChunks = messageEncryptToChunks(message, PUBLIC_KEY);
+    expect(encryptedChunks).toBeTruthy();
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("messageEncryptToChunks - Encrypts a long message with custom chunk size", () => {
+    const message =
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+    const encryptedChunks = messageEncryptToChunks(message, PUBLIC_KEY, 100);
+    expect(encryptedChunks).toBeTruthy();
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("messageEncryptToChunks - Throws error for invalid public key", () => {
+    const message = "Hello, world!";
+    const publicKey = "INVALID_PUBLIC_KEY";
+    expect(() => {
+      messageEncryptToChunks(message, publicKey);
+    }).toThrow("Public Key is not well PEM formatted");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("messageEncryptToChunks - Returns empty string for empty message", () => {
+    const encryptedChunks = messageEncryptToChunks("", PUBLIC_KEY);
+    expect(encryptedChunks).toBe("");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------
+
+describe("UTILS - messageDecryptFromChunks", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  const PUBLIC_KEY = fs.readFileSync("./keys/public_key.pem", "utf8");
+  const PRIVATE_KEY = fs.readFileSync("./keys/private_key.pem", "utf8");
+  const messageDecryptFromChunks = utils.messageDecryptFromChunks;
+  const messageEncryptToChunks = utils.messageEncryptToChunks;
+
+  // ----------------------------------------------------------------------------------------------
+
+  test("messageDecryptFromChunks - Returns empty string for empty messageChunks", () => {
+    const result = messageDecryptFromChunks([], PRIVATE_KEY);
+    expect(result).toBe("");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  test("messageDecryptFromChunks - Throws error for invalid private key format", () => {
+    expect(() => {
+      messageDecryptFromChunks(["chunk1", "chunk2"], "invalid_private_key");
+    }).toThrow("Public Key is not well PEM formatted");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  test("messageDecryptFromChunks - Decrypt the message correctly", () => {
+    const message = "Hello, world!";
+    const encryptedChunks = messageEncryptToChunks(message, PUBLIC_KEY);
+    const decrypted = messageDecryptFromChunks(
+      encryptedChunks.split(","),
+      PRIVATE_KEY
+    );
+    expect(decrypted).toEqual(message);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  test("messageDecryptFromChunks - Calls privateKeyFromPem with correct parameters", () => {
+    const PUBLIC_KEY2 = fs.readFileSync("./keys/public_key2.pem", "utf8");
+    const message = "Hello, world!";
+    const encryptedChunks = messageEncryptToChunks(message, PUBLIC_KEY2);
+    try {
+      const decrypted = messageDecryptFromChunks(
+        encryptedChunks.split(","),
+        PRIVATE_KEY
+      );
+    } catch (error) {
+      expect(error.message).toBe("Invalid RSAES-OAEP padding.");
+    }
+  });
+
+  // ----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------
+
 describe("UTILS - regexDigitsOnly", () => {
   // ----------------------------------------------------------------------------------------------
 
@@ -1292,7 +1396,6 @@ describe("UTILS - removeDuplicatedStrings", () => {
 
 // ------------------------------------------------------------------------------------------------
 
-
 describe("UTILS - stringCompress", () => {
   // ----------------------------------------------------------------------------------------------
 
@@ -1321,8 +1424,7 @@ describe("UTILS - stringCompress", () => {
 
 // ------------------------------------------------------------------------------------------------
 
-describe('UTILS - stringDecompress', () => {
-
+describe("UTILS - stringDecompress", () => {
   // ----------------------------------------------------------------------------------------------
 
   const stringCompress = utils.stringCompress;
@@ -1330,8 +1432,8 @@ describe('UTILS - stringDecompress', () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it('stringDecompress - should decompress the gzipped text and return the original text by default', async () => {
-    const originalText = 'Hello, World!';
+  it("stringDecompress - should decompress the gzipped text and return the original text by default", async () => {
+    const originalText = "Hello, World!";
     const gzippedText = await stringCompress(originalText);
     const result = await stringDecompress(gzippedText);
     expect(result).to.equal(originalText);
@@ -1339,11 +1441,11 @@ describe('UTILS - stringDecompress', () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it('stringDecompress - should decompress the gzipped text and return the raw zlib-encoded string when raw parameter is true', async () => {
-    const originalText = 'Hello, World!';
+  it("stringDecompress - should decompress the gzipped text and return the raw zlib-encoded string when raw parameter is true", async () => {
+    const originalText = "Hello, World!";
     const gzippedText = await stringCompress(originalText, true);
     const result = await stringDecompress(gzippedText, true);
-    expect(result).to.be.a('string');
+    expect(result).to.be.a("string");
     expect(result).to.not.be.empty;
   });
 
@@ -1613,8 +1715,7 @@ describe("UTILS - stringZLibCompress", () => {
 
 // ------------------------------------------------------------------------------------------------
 
-describe('UTILS - stringZLibDecompress', () => {
-
+describe("UTILS - stringZLibDecompress", () => {
   // ----------------------------------------------------------------------------------------------
 
   const stringZLibCompress = utils.stringZLibCompress;
@@ -1622,8 +1723,8 @@ describe('UTILS - stringZLibDecompress', () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it('stringZLibDecompress - should decompress the zlibbed text and return the original text by default', async () => {
-    const originalText = 'HELLO WORLD!!!';
+  it("stringZLibDecompress - should decompress the zlibbed text and return the original text by default", async () => {
+    const originalText = "HELLO WORLD!!!";
     const zlibbedText = await stringZLibCompress(originalText);
     const result = await stringZLibDecompress(zlibbedText);
     expect(result).to.equal(originalText);
@@ -1631,11 +1732,11 @@ describe('UTILS - stringZLibDecompress', () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it('stringZLibDecompress - should decompress the zlibbed text and return the raw zlib-encoded string when raw parameter is true', async () => {
-    const originalText = 'Hello, World!';
+  it("stringZLibDecompress - should decompress the zlibbed text and return the raw zlib-encoded string when raw parameter is true", async () => {
+    const originalText = "Hello, World!";
     const zlibbedText = await stringZLibCompress(originalText, true);
     const result = await stringZLibDecompress(zlibbedText, true);
-    expect(result).to.be.a('string');
+    expect(result).to.be.a("string");
     expect(result).to.not.be.empty;
   });
 

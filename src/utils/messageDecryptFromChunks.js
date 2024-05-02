@@ -1,6 +1,4 @@
 const NF = require("node-forge");
-const base64From = require("./base64From");
-const uint8ArrayToString = require("./uint8ArrayToString");
 
 // ------------------------------------------------------------------------------------------------
 
@@ -31,7 +29,7 @@ function messageDecryptFromChunks(messageChunks, privateKey) {
   const message = [];
   for (let chunk of messageChunks) {
     message.push(
-      PK.decrypt(uint8ArrayToString(base64From(chunk), ","), "RSA-OAEP")
+      PK.decrypt(NF.util.decode64(chunk), "RSA-OAEP")
     );
   }
 

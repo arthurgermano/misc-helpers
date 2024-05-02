@@ -1,6 +1,4 @@
 const NF = require("node-forge");
-const base64To = require("./base64To");
-const uint8ArrayFromString = require("./uint8ArrayFromString");
 
 // ------------------------------------------------------------------------------------------------
 
@@ -35,11 +33,8 @@ function messageEncryptToChunks(message, publicKey, chunkSize = 200) {
 
   for (let i = 0; i < message.length; i += chunkSize) {
     chunks.push(
-      base64To(
-        uint8ArrayFromString(
-          PK.encrypt(message.substring(i, i + chunkSize), "RSA-OAEP"),
-          ","
-        )
+      NF.util.encode64(
+        PK.encrypt(message.substring(i, i + chunkSize), "RSA-OAEP")
       )
     );
   }

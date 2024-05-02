@@ -52,6 +52,8 @@ module.exports = {
     stringZLibCompress: require("./src/utils/stringZLibCompress.js"),
     stringZLibDecompress: require("./src/utils/stringZLibDecompress.js"),
     toString: require("./src/utils/toString.js"),
+    uint8ArrayFromString: require("./src/utils/uint8ArrayFromString"),
+    uint8ArrayToString: require("./src/utils/uint8ArrayToString"),
   },
   validators: {
     validateCADICMSPR: require("./src/validators/validateCADICMSPR.js"),

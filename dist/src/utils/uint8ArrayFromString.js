@@ -1,0 +1,1 @@
+function uint8ArrayFromString(r="",n){let e;if("undefined"==typeof window){const n=Buffer.from(r,"utf-8");e=new Uint8Array(n)}else{const n=new ArrayBuffer(r.length);e=new Uint8Array(n);for(let n=0;n<r.length;n++)e[n]=r.charCodeAt(n)}return n?e.join(n):e}module.exports=uint8ArrayFromString;

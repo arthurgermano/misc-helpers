@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, assert } from "vitest";
 import { constants, utils } from "../dist/index.js";
 import fs from "fs";
 import jsonTest from "./testContent.js";
@@ -1087,14 +1087,14 @@ describe("UTILS - messageDecryptFromChunks", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  test("messageDecryptFromChunks - Returns empty string for empty messageChunks", () => {
+  it("messageDecryptFromChunks - Returns empty string for empty messageChunks", () => {
     const result = messageDecryptFromChunks([], PRIVATE_KEY);
     expect(result).toBe("");
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  test("messageDecryptFromChunks - Throws error for invalid private key format", () => {
+  it("messageDecryptFromChunks - Throws error for invalid private key format", () => {
     expect(() => {
       messageDecryptFromChunks(["chunk1", "chunk2"], "invalid_private_key");
     }).toThrow("Private Key is not well PEM formatted");
@@ -1102,7 +1102,7 @@ describe("UTILS - messageDecryptFromChunks", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  test("messageDecryptFromChunks - Decrypt the message correctly", () => {
+  it("messageDecryptFromChunks - Decrypt the message correctly", () => {
     const message = "Hello, world!";
     const encryptedChunks = messageEncryptToChunks(message, PUBLIC_KEY);
     const decrypted = messageDecryptFromChunks(
@@ -1114,7 +1114,7 @@ describe("UTILS - messageDecryptFromChunks", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  test("messageDecryptFromChunks - Calls privateKeyFromPem with correct parameters", () => {
+  it("messageDecryptFromChunks - Calls privateKeyFromPem with correct parameters", () => {
     const PUBLIC_KEY2 = fs.readFileSync("./keys/public_key2.pem", "utf8");
     const message = "Hello, world!";
     const encryptedChunks = messageEncryptToChunks(message, PUBLIC_KEY2);
@@ -1130,7 +1130,7 @@ describe("UTILS - messageDecryptFromChunks", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  test("messageDecryptFromChunks - Encrypt a long message", () => {
+  it("messageDecryptFromChunks - Encrypt a long message", () => {
     const encryptedChunks = messageEncryptToChunks(jsonTest, PUBLIC_KEY);
     try {
       const decrypted = messageDecryptFromChunks(
@@ -1144,7 +1144,7 @@ describe("UTILS - messageDecryptFromChunks", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  test("messageDecryptFromChunks - Encrypt a long message with chunk size greater than allowed to not throw any errors", () => {
+  it("messageDecryptFromChunks - Encrypt a long message with chunk size greater than allowed to not throw any errors", () => {
     const encryptedChunks = messageEncryptToChunks(jsonTest, PUBLIC_KEY, 215);
 
     const decrypted = messageDecryptFromChunks(
@@ -1863,6 +1863,127 @@ describe("UTILS - toString", () => {
     };
     const result = toString(customObject, false);
     expect(result).toBe("[object Object]");
+  });
+});
+
+// ------------------------------------------------------------------------------------------------
+
+describe("UTILS - uint8ArrayFromString", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  const uint8ArrayFromString = utils.uint8ArrayFromString;
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should return Uint8Array when no joinChar is specified", () => {
+    const text = "Hello, world!";
+    const result = uint8ArrayFromString(text);
+    assert.ok(result instanceof Uint8Array);
+    assert.strictEqual(result.length, text.length);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should return joined string when joinChar is specified", () => {
+    const text = "Hello, world!";
+    const joinChar = "-";
+    const result = uint8ArrayFromString(text, joinChar);
+    assert.strictEqual(typeof result, "string");
+    assert.strictEqual(
+      result,
+      "72-101-108-108-111-44-32-119-111-114-108-100-33"
+    );
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should return empty Uint8Array when text is empty", () => {
+    const result = uint8ArrayFromString("");
+    assert.ok(result instanceof Uint8Array);
+    assert.strictEqual(result.length, 0);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should return Uint8Array with correct values for non-ASCII characters", () => {
+    const text = "😊🌟";
+    const result = uint8ArrayFromString(text);
+    const expected = new Uint8Array([240, 159, 152, 138, 240, 159, 140, 159]);
+    assert.deepStrictEqual(result, expected);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should handle special characters correctly", () => {
+    const text = "Special characters: \n\r\t";
+    const result = uint8ArrayFromString(text);
+    const expected = new Uint8Array([
+      83, 112, 101, 99, 105, 97, 108, 32, 99, 104, 97, 114, 97, 99, 116, 101,
+      114, 115, 58, 32, 10, 13, 9,
+    ]);
+    assert.deepStrictEqual(result, expected);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------
+
+describe("UTILS - uint8ArrayToString", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  const uint8ArrayToString = utils.uint8ArrayToString;
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should return an empty string if uint8Array is null or undefined", () => {
+    const result = uint8ArrayToString(null);
+    assert.strictEqual(result, "");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should return the original string when no splitChar is specified", () => {
+    const uint8Array = new Uint8Array([
+      72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33,
+    ]);
+    const result = uint8ArrayToString(uint8Array);
+    assert.strictEqual(result, "Hello, world!");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should return the original string when splitChar is not specified", () => {
+    const uint8Array = new Uint8Array([
+      72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33,
+    ]);
+    const result = uint8ArrayToString(uint8Array, "");
+    assert.strictEqual(result, "Hello, world!");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should split the Uint8Array by the specified splitChar", () => {
+    const uint8Array =
+      "72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33";
+    const result = uint8ArrayToString(uint8Array, ",");
+    assert.strictEqual(result, "Hello, world!");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should correctly handle non-ASCII characters", () => {
+    const uint8Array = new Uint8Array([240, 159, 152, 138, 240, 159, 140, 159]);
+    const result = uint8ArrayToString(uint8Array);
+    assert.strictEqual(result, "😊🌟");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should correctly handle empty Uint8Array", () => {
+    const uint8Array = new Uint8Array([]);
+    const result = uint8ArrayToString(uint8Array);
+    assert.strictEqual(result, "");
   });
 });
 

@@ -1,1 +1,0 @@
-function uint8ArrayToString(r,t){if(!r)return"";if(t&&(r=r.split(t)),"undefined"==typeof window){return Buffer.from(r).toString("utf-8")}let n="";for(let t=0;t<r.length;t++)n+=String.fromCharCode(r[t]);return n}module.exports=uint8ArrayToString;

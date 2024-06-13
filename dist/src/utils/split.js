@@ -1,1 +1,0 @@
-function split(t,i=" "){return t&&"string"==typeof t?t.split(i):[]}module.exports=split;

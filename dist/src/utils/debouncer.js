@@ -1,1 +1,0 @@
-function debouncer(t,e=1e3){try{let r;return(...c)=>{clearTimeout(r),r=setTimeout((async()=>{try{await t.apply(this,c)}catch(t){throw t}}),e)}}catch(t){throw t}}module.exports=debouncer;

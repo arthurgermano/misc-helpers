@@ -1,5 +1,5 @@
 import { describe, it } from "vitest";
-import { validators } from "../dist/index.js";
+import { validators } from "../index.js";
 
 // ------------------------------------------------------------------------------------------------
 

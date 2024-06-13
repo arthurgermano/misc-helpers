@@ -1,45 +1,30 @@
-const NF = require("node-forge");
+const { encrypt } = require("../crypto");
 
 // ------------------------------------------------------------------------------------------------
 
-/**
- * @summary. Returns a text compressed
- * @param {String} message - The message to be encrypted
- * @param {String} publicKey - The public key to encrypt the message
- * @param {Integer} chunkSize - The maximum size of chunk - it is LIMITED because of RSA-OAEP - KEY SIZE!
- * @returns {Array} - The message encrypted in chunks
- */
-
-function messageEncryptToChunks(message, publicKey, chunkSize = 200) {
-  if (!message) return "";
-  if (
-    !publicKey ||
-    !publicKey.includes("-----BEGIN PUBLIC KEY-----") ||
-    !publicKey.includes("-----END PUBLIC KEY-----")
-  ) {
-    throw new Error("Public Key is not well PEM formatted");
+/*
+* Encrypts a message into chunks using RSA-OAEP encryption.
+* @async
+* @param {string} publicKey - The RSA public key in PEM format.
+* @param {string} message - The message to encrypt.
+* @param {Object} [props={}] - Additional encryption properties.
+* @param {number} [props.chunkSize] - The size of each chunk (default: 214 bytes).
+* @returns {Promise<string[]>} A Promise that resolves to an array of encrypted message chunks.
+* @throws {Error} If encryption fails or any other error occurs.
+*/
+async function messageEncryptToChunks(publicKey, message, props = {}) {
+  try {
+    const chunks = [];
+    const chunkSize = props.chunkSize || 190;
+    for (let i = 0; i < message.length; i += chunkSize) {
+      chunks.push(
+        await encrypt(publicKey, message.substring(i, i + chunkSize), props)
+      );
+    }
+    return chunks;
+  } catch (error) {
+    throw error;
   }
-  if (chunkSize < 0 || !chunkSize) {
-    chunkSize = 200;
-  } else if (chunkSize > 214) {
-    chunkSize = 214;
-    console.warn(
-      "MiscHelpers: NodeForge - Encription with public key the maximum chunk size is 214!"
-    );
-  }
-
-  const chunks = [];
-  const PK = NF.pki.publicKeyFromPem(publicKey);
-
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(
-      NF.util.encode64(
-        PK.encrypt(message.substring(i, i + chunkSize), "RSA-OAEP")
-      )
-    );
-  }
-
-  return chunks.join(",");
 }
 
 // ------------------------------------------------------------------------------------------------

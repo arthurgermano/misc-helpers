@@ -1,5 +1,11 @@
+const bufferCompare = require("./src/utils/bufferCompare.js");
+
 module.exports = {
+  auth: {
+    webAuthn: require("./src/auth/webauthn/index.js"),
+  },
   constants: require("./src/constants.js"),
+  crypto: require("./src/crypto/index.js"),
   custom: {
     db: {
       sequelize: {
@@ -21,8 +27,14 @@ module.exports = {
   utils: {
     assign: require("./src/utils/assign.js"),
     base64From: require("./src/utils/base64From.js"),
+    base64FromBuffer: require("./src/utils/base64FromBuffer.js"),
     base64To: require("./src/utils/base64To.js"),
+    base64ToBuffer: require("./src/utils/base64ToBuffer.js"),
     base64URLEncode: require("./src/utils/base64URLEncode.js"),
+    bufferCompare: require("./src/utils/bufferCompare.js"),
+    bufferConcatenate: require("./src/utils/bufferConcatenate.js"),
+    bufferFromString: require("./src/utils/bufferFromString.js"),
+    bufferToString: require("./src/utils/bufferToString.js"),
     calculateSecondsInTime: require("./src/utils/calculateSecondsInTime.js"),
     currencyBRToFloat: require("./src/utils/currencyBRToFloat"),
     dateToFormat: require("./src/utils/dateToFormat.js"),
@@ -65,5 +77,7 @@ module.exports = {
   ...require("./src/helpers"),
   ...require("./src/utils"),
   ...require("./src/validators"),
+  ...require("./src/auth/webauthn"),
+  ...require("./src/crypto"),
   waitPlugin: require("./src/custom/waitPlugin"),
 };

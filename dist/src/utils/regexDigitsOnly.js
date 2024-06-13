@@ -1,1 +1,0 @@
-const toString=require("./toString.js");function regexDigitsOnly(t=""){return toString(t).replace(/[^0-9]/g,"").trim()}module.exports=regexDigitsOnly;

@@ -1,1 +1,0 @@
-function JSONTo(r={},t=!0){try{return JSON.stringify(r)}catch(r){if(t)throw r}return null}module.exports=JSONTo;

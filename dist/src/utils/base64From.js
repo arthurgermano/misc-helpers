@@ -1,1 +1,0 @@
-function base64From(e=""){return"string"==typeof e&&e?"undefined"==typeof window?Buffer.from(e,"base64").toString():atob(e):""}module.exports=base64From;

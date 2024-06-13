@@ -1,1 +1,0 @@
-const{decompressSync:decompressSync,strFromU8:strFromU8}=require("fflate"),base64From=require("./base64From");function stringDecompress(r,e=!1){return new Promise(((s,o)=>{try{if(!r)return s("");let o=r;if(!e){const e=base64From(r);o=new Uint8Array(e.split(","))}const t=decompressSync(o);s(strFromU8(t))}catch(r){o(r)}}))}module.exports=stringDecompress;

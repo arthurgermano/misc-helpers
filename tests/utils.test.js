@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, assert } from "vitest";
-import { constants, utils } from "../dist/index.js";
+import { constants, utils } from "../index.js";
 import fs from "fs";
 import jsonTest from "./testContent.js";
 
@@ -158,6 +158,75 @@ describe("UTILS - base64From", () => {
 
 // ------------------------------------------------------------------------------------------------
 
+describe("UTILS - base64FromBuffer", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  const base64FromBuffer = utils.base64FromBuffer;
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("base64FromBuffer - should convert an ArrayBuffer to a Base64 string", () => {
+    // Create an example ArrayBuffer
+    const buffer = new ArrayBuffer(4);
+    const view = new Uint8Array(buffer);
+    view[0] = 72;
+    view[1] = 101;
+    view[2] = 108;
+    view[3] = 108;
+
+    // Expected Base64 string
+    const expectedBase64 = "SGVsbA";
+
+    // Call the function
+    const result = base64FromBuffer(buffer);
+
+    // Assert that the result matches the expected Base64 string
+    expect(result).toBe(expectedBase64);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("base64FromBuffer - should return an empty string if the buffer is empty", () => {
+    // Create an empty ArrayBuffer
+    const buffer = new ArrayBuffer(0);
+
+    // Expected empty Base64 string
+    const expectedBase64 = "";
+
+    // Call the function
+    const result = base64FromBuffer(buffer);
+
+    // Assert that the result is an empty string
+    expect(result).toBe(expectedBase64);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("base64FromBuffer - should convert an ArrayBuffer with special characters to a Base64 string", () => {
+    // Create an example ArrayBuffer with special characters
+    const buffer = new ArrayBuffer(6);
+    const view = new Uint8Array(buffer);
+    view[0] = 72; // 'H'
+    view[1] = 101; // 'e'
+    view[2] = 108; // 'l'
+    view[3] = 108; // 'l'
+    view[4] = 111; // 'o'
+    view[5] = 240; // Special character (e.g., emoji)
+
+    // Expected Base64 string with special characters
+    const expectedBase64 = "SGVsbG/DsA";
+
+    // Call the function
+    const result = base64FromBuffer(buffer);
+
+    // Assert that the result matches the expected Base64 string
+    expect(result).toBe(expectedBase64);
+  });
+  // ----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------
+
 describe("UTILS - base64To", () => {
   // ----------------------------------------------------------------------------------------------
 
@@ -224,6 +293,69 @@ describe("UTILS - base64To", () => {
 
 // ------------------------------------------------------------------------------------------------
 
+describe("UTILS - base64ToBuffer", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  const base64ToBuffer = utils.base64ToBuffer;
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("base64ToBuffer - should convert a Base64 string to an ArrayBuffer", () => {
+    // Example Base64 string
+    const base64String = "SGVsbG8sIHdvcmxkIQ==";
+
+    // Expected ArrayBuffer
+    const expectedBuffer = new Uint8Array([
+      72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33,
+    ]).buffer;
+
+    // Call the function
+    const result = base64ToBuffer(base64String);
+
+    // Assert that the result matches the expected ArrayBuffer
+    expect(result).toEqual(expectedBuffer);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("base64ToBuffer - should return an empty ArrayBuffer if the Base64 string is empty", () => {
+    // Example empty Base64 string
+    const base64String = "";
+
+    // Expected empty ArrayBuffer
+    const expectedBuffer = new ArrayBuffer(0);
+
+    // Call the function
+    const result = base64ToBuffer(base64String);
+
+    // Assert that the result matches the expected empty ArrayBuffer
+    expect(result).toEqual(expectedBuffer);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("base64ToBuffer - should handle Base64 string with very special characters", () => {
+    // Example Base64 string with very special characters (including emojis)
+    const base64String =
+      "8J+klPCfkpzojIPwn5ST8J+klPCfkpzojIPwn5ST8J+klPCfkpzojIPwn5ST8J+klPCfkpzojIPwn5ST8J+klPCfkpzojIPwn5ST"; // Some special characters
+
+    // Expected ArrayBuffer
+    const expectedBuffer = new Uint8Array([
+      226, 152, 169, 226, 152, 169, 226, 152, 169, 226, 152, 169, 226, 152, 169,
+      226, 152, 169, 226, 152, 169, 226, 152, 169, 226, 152, 169, 226, 152, 169,
+      226, 152, 169, 226, 152, 169, 226, 152, 169, 226, 152, 169, 226, 152, 169,
+    ]).buffer;
+
+    // Call the function
+    const result = base64ToBuffer(base64String);
+
+    // Assert that the result matches the expected ArrayBuffer
+    expect(result).toEqual(expectedBuffer);
+  });
+});
+
+// ------------------------------------------------------------------------------------------------
+
 describe("UTILS - base64URLEncode", () => {
   // ----------------------------------------------------------------------------------------------
 
@@ -277,6 +409,213 @@ describe("UTILS - base64URLEncode", () => {
     expect(result).toBe(
       "77-9bmzvv73vv73vv73vv73ilqHvv73vv703ee-_vWLvv70477-9c0rvv73vv73vv70"
     );
+  });
+
+  // ----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------
+
+describe("UTILS - bufferCompare", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  const bufferCompare = utils.bufferCompare;
+
+  // ----------------------------------------------------------------------------------------------
+  it("bufferCompare - buffers are equal", () => {
+    const buffer1 = new Uint8Array([1, 2, 3, 4]).buffer;
+    const buffer2 = new Uint8Array([1, 2, 3, 4]).buffer;
+
+    expect(bufferCompare(buffer1, buffer2)).toBe(true);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("bufferCompare - buffers are not equal (different lengths)", () => {
+    const buffer1 = new Uint8Array([1, 2, 3, 4]).buffer;
+    const buffer2 = new Uint8Array([1, 2, 3, 4, 5]).buffer;
+
+    expect(bufferCompare(buffer1, buffer2)).toBe(false);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("bufferCompare - buffers are not equal (same lengths, different content)", () => {
+    const buffer1 = new Uint8Array([1, 2, 3, 4]).buffer;
+    const buffer2 = new Uint8Array([1, 2, 3, 5]).buffer;
+
+    expect(bufferCompare(buffer1, buffer2)).toBe(false);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("bufferCompare - one buffer is null", () => {
+    const buffer1 = null;
+    const buffer2 = new Uint8Array([1, 2, 3, 4]).buffer;
+
+    expect(bufferCompare(buffer1, buffer2)).toBe(false);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("bufferCompare - both buffers are null", () => {
+    const buffer1 = null;
+    const buffer2 = null;
+
+    expect(bufferCompare(buffer1, buffer2)).toBe(false);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("bufferCompare - empty buffers are equal", () => {
+    const buffer1 = new Uint8Array([]).buffer;
+    const buffer2 = new Uint8Array([]).buffer;
+
+    expect(bufferCompare(buffer1, buffer2)).toBe(true);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("bufferCompare - buffers with special characters", () => {
+    const buffer1 = new Uint8Array([0, 255, 128, 64]).buffer;
+    const buffer2 = new Uint8Array([0, 255, 128, 64]).buffer;
+
+    expect(bufferCompare(buffer1, buffer2)).toBe(true);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("bufferCompare - buffers with different special characters", () => {
+    const buffer1 = new Uint8Array([0, 255, 128, 64]).buffer;
+    const buffer2 = new Uint8Array([0, 255, 128, 63]).buffer;
+
+    expect(bufferCompare(buffer1, buffer2)).toBe(false);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------
+
+describe("UTILS - bufferConcatenate", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  const bufferConcatenate = utils.bufferConcatenate;
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("bufferConcatenate - should concatenate two buffers correctly", () => {
+    const buffer1 = new Uint8Array([1, 2, 3]).buffer;
+    const buffer2 = new Uint8Array([4, 5, 6]).buffer;
+    const concatenated = bufferConcatenate(buffer1, buffer2);
+
+    const expected = new Uint8Array([1, 2, 3, 4, 5, 6]).buffer;
+    expect(concatenated).toEqual(expected);
+  });
+
+  // -----------------------------------------------------------------------------------------------
+
+  it("bufferConcatenate - should return null if buffer1 is null", () => {
+    const buffer1 = null;
+    const buffer2 = new Uint8Array([4, 5, 6]).buffer;
+    const concatenated = bufferConcatenate(buffer1, buffer2);
+    expect(concatenated).toBeNull();
+  });
+
+  // -----------------------------------------------------------------------------------------------
+
+  it("bufferConcatenate - should return null if buffer2 is null", () => {
+    const buffer1 = new Uint8Array([1, 2, 3]).buffer;
+    const buffer2 = null;
+    const concatenated = bufferConcatenate(buffer1, buffer2);
+    expect(concatenated).toBeNull();
+  });
+
+  // -----------------------------------------------------------------------------------------------
+
+  it("bufferConcatenate - should return null if both buffers are null", () => {
+    const buffer1 = null;
+    const buffer2 = null;
+    const concatenated = bufferConcatenate(buffer1, buffer2);
+    expect(concatenated).toBeNull();
+  });
+
+  // -----------------------------------------------------------------------------------------------
+
+  it("bufferConcatenate - should concatenate two empty buffers correctly", () => {
+    const buffer1 = new Uint8Array([]).buffer;
+    const buffer2 = new Uint8Array([]).buffer;
+    const concatenated = bufferConcatenate(buffer1, buffer2);
+
+    const expected = new Uint8Array([]).buffer;
+    expect(concatenated).toEqual(expected);
+  });
+
+  // -----------------------------------------------------------------------------------------------
+
+  it("bufferConcatenate - should concatenate buffers with special characters correctly", () => {
+    const buffer1 = new Uint8Array([0, 255, 128]).buffer;
+    const buffer2 = new Uint8Array([64, 32, 16]).buffer;
+    const concatenated = bufferConcatenate(buffer1, buffer2);
+
+    const expected = new Uint8Array([0, 255, 128, 64, 32, 16]).buffer;
+    expect(concatenated).toEqual(expected);
+  });
+
+  // -----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------
+
+describe("UTILS - bufferFromString", () => {
+  // ------------------------------------------------------------------------------------------------
+
+  const bufferFromString = utils.bufferFromString;
+
+  // ------------------------------------------------------------------------------------------------
+
+  it("bufferFromString - should generate a buffer from a string in Node.js environment", () => {
+    const str = "Hello, World!";
+    const buffer = bufferFromString(str, "utf-8");
+    expect(buffer).toBeInstanceOf(Buffer);
+    expect(buffer.toString()).toBe(str);
+  });
+
+  // ------------------------------------------------------------------------------------------------
+
+  it("bufferFromString - should generate a buffer from a string in browser environment", () => {
+    const str = "Hello, World!";
+    const buffer = bufferFromString(str);
+    expect(buffer).toBeInstanceOf(Uint8Array);
+    expect(new TextDecoder().decode(buffer)).toBe(str);
+  });
+
+  // ------------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------
+
+describe("UTILS - bufferToString", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  const bufferToString = utils.bufferToString;
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("bufferToString - should convert a buffer to a string in Node.js environment", () => {
+    const buffer = Buffer.from("Hello, World!", "utf-8");
+    const str = bufferToString(buffer, "utf-8");
+    expect(str).toBe("Hello, World!");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("bufferToString - should convert a buffer to a string in browser environment", () => {
+    const buffer = new Uint8Array([
+      72, 101, 108, 108, 111, 44, 32, 87, 111, 114, 108, 100,
+    ]);
+    const str = bufferToString(buffer, "utf-8");
+    expect(str).toBe("Hello, World");
   });
 
   // ----------------------------------------------------------------------------------------------
@@ -1040,36 +1379,74 @@ describe("UTILS - messageEncryptToChunks", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it("messageEncryptToChunks - Encrypts a short message with default chunk size", () => {
+  it("messageEncryptToChunks - Encrypts a short message with default chunk size", async () => {
     const message = "Hello, world!";
-    const encryptedChunks = messageEncryptToChunks(message, PUBLIC_KEY);
+    const encryptedChunks = await messageEncryptToChunks(PUBLIC_KEY, message);
     expect(encryptedChunks).toBeTruthy();
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it("messageEncryptToChunks - Encrypts a long message with custom chunk size", () => {
-    const message =
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
-    const encryptedChunks = messageEncryptToChunks(message, PUBLIC_KEY, 100);
+  it("messageEncryptToChunks - Encrypts a long message with custom chunk size", async () => {
+    const longMessage = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`;
+    const encryptedChunks = await messageEncryptToChunks(
+      PUBLIC_KEY,
+      longMessage,
+      { chunkSize: 190 }
+    );
     expect(encryptedChunks).toBeTruthy();
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it("messageEncryptToChunks - Throws error for invalid public key", () => {
+  it("messageEncryptToChunks - Throws error for invalid public key", async () => {
     const message = "Hello, world!";
     const publicKey = "INVALID_PUBLIC_KEY";
-    expect(() => {
-      messageEncryptToChunks(message, publicKey);
-    }).toThrow("Public Key is not well PEM formatted");
+
+    try {
+      await messageEncryptToChunks(publicKey, message);
+    } catch (error) {
+      expect(error.message).toBe("Public Key is not well PEM formatted");
+    }
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it("messageEncryptToChunks - Returns empty string for empty message", () => {
-    const encryptedChunks = messageEncryptToChunks("", PUBLIC_KEY);
-    expect(encryptedChunks).toBe("");
+  it("messageEncryptToChunks - Returns empty string for empty message", async () => {
+    const encryptedChunks = await messageEncryptToChunks(PUBLIC_KEY, "");
+    expect(encryptedChunks).to.be.an("array").that.is.empty;
   });
 
   // ----------------------------------------------------------------------------------------------
@@ -1087,70 +1464,80 @@ describe("UTILS - messageDecryptFromChunks", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it("messageDecryptFromChunks - Returns empty string for empty messageChunks", () => {
-    const result = messageDecryptFromChunks([], PRIVATE_KEY);
+  it("messageDecryptFromChunks - Returns empty string for empty messageChunks", async () => {
+    const result = await messageDecryptFromChunks(PRIVATE_KEY, []);
     expect(result).toBe("");
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it("messageDecryptFromChunks - Throws error for invalid private key format", () => {
-    expect(() => {
-      messageDecryptFromChunks(["chunk1", "chunk2"], "invalid_private_key");
-    }).toThrow("Private Key is not well PEM formatted");
+  it("messageDecryptFromChunks - Throws error for invalid private key format", async () => {
+    try {
+      await messageDecryptFromChunks("invalid_private_key", [
+        "chunk1",
+        "chunk2",
+      ]);
+    } catch (error) {
+      expect(error.message).toBe("Private Key is not well PEM formatted");
+    }
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it("messageDecryptFromChunks - Decrypt the message correctly", () => {
+  it("messageDecryptFromChunks - Decrypt the message correctly", async () => {
     const message = "Hello, world!";
-    const encryptedChunks = messageEncryptToChunks(message, PUBLIC_KEY);
-    const decrypted = messageDecryptFromChunks(
-      encryptedChunks.split(","),
-      PRIVATE_KEY
+    const encryptedChunks = await messageEncryptToChunks(PUBLIC_KEY, message);
+    const decrypted = await messageDecryptFromChunks(
+      PRIVATE_KEY,
+      encryptedChunks
     );
+
     expect(decrypted).toEqual(message);
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it("messageDecryptFromChunks - Calls privateKeyFromPem with correct parameters", () => {
+  it("messageDecryptFromChunks - Calls privateKeyFromPem with correct parameters but with different public keys", async () => {
     const PUBLIC_KEY2 = fs.readFileSync("./keys/public_key2.pem", "utf8");
     const message = "Hello, world!";
-    const encryptedChunks = messageEncryptToChunks(message, PUBLIC_KEY2);
     try {
-      const decrypted = messageDecryptFromChunks(
-        encryptedChunks.split(","),
-        PRIVATE_KEY
-      );
+      const encryptedChunks = await messageEncryptToChunks(PUBLIC_KEY2, message);
+      await messageDecryptFromChunks(PRIVATE_KEY, encryptedChunks);
     } catch (error) {
-      expect(error.message).toBe("Invalid RSAES-OAEP padding.");
+      expect(error.message).toBe(
+        "error:02000079:rsa routines::oaep decoding error"
+      );
     }
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it("messageDecryptFromChunks - Encrypt a long message", () => {
-    const encryptedChunks = messageEncryptToChunks(jsonTest, PUBLIC_KEY);
+  it("messageDecryptFromChunks - Encrypt a long message with chunk size greater than allowed", async () => {
     try {
-      const decrypted = messageDecryptFromChunks(
-        encryptedChunks.split(","),
-        PRIVATE_KEY
+      const encryptedChunks = await messageEncryptToChunks(
+        PUBLIC_KEY,
+        jsonTest,
+        { chunkSize: 300 }
       );
+      await messageDecryptFromChunks(PRIVATE_KEY, encryptedChunks);
     } catch (error) {
-      expect(error.message).toBe("Invalid RSAES-OAEP padding.");
+      expect(error.message).toBe(
+        "error:0200006E:rsa routines::data too large for key size"
+      );
     }
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it("messageDecryptFromChunks - Encrypt a long message with chunk size greater than allowed to not throw any errors", () => {
-    const encryptedChunks = messageEncryptToChunks(jsonTest, PUBLIC_KEY, 215);
+  it("messageDecryptFromChunks - Encrypt a long message with chunk size equal to allowed", async () => {
+    const encryptedChunks = await messageEncryptToChunks(PUBLIC_KEY, jsonTest);
 
-    const decrypted = messageDecryptFromChunks(
-      encryptedChunks.split(","),
-      PRIVATE_KEY
+    const decrypted = await messageDecryptFromChunks(
+      PRIVATE_KEY,
+      encryptedChunks
     );
+
+    expect(decrypted).toEqual(jsonTest);
   });
 
   // ----------------------------------------------------------------------------------------------

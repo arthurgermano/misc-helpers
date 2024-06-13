@@ -1,1 +1,0 @@
-const{zlibSync:zlibSync,strToU8:strToU8}=require("fflate"),base64To=require("./base64To");function stringZLibCompress(e,r=!1,s={}){return new Promise(((o,t)=>{try{if(!e)return o("");const t=strToU8(e),i=zlibSync(t,{level:s.level,mem:s.mem});if(!r)return o(base64To(i.join(",")));o(i)}catch(e){t(e)}}))}module.exports=stringZLibCompress;

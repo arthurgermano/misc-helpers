@@ -1,1 +1,0 @@
-const{compressSync:compressSync,strToU8:strToU8}=require("fflate"),base64To=require("./base64To");function stringCompress(e,r=!1,s={}){return new Promise(((o,n)=>{try{if(!e)return o("");const n=strToU8(e),t=compressSync(n,{level:s.level,mem:s.men});if(!r)return o(base64To(t.join(",")));o(t)}catch(e){n(e)}}))}module.exports=stringCompress;

@@ -1,39 +1,27 @@
-const NF = require("node-forge");
+const { decrypt } = require("../crypto");
 
 // ------------------------------------------------------------------------------------------------
 
 /**
- * @summary. Returns a text compressed
- * @param {String} message - The message to be encrypted
- * @param {String} privateKey - The public key to encrypt the message
- * @returns {Array} - The message encrypted in chunks
+ * Decrypts a message from encrypted chunks using RSA-OAEP decryption.
+ * @async
+ * @param {string} privateKey - The RSA private key in PEM format.
+ * @param {string[]} messageChunks - An array of encrypted message chunks.
+ * @param {Object} [props={}] - Additional decryption properties.
+ * @returns {Promise<string>} A Promise that resolves to the decrypted message.
+ * @throws {Error} If decryption fails or any other error occurs.
  */
+async function messageDecryptFromChunks(privateKey, messageChunks, props = {}) {
+  try {
+    const message = [];
+    for (let chunk of messageChunks) {
+      message.push(await decrypt(privateKey, chunk, props));
+    }
 
-function messageDecryptFromChunks(messageChunks, privateKey) {
-  if (
-    !messageChunks ||
-    !Array.isArray(messageChunks) ||
-    messageChunks.length == 0
-  )
-    return "";
-  if (
-    !privateKey ||
-    !privateKey.includes("-----BEGIN PRIVATE KEY-----") ||
-    !privateKey.includes("-----END PRIVATE KEY-----")
-  ) {
-    throw new Error("Private Key is not well PEM formatted");
+    return message.join("");
+  } catch (error) {
+    throw error;
   }
-
-  const PK = NF.pki.privateKeyFromPem(privateKey);
-  const chunks = [];
-  const message = [];
-  for (let chunk of messageChunks) {
-    message.push(
-      PK.decrypt(NF.util.decode64(chunk), "RSA-OAEP")
-    );
-  }
-
-  return message.join("");
 }
 
 // ------------------------------------------------------------------------------------------------

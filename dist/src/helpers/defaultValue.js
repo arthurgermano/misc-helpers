@@ -1,1 +1,0 @@
-function defaultValue(u,e){return null==u?e:u}module.exports=defaultValue;

@@ -1,1 +1,0 @@
-const isObject=require("../helpers/isObject.js");function deleteKeys(e={},r=[]){if(!Array.isArray(r)||!isObject(e))return e;for(let t of r)delete e[t];return e}module.exports=deleteKeys;

@@ -1,1 +1,0 @@
-function isInstanceOf(n,e){return n instanceof e}module.exports=isInstanceOf;

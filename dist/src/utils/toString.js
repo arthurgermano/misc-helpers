@@ -1,1 +1,0 @@
-function toString(t="",r=!0){let n="";if("string"!=typeof t){if(!t)return n;if(t.toString&&(n=t.toString()),r&&"[object Object]"==n)try{n=JSON.stringify(t)}catch(r){return t.toString()}return n}return t}module.exports=toString;

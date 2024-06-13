@@ -1,1 +1,0 @@
-const{unzlibSync:unzlibSync,strFromU8:strFromU8}=require("fflate"),base64From=require("./base64From");function stringZLibDecompress(r,e=!1){return new Promise(((n,s)=>{try{if(!r)return n("");let s=r;if(!e){const e=base64From(r);s=new Uint8Array(e.split(","))}const t=unzlibSync(s);n(strFromU8(t))}catch(r){s(r)}}))}module.exports=stringZLibDecompress;

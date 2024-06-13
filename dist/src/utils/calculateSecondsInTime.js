@@ -1,1 +1,0 @@
-function calculateSecondsInTime(e,n=!0){return n?new Date(Date.now()+1e3*e).getTime():new Date(Date.now()-1e3*e).getTime()}module.exports=calculateSecondsInTime;

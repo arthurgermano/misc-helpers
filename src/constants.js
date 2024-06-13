@@ -25,6 +25,7 @@ module.exports = {
   DATE_BR_MONTH_FORMAT_FS: `yyyy/MM`,
 
   // ----------------------------------------------------------------------------------------------
+  // CNPJ and CPF
 
   STRING_FORMAT_CADICMSPR: "########-##",
   STRING_FORMAT_CNPJ: "##.###.###/####-##",

@@ -4,5 +4,5 @@ module.exports = {
   getRegistrationAuthData: require("./getRegistrationAuthData"),
   getWebAuthnAuthenticationAssertion: require("./getWebAuthnAuthenticationAssertion"),
   getWebAuthnRegistrationCredential: require("./getWebAuthnRegistrationCredential"),
-  validateRPID: require("./validateRIPD"),
+  validateRPID: require("./validateRPID"),
 };

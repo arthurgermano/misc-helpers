@@ -44,6 +44,8 @@ function getRegistrationAuthData(credential) {
         rawId,
         id: credential.id,
         type: credential.type,
+        authenticatorAttachment: credential.authenticatorAttachment,
+        clientExtensionResults: credential.getClientExtensionResults(),
       },
       authData,
       response: {
@@ -52,9 +54,8 @@ function getRegistrationAuthData(credential) {
         clientDataJSONDecoded,
         clientDataJSON,
         transports: response.getTransports() || [],
+        publicKeyAlgorithm: response.getPublicKeyAlgorithm(),
       },
-      publicKey,
-      publicKeyAlgorithm: response.getPublicKeyAlgorithm(),
     };
   } catch (error) {
     throw error;

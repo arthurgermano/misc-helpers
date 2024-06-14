@@ -1,5 +1,8 @@
 # Miscellaneous Changelog
 
-## 1.0.0
+## 1.3.0
 
-- First version release published.
+- Improved documentation
+- supporting webauthn autentication flow
+- several new functions added
+- more test coverage

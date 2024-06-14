@@ -1,6 +1,6 @@
 /tests/
-/src/
-/index.js
+/keys/
+.gitignore
 CHANGELOG.md
 uglify.json
 readme.md

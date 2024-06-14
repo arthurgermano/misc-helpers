@@ -40,13 +40,11 @@ function getRegistrationAuthData(credential) {
     const publicKey = base64FromBuffer(response.getPublicKey());
 
     return {
-      credential: {
-        rawId,
-        id: credential.id,
-        type: credential.type,
-        authenticatorAttachment: credential.authenticatorAttachment,
-        clientExtensionResults: credential.getClientExtensionResults(),
-      },
+      rawId,
+      id: credential.id,
+      type: credential.type,
+      authenticatorAttachment: credential.authenticatorAttachment,
+      clientExtensionResults: credential.getClientExtensionResults(),
       authData,
       response: {
         attestationObject,
@@ -54,6 +52,7 @@ function getRegistrationAuthData(credential) {
         clientDataJSONDecoded,
         clientDataJSON,
         transports: response.getTransports() || [],
+        publicKey,
         publicKeyAlgorithm: response.getPublicKeyAlgorithm(),
       },
     };

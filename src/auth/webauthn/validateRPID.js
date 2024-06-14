@@ -22,17 +22,10 @@ async function validateRPID(originalRPID, verifyRPID, algorithm = "SHA-256") {
     }
 
     const crypto = getCrypto();
-    let originalRPIDDigest;
-    if (typeof window !== "undefined") {
-      originalRPIDDigest = await crypto.subtle.digest(
-        algorithm,
-        bufferFromString(originalRPID)
-      );
-    } else {
-      const hash = crypto.createHash(getAlgorithm(algorithm));
-      hash.update(bufferFromString(originalRPID));
-      originalRPIDDigest = hash.digest();
-    }
+    const originalRPIDDigest = await crypto.subtle.digest(
+      algorithm,
+      bufferFromString(originalRPID)
+    );
 
     const verifyRPIDBuffer = base64ToBuffer(verifyRPID, false);
     const verifyRPIDDigest = verifyRPIDBuffer.slice(0, 32);
@@ -49,12 +42,6 @@ async function validateRPID(originalRPID, verifyRPID, algorithm = "SHA-256") {
 }
 
 // ------------------------------------------------------------------------------------------------
-
-function getAlgorithm(algorithm = "SHA-256") {
-  algorithm = algorithm.toLocaleLowerCase();
-  algorithm = algorithm.replace("-", "");
-  return algorithm;
-}
 
 module.exports = validateRPID;
 

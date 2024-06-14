@@ -3,6 +3,8 @@ import { constants, crypto, utils, auth } from "../index.js";
 import fs from "fs";
 import { credential, assertion } from "./webauthnTestContent.js";
 
+// ------------------------------------------------------------------------------------------------
+
 const PUBLIC_KEY = fs.readFileSync("./keys/public_key.pem", "utf8");
 const PRIVATE_KEY = fs.readFileSync("./keys/private_key.pem", "utf8");
 
@@ -170,7 +172,7 @@ describe("CRYPTO - importPublicKey", function () {
   // ----------------------------------------------------------------------------------------------
 
   it("importPublicKey - import key correctly", async function () {
-    const publicKey = base64ToBuffer(credential.publicKey, false);
+    const publicKey = base64ToBuffer(credential.response.publicKey, false);
     const importedKey = await importPublicKey(
       "spki",
       publicKey,
@@ -216,7 +218,7 @@ describe("CRYPTO - verifySignature", function () {
       clientDataJSONSHA256Data
     );
 
-    const publicKey = base64ToBuffer(credential.publicKey, false);
+    const publicKey = base64ToBuffer(credential.response.publicKey, false);
     const importedKey = await importPublicKey(
       "spki",
       publicKey,

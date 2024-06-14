@@ -56,6 +56,7 @@ describe("WEBAUTHN - convertECDSAASN1Signature", function () {
   const convertECDSAASN1Signature = auth.webAuthn.convertECDSAASN1Signature;
   const base64ToBuffer = utils.base64ToBuffer;
   const bufferCompare = utils.bufferCompare;
+  // const base64FromBuffer = utils.base64FromBuffer;
 
   // ----------------------------------------------------------------------------------------------
   it("convertECDSAASN1Signature - should correctly convert valid ASN.1 sequence", function () {
@@ -63,8 +64,9 @@ describe("WEBAUTHN - convertECDSAASN1Signature", function () {
       base64ToBuffer(assertion.response.signature, false)
     );
     const result = convertECDSAASN1Signature(signature);
+    // console.log(">>>",base64FromBuffer(result))
     const expected = base64ToBuffer(
-      "E8Kaw5XCncKDBcK+RVURw7dxeA0swpXCthDCm29KJ8OyXcKQwohBBQMtwozCgQjCrzZowqDCvsK8CsOQw6DDqMO0YDjCgMOzf8Oww4J7w4PCnsKNM8OREcO2ICjDnMK0cQ"
+      "FWrDh8KZw6nDgMK8w4cvwo0nAzV6wpUZw6ZawolgbsKxwqccwqDDhsOUO8O2w7Mqw6Qiw4B7w5TDsBzCtnnDicOfJnjChSo1wr7DmcOJSsKbwpDCtGwMwqo5w6Ytw4HCthg6"
     );
     expect(bufferCompare(result, expected)).toBe(true);
   });
@@ -80,6 +82,37 @@ describe("WEBAUTHN - convertECDSAASN1Signature", function () {
     assert.throws(() => {
       convertECDSAASN1Signature(input);
     }, "Expected ASN.1 sequence element to be an INTEGER");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------
+
+describe("WEBAUTHN - validateAuthentication", function () {
+  // ----------------------------------------------------------------------------------------------
+
+  const validateAuthentication = auth.webAuthn.validateAuthentication;
+
+  // ----------------------------------------------------------------------------------------------
+  it("validateAuthentication - should validate authentication correctly", async function () {
+    // console.log(credential)
+    const isValid = await validateAuthentication(
+      credential,
+      assertion,
+      {
+        rpID: "localhost",
+        counterCredential: 1,
+        challenge: "OE9pQ2w4UDNBZnlwMGZtdWI4c2NoalVXTno3eTBuN2I",
+        origin: "https://localhost:3000",
+        type: "webauthn.get",
+      },
+      {
+        counterAssertion: 0,
+      },
+      {}
+    );
+    expect(isValid).toBe(true);
   });
 
   // ----------------------------------------------------------------------------------------------

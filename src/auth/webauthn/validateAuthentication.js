@@ -91,7 +91,17 @@ async function validateAuthentication(
 }
 
 // ------------------------------------------------------------------------------------------------
-
+/**
+ * Validates counters for the expected and incoming properties.
+ * 
+ * @param {Object} expectedProps - The expected properties.
+ * @param {number} expectedProps.counterCredential - The expected credential counter.
+ * @param {Object} incomingProps - The incoming properties.
+ * @param {number} incomingProps.counterAssertion - The incoming assertion counter.
+ * 
+ * @throws Will throw an error if the counter validation fails.
+ * @returns {boolean} Returns true if the counters are valid.
+ */
 function validateCounters(expectedProps, incomingProps) {
   if (
     !isNumber(expectedProps.counterCredential) ||
@@ -118,7 +128,13 @@ function validateCounters(expectedProps, incomingProps) {
 }
 
 // ------------------------------------------------------------------------------------------------
-
+/**
+ * Validates the flags in the assertion.
+ * 
+ * @param {Object} assertion - The assertion object.
+ * 
+ * @throws Will throw an error if the flags validation fails.
+ */
 function validateFlags(assertion) {
   if (!assertion.authData.flags.up) {
     throw new Error(`User Present is required for authentication.`);
@@ -130,7 +146,14 @@ function validateFlags(assertion) {
 }
 
 // ------------------------------------------------------------------------------------------------
-
+/**
+ * Validates the properties of the credential.
+ * 
+ * @param {Object} credential - The credential object.
+ * 
+ * @throws Will throw an error if the credential validation fails.
+ * @returns {boolean} Returns true if the credential properties are valid.
+ */
 function validateCredentialProps(credential) {
   if (!credential) {
     throw new Error("Missing credential");
@@ -150,7 +173,14 @@ function validateCredentialProps(credential) {
 }
 
 // ------------------------------------------------------------------------------------------------
-
+/**
+ * Validates the properties of the assertion.
+ * 
+ * @param {Object} assertion - The assertion object.
+ * 
+ * @throws Will throw an error if the assertion validation fails.
+ * @returns {boolean} Returns true if the assertion properties are valid.
+ */
 function validateAssertionProps(assertion) {
   if (!assertion) {
     throw new Error("Missing assertion");
@@ -170,7 +200,18 @@ function validateAssertionProps(assertion) {
 }
 
 // ------------------------------------------------------------------------------------------------
-
+/**
+ * Validates the request parameters in the assertion against the expected properties.
+ * 
+ * @param {Object} assertion - The assertion object.
+ * @param {Object} [expectedProps={}] - The expected properties.
+ * @param {string} [expectedProps.challenge] - The expected challenge.
+ * @param {string} [expectedProps.origin] - The expected origin.
+ * @param {string} [expectedProps.type] - The expected type.
+ * 
+ * @throws Will throw an error if the request parameters validation fails.
+ * @returns {boolean} Returns true if the request parameters are valid.
+ */
 function validateRequestParams(assertion, expectedProps = {}) {
   const clientDataJSON = JSON.parse(assertion.response.clientDataJSONDecoded);
   if (expectedProps.challenge != clientDataJSON?.challenge) {
@@ -200,7 +241,15 @@ function validateRequestParams(assertion, expectedProps = {}) {
 }
 
 // ------------------------------------------------------------------------------------------------
-
+/**
+ * Validates that the credential ID and raw ID match the assertion ID and raw ID.
+ * 
+ * @param {Object} credential - The credential object.
+ * @param {Object} assertion - The assertion object.
+ * 
+ * @throws Will throw an error if the credential and assertion IDs do not match.
+ * @returns {boolean} Returns true if the credential and assertion IDs match.
+ */
 function validateCredentialAssertion(credential, assertion) {
   if (credential.id != assertion.id) {
     throw new Error("Credential ID does not match assertion ID");
@@ -212,7 +261,14 @@ function validateCredentialAssertion(credential, assertion) {
 }
 
 // ------------------------------------------------------------------------------------------------
-
+/**
+ * Retrieves the key import algorithm parameters based on the public key algorithm.
+ * 
+ * @param {number} publicKeyAlgorithm - The public key algorithm.
+ * 
+ * @throws Will throw an error if the public key algorithm is not supported.
+ * @returns {Object} The key import algorithm parameters.
+ */
 function getImportPublicKeyAlgorithm(publicKeyAlgorithm) {
   if (publicKeyAlgorithm === -7) {
     return {
@@ -233,7 +289,13 @@ function getImportPublicKeyAlgorithm(publicKeyAlgorithm) {
 }
 
 // ------------------------------------------------------------------------------------------------
-
+/**
+ * Retrieves the algorithm parameters for verifying a signature based on the public key algorithm.
+ * 
+ * @param {number} publicKeyAlgorithm - The public key algorithm identifier.
+ * @returns {Object} The algorithm parameters for verifying the signature.
+ * @throws Will throw an error if the public key algorithm is not supported.
+ */
 function getAlgorithmVerifySignatureParam(publicKeyAlgorithm) {
   if (publicKeyAlgorithm === -7) {
     return {
@@ -256,7 +318,14 @@ function getAlgorithmVerifySignatureParam(publicKeyAlgorithm) {
 }
 
 // ------------------------------------------------------------------------------------------------
-
+/**
+ * Generates a hash from the authenticator data and client data JSON of the assertion.
+ * 
+ * @param {Crypto} crypto - The crypto object for cryptographic operations.
+ * @param {Object} assertion - The WebAuthn assertion object.
+ * @returns {Promise<ArrayBuffer>} The concatenated hash of the authenticator data and client data JSON.
+ * @throws Will throw an error if there's an issue generating the hash.
+ */
 async function generateHashFromAssertion(crypto, assertion) {
   try {
     // Creating the signature to be compared with the one generated by the authenticator

@@ -4,12 +4,12 @@ const bufferConcatenate = require("../../utils/bufferConcatenate");
 /**
  * Converts an ECDSA signature in ASN.1/DER format to a concatenated r|s format.
  *
- * @param {Uint8Array} input - The input signature in ASN.1/DER format.
+ * @param {Uint8Array} asn1Signature - The input signature in ASN.1/DER format.
  * @returns {Uint8Array} - The signature in concatenated r|s format.
  * @throws {Error} - Throws an error if the input does not contain exactly 2 ASN.1 sequence elements or if r or s have an unexpected length.
  */
-function convertECDSAASN1Signature(input) {
-  const elements = readASN1IntegerSequence(input);
+function convertECDSAASN1Signature(asn1Signature) {
+  const elements = readASN1IntegerSequence(asn1Signature);
   if (elements.length !== 2)
     throw new Error("Expected 2 ASN.1 sequence elements");
   let [r, s] = elements;

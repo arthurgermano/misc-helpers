@@ -1,5 +1,3 @@
-const bufferCompare = require("./src/utils/bufferCompare.js");
-
 module.exports = {
   auth: {
     webAuthn: require("./src/auth/webauthn/index.js"),

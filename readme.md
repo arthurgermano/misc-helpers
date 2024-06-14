@@ -48,7 +48,93 @@ A collection of utility functions and validators for common tasks.
   - [Utils](#utils)
     - [assign](#assign)
       - [Example](#example-9)
+    - [base64From](#base64from)
+      - [Example](#example-10)
+    - [base64FromBuffer](#base64frombuffer)
+      - [Example](#example-11)
+    - [base64To](#base64to)
+      - [Example](#example-12)
+    - [base64ToBuffer](#base64tobuffer)
+      - [Example](#example-13)
+    - [bufferCompare](#buffercompare)
+      - [Example](#example-14)
+    - [bufferConcatenate](#bufferconcatenate)
+      - [Example](#example-15)
+    - [bufferFromString](#bufferfromstring)
+      - [Example](#example-16)
+    - [bufferToString](#buffertostring)
+      - [Example](#example-17)
+    - [calculateSecondsInTime](#calculatesecondsintime)
+      - [Example](#example-18)
+    - [currencyBRToFloat](#currencybrtofloat)
+      - [Example](#example-19)
+    - [dateFirstHourOfDay](#datefirsthourofday)
+      - [Example](#example-20)
+    - [dateLastHourOfDay](#datelasthourofday)
+      - [Example](#example-21)
+    - [dateToFormat](#datetoformat)
+      - [Example](#example-22)
+    - [debouncer](#debouncer)
+      - [Example](#example-23)
+    - [deleteKeys](#deletekeys)
+      - [Example](#example-24)
+    - [generateRandomString](#generaterandomstring)
+      - [Example](#example-25)
+    - [generateSimpleId](#generatesimpleid)
+      - [Example](#example-26)
+    - [getExecutionTime](#getexecutiontime)
+      - [Example](#example-27)
+    - [JSONFrom](#jsonfrom)
+      - [Example](#example-28)
+    - [JSONTo](#jsonto)
+      - [Example](#example-29)
+    - [messageDecryptFromChunks](#messagedecryptfromchunks)
+      - [Example](#example-30)
+    - [messageEncryptToChunks](#messageencrypttochunks)
+      - [Example](#example-31)
+    - [normalize](#normalize)
+      - [Example](#example-32)
+    - [pushLogMessage](#pushlogmessage)
+      - [Example](#example-33)
+    - [regexDigitsOnly](#regexdigitsonly)
+      - [Example](#example-34)
+    - [regexLettersOnly](#regexlettersonly)
+      - [Example](#example-35)
+    - [regexReplaceTrim](#regexreplacetrim)
+      - [Example](#example-36)
+    - [removeDuplicatedStrings](#removeduplicatedstrings)
+      - [Example](#example-37)
+    - [split](#split)
+      - [Example](#example-38)
+    - [stringCompress](#stringcompress)
+      - [Example](#example-39)
+    - [stringDecompress](#stringdecompress)
+      - [Example](#example-40)
+    - [stringToDate](#stringtodate)
+      - [Example](#example-41)
+    - [stringToDateToFormat](#stringtodatetoformat)
+      - [Example](#example-42)
+    - [stringToFormat](#stringtoformat)
+      - [Example](#example-43)
+    - [stringZLibCompress](#stringzlibcompress)
+      - [Example](#example-44)
+    - [stringZLibDecompress](#stringzlibdecompress)
+      - [Example](#example-45)
+    - [toString](#tostring)
+      - [Example](#example-46)
+    - [uint8ArrayFromString](#uint8arrayfromstring)
+      - [Example](#example-47)
+    - [uint8ArrayToString](#uint8arraytostring)
+      - [Example](#example-48)
   - [Validators](#validators)
+    - [validateCADICMSPR](#validatecadicmspr)
+      - [Example](#example-49)
+    - [validateCNPJ](#validatecnpj)
+      - [Example](#example-50)
+    - [validateCPF](#validatecpf)
+      - [Example](#example-51)
+    - [validateEmail](#validateemail)
+      - [Example](#example-52)
 
 <hr />
 
@@ -574,10 +660,1164 @@ const mergedObject = assign(targetObject, sourceObject);
 console.log(mergedObject); // Output: { a: 1, b: 3, c: 4 }
 ```
 
+### base64From
+
+- Description: Converts a Base64 encoded string to plain text (UTF-8) or a Buffer, depending on the environment and options.
+- Returns: Decoded plain text (UTF-8) string or Buffer.
+- Params:
+  - `text` (string): The Base64 encoded string to decode (default: "").
+  - `toString` (boolean): If true and in Node.js environment, decode to UTF-8 string. Default is true.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const base64String = "SGVsbG8gV29ybGQh"; // Example Base64 encoded string
+const decodedText = base64From(base64String);
+console.log(decodedText); // Output: "Hello World!"
+```
+
+### base64FromBuffer
+
+- Description: Converts an ArrayBuffer to a Base64 string.
+- Returns: The Base64-encoded string representation of the ArrayBuffer.
+- Params:
+  - `buffer` (ArrayBuffer): The ArrayBuffer to convert to Base64.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const base64To = require("./base64To");
+
+const arrayBuffer = new ArrayBuffer(16);
+const view = new Uint8Array(arrayBuffer);
+for (let i = 0; i < view.length; i++) {
+    view[i] = i;
+}
+
+const base64String = base64FromBuffer(arrayBuffer);
+console.log('Base64 Encoded:', base64String);
+```
+
+### base64To
+
+- Description: Returns a text in a base64 format.
+- Params:
+  - `text` (String): The text to be transformed.
+  - `fromFormat` (String): From what format to expect (default: utf8).
+- Returns: The text transformed into Base64 format.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const toString = require("./toString.js");
+
+const base64String = base64To("Hello, world!", "utf8");
+console.log('Base64 Encoded:', base64String);
+```
+
+### base64ToBuffer
+
+- Description: Converts a Base64 encoded string to a binary Buffer or ArrayBuffer.
+- Params:
+  - `base64String` (string): The Base64 encoded string to decode.
+  - `toString` (boolean): If true and in Node.js environment, decode to UTF-8 string. Default is true.
+- Returns: Decoded binary Buffer or ArrayBuffer.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const base64From = require("./base64From");
+
+const base64String = "SGVsbG8sIHdvcmxkIQ=="; // Example Base64 string
+const buffer = base64ToBuffer(base64String);
+console.log('Decoded Buffer:', buffer);
+
+```
+
+### bufferCompare
+
+- Description: Compares two ArrayBuffer objects for equality.
+- Params:
+  - `buffer1` (ArrayBuffer): The first ArrayBuffer.
+  - `buffer2` (ArrayBuffer): The second ArrayBuffer.
+- Returns: boolean - True if the buffers are equal, false otherwise.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const bufferCompare = require("./bufferCompare");
+
+const buffer1 = new ArrayBuffer(8);
+const view1 = new Uint8Array(buffer1);
+for (let i = 0; i < view1.length; i++) {
+    view1[i] = i;
+}
+
+const buffer2 = new ArrayBuffer(8);
+const view2 = new Uint8Array(buffer2);
+for (let i = 0; i < view2.length; i++) {
+    view2[i] = i;
+}
+
+const isEqual = bufferCompare(buffer1, buffer2);
+console.log('Buffers are equal:', isEqual);
+```
+
+### bufferConcatenate
+
+- Description: Concatenates two ArrayBuffer objects.
+- Params:
+  - `buffer1` (ArrayBuffer): The first ArrayBuffer.
+  - `buffer2` (ArrayBuffer): The second ArrayBuffer.
+- Returns: ArrayBuffer - The concatenated ArrayBuffer.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const bufferConcatenate = require("./bufferConcatenate");
+
+const buffer1 = new ArrayBuffer(4);
+const view1 = new Uint8Array(buffer1);
+view1.set([1, 2, 3, 4]);
+
+const buffer2 = new ArrayBuffer(3);
+const view2 = new Uint8Array(buffer2);
+view2.set([5, 6, 7]);
+
+const concatenatedBuffer = bufferConcatenate(buffer1, buffer2);
+const concatenatedView = new Uint8Array(concatenatedBuffer);
+
+console.log('Concatenated Buffer:', concatenatedView);
+```
+
+### bufferFromString
+
+- Description: Generates a buffer from a given string in both Node.js and browser environments.
+- Params:
+  - `txtString` (string): The string to convert to a buffer.
+  - `encoding` (string, optional): The encoding to use (only applicable in Node.js). Default is "utf-8".
+- Returns: Buffer|Uint8Array - The buffer representation of the string.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const bufferFromString = require("./bufferFromString");
+
+// Node.js usage
+const bufferNode = bufferFromString('Hello, World!', 'utf-8');
+console.log(bufferNode);
+
+// Browser usage
+const bufferBrowser = bufferFromString('Hello, World!');
+console.log(bufferBrowser);
+```
+
+### bufferToString
+
+- Description: Generates a string from a buffer in both Node.js and browser environments.
+- Params:
+  - `buffer` (Buffer|Uint8Array): The buffer to convert to a string.
+  - `encoding` (string, optional): The encoding to use (only applicable in Node.js). Default is "utf-8".
+- Returns: string - The string representation of the buffer.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const bufferToString = require("./bufferToString");
+
+// Node.js usage
+const bufferNode = Buffer.from('Hello, World!');
+const strNode = bufferToString(bufferNode);
+console.log(strNode); // Output: Hello, World!
+
+// Browser usage
+const bufferBrowser = new Uint8Array([72, 101, 108, 108, 111, 44, 32, 87, 111, 114, 108, 100, 33]);
+const strBrowser = bufferToString(bufferBrowser);
+console.log(strBrowser); // Output: Hello, World!
+```
+
+### calculateSecondsInTime
+
+- Description: Returns the time value given the seconds, either adding or subtracting the seconds from the current time.
+- Params:
+  - `seconds` (Number): Value to be added or subtracted in seconds.
+  - `add` (Boolean, optional): Whether to add (`true`) or subtract (`false`) the seconds from the current time. Default is `true`.
+- Returns: Number - The time value in milliseconds.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const calculateSecondsInTime = require("./calculateSecondsInTime");
+
+// Adding seconds
+const addedTime = calculateSecondsInTime(60); // Adds 60 seconds to the current time
+console.log(addedTime); // Output: Current time + 60 seconds
+
+// Subtracting seconds
+const subtractedTime = calculateSecondsInTime(60, false); // Subtracts 60 seconds from the current time
+console.log(subtractedTime); // Output: Current time - 60 seconds
+```
+
+### currencyBRToFloat
+
+- Description: Returns a float value from a given money string formatted in Brazilian Real (BRL) currency.
+- Params:
+  - `moneyString` (String): The money string to be transformed into a float.
+- Returns: Float - The float representation of the money string, or `false` if conversion fails.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const currencyBRToFloat = require("./currencyBRToFloat");
+
+// Valid money string
+const money1 = "R$ 1.234,56";
+const result1 = currencyBRToFloat(money1);
+console.log(result1); // Output: 1234.56 (float)
+
+// Another valid money string
+const money2 = "R$ 999,99";
+const result2 = currencyBRToFloat(money2);
+console.log(result2); // Output: 999.99 (float)
+
+// Invalid money string
+const invalidMoney = "R$ ABC";
+const result3 = currencyBRToFloat(invalidMoney);
+console.log(result3); // Output: false (conversion failed)
+```
+
+### dateFirstHourOfDay
+
+- Description: Returns a new Date object with the hour, minute, second, and millisecond set to 00:00:00.
+- Params:
+  - `date` (Date): The date object for which the time should be set to the first hour of the day.
+- Returns: Date - A new Date object with hour, minute, second, and millisecond set to 00:00:00.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const dateFirstHourOfDay = require("./dateFirstHourOfDay");
+
+// Create a new Date object
+const date = new Date();
+
+// Set the date to the first hour of the day
+const result = dateFirstHourOfDay(date);
+console.log(result); // Output: Date object with time set to 00:00:00
+```
+
+### dateLastHourOfDay
+
+- Description: Returns a new Date object with the hour, minute, second, and millisecond set to 23:59:59.
+- Params:
+  - `date` (Date): The date object for which the time should be set to the last hour of the day.
+- Returns: Date - A new Date object with hour, minute, second, and millisecond set to 23:59:59.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const dateLastHourOfDay = require("./dateLastHourOfDay");
+
+// Create a new Date object
+const date = new Date();
+
+// Set the date to the last hour of the day
+const result = dateLastHourOfDay(date);
+console.log(result); // Output: Date object with time set to 23:59:59
+```
+
+### dateToFormat
+
+- Description: Returns a formatted string representation of a Date object according to the specified format.
+- Params:
+  - `date` (Date): The Date object to format.
+  - `stringFormat` (String): Optional. The format string in which the Date object should be formatted. Default is `dd-MM-yyyy`.
+- Returns: String - A string formatted according to the specified format.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const dateToFormat = require("./dateToFormat");
+const { DATE_BR_FORMAT_D } = require("../constants");
+
+// Create a new Date object
+const date = new Date();
+
+// Format the date according to the Brazilian date format
+const formattedDate = dateToFormat(date, DATE_BR_FORMAT_D);
+console.log(formattedDate); // Output: Formatted date string according to the format dd-MM-yyyy
+```
+
+### debouncer
+
+- Description: Debounces a function until the timeout period has elapsed, ensuring it is executed only once within that period.
+- Params:
+  - `callback` (Function): The function to be executed after the timeout period.
+  - `timeout` (Integer): Optional. The timeout period in milliseconds. Default is 1000 milliseconds.
+- Returns: Function - A debounced function that delays execution of `callback` until after the timeout period has elapsed.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const debouncer = require("./debouncer");
+
+// Define a function to be debounced
+function fetchData(query) {
+  // Simulating an asynchronous operation
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      console.log(`Fetching data for query: ${query}`);
+      resolve();
+    }, 500);
+  });
+}
+
+// Create a debounced version of fetchData with a timeout of 1000 milliseconds
+const debouncedFetchData = debouncer(fetchData, 1000);
+
+// Invoke the debounced function multiple times in rapid succession
+debouncedFetchData("search query 1");
+debouncedFetchData("search query 2");
+debouncedFetchData("search query 3");
+
+// Only one execution of fetchData will occur after the timeout period (1000 milliseconds)
+```
+
+### deleteKeys
+
+- Description: Removes specified keys from an object.
+- Params:
+  - `object` (Object): The object from which keys should be deleted.
+  - `keys` (Array): The array of keys to be deleted from the object.
+- Returns: Object - The object with the specified keys removed.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const deleteKeys = require("./deleteKeys");
+
+// Example object
+let user = {
+  id: 1,
+  username: "john_doe",
+  email: "john.doe@example.com",
+  password: "password123",
+};
+
+// Keys to delete
+const keysToDelete = ["password", "email"];
+
+// Remove keys from the user object
+const modifiedUser = deleteKeys(user, keysToDelete);
+
+console.log(modifiedUser);
+// Output: { id: 1, username: 'john_doe' }
+```
+
+### generateRandomString
+
+- Description: Generates a new random string based on specified size and options.
+- Params:
+  - `size` (Integer): The size of the string to generate (default: 32).
+  - `options` (Object): Optional. The options to customize behavior.
+    - `options.excludeLowerCaseChars` (Boolean): Whether to exclude lowercase characters (default: false).
+    - `options.excludeUpperCaseChars` (Boolean): Whether to exclude uppercase characters (default: false).
+    - `options.excludeAccentedChars` (Boolean): Whether to exclude accented characters (default: false).
+    - `options.excludeDigits` (Boolean): Whether to exclude digits (default: false).
+    - `options.excludeSymbols` (Boolean): Whether to exclude symbols (default: false).
+    - `options.includeSymbols` (String): A string with customized symbols to include.
+- Returns: String - A new random string based on the specified criteria.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const generateRandomString = require("./generateRandomString");
+
+// Generate a random string of size 16 with default options
+const randomString1 = generateRandomString(16);
+console.log(randomString1);
+
+// Generate a random string of size 8 excluding digits and symbols
+const randomString2 = generateRandomString(8, {
+  excludeDigits: true,
+  excludeSymbols: true
+});
+console.log(randomString2);
+```
+
+### generateSimpleId
+
+- Description: Returns a new simple string identifier based on a given text and optional separator.
+- Params:
+  - `id` (String): The string text identifier to incorporate into the new id.
+  - `separator` (String): Optional. The separator between id parts (default: "_").
+- Returns: String - A new string identifier combining the given text, current timestamp, and random number.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const generateSimpleId = require("./generateSimpleId");
+
+// Generate a simple id with default separator
+const id1 = generateSimpleId("example");
+console.log(id1);
+
+// Generate a simple id with custom separator
+const id2 = generateSimpleId("example", "-");
+console.log(id2);
+```
+
+### getExecutionTime
+
+- Description: Returns the elapsed time in milliseconds from a given reference time using Node.js `process.hrtime`.
+- Params:
+  - `time` (BigInteger): Optional. The reference time in milliseconds to compare against (default: 0).
+- Returns: BigInteger - The elapsed time in milliseconds from the given time.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const getExecutionTime = require("./getExecutionTime");
+
+// Measure execution time of a function
+const start = process.hrtime();
+// Perform some operation or function here
+const end = getExecutionTime(start);
+console.log(`Execution time: ${end} ms`);
+```
+
+### JSONFrom
+
+- Description: Returns an object parsed from a JSON string.
+- Params:
+  - `text` (String): The JSON string to parse into an object.
+  - `throwsError` (Boolean): Optional. Whether this function should throw an error on parsing failure (default: true).
+- Returns: Object - The parsed object from the JSON string, or null if parsing fails and `throwsError` is false.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const JSONFrom = require("./JSONFrom");
+
+const jsonString = '{"key": "value"}';
+const parsedObject = JSONFrom(jsonString);
+console.log(parsedObject); // Output: { key: 'value' }
+```
+
+### JSONTo
+
+- Description: Returns a JSON string representation of an object.
+- Params:
+  - `object` (Object): Optional. The object to be transformed into a JSON string (default: {}).
+  - `throwsError` (Boolean): Optional. Whether this function should throw an error on stringification failure (default: true).
+- Returns: String - The JSON string representation of the object, or null if stringification fails and `throwsError` is false.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const JSONTo = require("./JSONTo");
+
+const obj = { key: 'value' };
+const jsonString = JSONTo(obj);
+console.log(jsonString); // Output: '{"key":"value"}'
+```
+
+### messageDecryptFromChunks
+
+- Description: Decrypts a message from encrypted chunks using RSA-OAEP decryption.
+- Params:
+  - `privateKey` (string): The RSA private key in PEM format.
+  - `messageChunks` (string[]): An array of encrypted message chunks.
+  - `props` (Object): Optional. Additional decryption properties (default: {}).
+  - `props.algorithm` (string): Optional. Encryption algorithm to use (default: 'RSA-OAEP').
+  - `props.inputEncoding` (string): Optional. Input encoding of the encrypted chunks (default: 'base64').
+  - `props.outputEncoding` (string): Optional. Output encoding of the decrypted message (default: 'utf8').
+- Returns: Promise<string> - A Promise that resolves to the decrypted message as a string.
+- Throws: Error - If decryption fails or any other error occurs.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const messageDecryptFromChunks = require("./messageDecryptFromChunks");
+const { readFileSync } = require("fs");
+
+async function decryptMessage() {
+  const privateKey = readFileSync("private_key.pem", "utf8");
+  const messageChunks = [
+    "encrypted_chunk_1",
+    "encrypted_chunk_2",
+    "encrypted_chunk_3"
+  ];
+
+  try {
+    const decryptedMessage = await messageDecryptFromChunks(privateKey, messageChunks);
+    console.log("Decrypted Message:", decryptedMessage);
+  } catch (error) {
+    console.error("Decryption Error:", error);
+  }
+}
+
+decryptMessage();
+```
+
+### messageEncryptToChunks
+
+- Description: Encrypts a message into chunks using RSA-OAEP encryption.
+- Params:
+  - `publicKey` (string): The RSA public key in PEM format.
+  - `message` (string): The message to encrypt.
+  - `props` (Object): Optional. Additional encryption properties (default: {}).
+  - `props.algorithm` (string): Optional. Encryption algorithm to use (default: 'RSA-OAEP').
+  - `props.inputEncoding` (string): Optional. Input encoding of the message (default: 'utf8').
+  - `props.outputEncoding` (string): Optional. Output encoding of the encrypted chunks (default: 'base64').
+  - `props.chunkSize` (number): Optional. The size of each chunk in bytes (default: 190).
+- Returns: Promise<string[]> - A Promise that resolves to an array of encrypted message chunks.
+- Throws: Error - If encryption fails or any other error occurs.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const messageEncryptToChunks = require("./messageEncryptToChunks");
+const { readFileSync } = require("fs");
+
+async function encryptMessage() {
+  const publicKey = readFileSync("public_key.pem", "utf8");
+  const message = "This is a secret message to encrypt.";
+
+  try {
+    const encryptedChunks = await messageEncryptToChunks(publicKey, message);
+    console.log("Encrypted Chunks:", encryptedChunks);
+  } catch (error) {
+    console.error("Encryption Error:", error);
+  }
+}
+
+encryptMessage();
+```
+
+### normalize
+
+- Description: Returns a text normalized.
+- Params:
+  - `text` (String): The text to be normalized.
+- Returns: String - The text normalized.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const normalize = require("./normalize");
+
+const text = "héllõ wórld";
+const normalizedText = normalize(text);
+console.log(normalizedText); // Output: "hello world"
+```
+
+### pushLogMessage
+
+- Description: Pushes a message into a log object with the current time.
+- Params:
+  - `logObj` (Array): The log object array to which the message should be pushed.
+  - `message` (Boolean): The message to be pushed.
+  - `more_info` (Any): Optional. Additional information to be added to the log message.
+- Returns: Array - The log object array with the new message pushed into it.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const pushLogMessage = require("./pushLogMessage");
+
+let log = [];
+log = pushLogMessage(log, "Error occurred", { errorCode: 500 });
+console.log(log);
+```
+
+### regexDigitsOnly
+
+- Description: Returns a string containing only digits from the input text.
+- Params:
+  - `text` (String): The text from which digits should be extracted.
+- Returns: String - The text containing only digits.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const regexDigitsOnly = require("./regexDigitsOnly");
+
+const text = "abc123xyz456";
+const digitsOnly = regexDigitsOnly(text);
+console.log(digitsOnly); // Output: "123456"
+```
+
+### regexLettersOnly
+
+- Description: Returns a string containing only letters from the input text.
+- Params:
+  - `text` (String): The text from which letters should be extracted.
+- Returns: String - The text containing only letters.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const regexLettersOnly = require("./regexLettersOnly");
+
+const text = "123abc456XYZ!@#";
+const lettersOnly = regexLettersOnly(text);
+console.log(lettersOnly); // Output: "abcXYZ"
+```
+
+### regexReplaceTrim
+
+- Description: Returns a string with specified regex replaced by the provided replacement string.
+- Params:
+  - `text` (String): String containing values to be replaced.
+  - `regex` (String): Optional. The regex pattern to keep (default: "A-Za-zÀ-ú0-9 ").
+  - `replacement` (String): Optional. The string to replace matching patterns in the text.
+- Returns: String - The modified string with replacements.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const regexReplaceTrim = require("./regexReplaceTrim");
+
+const text = "abc123XYZ456!@#";
+const replacedText = regexReplaceTrim(text, "A-Za-z", "-");
+console.log(replacedText); // Output: "---123---456---#"
+```
+
+### removeDuplicatedStrings
+
+- Description: Returns a string with duplicated substrings removed.
+- Params:
+  - `text` (String): The string to be checked for duplicates.
+  - `splitString` (String): Optional. The character or substring used to split the text into array elements (default: " ").
+  - `caseInsensitive` (Boolean): Optional. Whether to remove duplicates case-insensitively (default: false).
+- Returns: String - The modified string with duplicated substrings removed.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const removeDuplicatedStrings = require("./removeDuplicatedStrings");
+
+const text = "apple banana apple orange banana";
+const uniqueText = removeDuplicatedStrings(text, " ");
+console.log(uniqueText); // Output: "apple banana orange"
+```
+
+### split
+
+- Description: Returns an array by splitting a string using a specified character.
+- Params:
+  - `text` (String): The string to be split.
+  - `char` (String): Optional. The character used to split the string (default: " ").
+- Returns: Array - An array of substrings.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const split = require("./split");
+
+const text = "apple,banana,orange";
+const array = split(text, ",");
+console.log(array); // Output: ["apple", "banana", "orange"]
+```
+
+### stringCompress
+
+- Description: Returns a text compressed using gzip compression.
+- Params:
+  - `text` (String): The text to be compressed.
+  - `raw` (Boolean): Optional. If true, returns the compressed data as raw gzip encoding (default: false).
+  - `options` (Object): Optional. Additional options for compression.
+  - `options.level` (Integer): Optional. Compression level (0-9, where 0 is no compression and 9 is maximum compression) (default: 3).
+  - `options.mem` (Integer): Optional. Memory usage parameter (default: 16).
+- Returns: Promise<String | Uint8Array> - A Promise that resolves to the compressed text or raw gzip encoding.
+- Throws: Error - If compression fails or any other error occurs.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const stringCompress = require("./stringCompress");
+
+async function compressText() {
+  const text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+  
+  try {
+    const compressedText = await stringCompress(text);
+    console.log("Compressed Text:", compressedText);
+  } catch (error) {
+    console.error("Compression Error:", error);
+  }
+}
+
+compressText();
+```
+
+### stringDecompress
+
+- Description: Returns a text decompressed from gzip compression.
+- Params:
+  - `gzipped` (String | Uint8Array): The text or Uint8Array to be decompressed, possibly base64 encoded if `raw` is false.
+  - `raw` (Boolean): Optional. If true, expects `gzipped` to be raw Uint8Array data; if false, expects `gzipped` to be base64 encoded (default: false).
+- Returns: Promise<String> - A Promise that resolves to the decompressed text.
+- Throws: Error - If decompression fails or any other error occurs.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const stringDecompress = require("./stringDecompress");
+
+async function decompressText() {
+  const gzippedText = "H4sIAAAAAAAA/8vJLS5R4EvyKklRjQQAAP//WgkIbAAAA";
+  
+  try {
+    const decompressedText = await stringDecompress(gzippedText, true);
+    console.log("Decompressed Text:", decompressedText);
+  } catch (error) {
+    console.error("Decompression Error:", error);
+  }
+}
+
+decompressText();
+```
+
+### stringToDate
+
+- Description: Returns a new Date object parsed from a string date representation.
+- Params:
+  - `stringDate` (String): The string date to be parsed.
+  - `stringFormat` (String): Optional. The format in which the string date text is provided (default: 'yyyy-MM-dd'T'HH:mm:ss.SSS'Z').
+  - `defaultDate` (Date): Optional. The default date to use if parsing fails (default: current date).
+- Returns: Date - A new Date object parsed from the string date, adjusted for timezone.
+- Throws: None.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const stringToDate = require("./stringToDate");
+const { DATE_ISO_FORMAT } = require("../constants");
+
+const dateString = "2023-06-14T12:00:00.000Z";
+const parsedDate = stringToDate(dateString, DATE_ISO_FORMAT);
+console.log("Parsed Date:", parsedDate);
+```
+
+### stringToDateToFormat
+
+- Description: Returns a formatted string date parsed from a string date representation.
+- Params:
+  - `stringDate` (String): The string date to be parsed.
+  - `fromFormat` (String): Optional. The format in which the string date text is provided (default: 'yyyy-MM-dd'T'HH:mm:ss.SSS').
+  - `toFormat` (String): Optional. The format to which the parsed date should be formatted (default: 'dd-MM-yyyy HH:mm:ss').
+- Returns: String - A formatted string date representation.
+- Throws: None.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const stringToDateToFormat = require("./stringToDateToFormat");
+const { DATE_ISO_FORMAT, DATE_BR_HOUR_FORMAT_D } = require("../constants");
+
+const dateString = "2023-06-14T12:00:00.000Z";
+const formattedDate = stringToDateToFormat(dateString, DATE_ISO_FORMAT, DATE_BR_HOUR_FORMAT_D);
+console.log("Formatted Date:", formattedDate);
+```
+
+### stringToFormat
+
+- Description: Returns a string formatted according to a given pattern.
+- Params:
+  - `text` (Any): The text to be formatted.
+  - `pattern` (String): Optional. The pattern specifying how the text should be formatted (default: "##.###.###/####-##").
+  - `options` (Object): Optional. The options to customize behavior.
+    - `options.digitsOnly` (Boolean): Whether to apply digits-only transformation (default: false).
+    - `options.paddingChar` (String): The padding character to use (default: '0').
+- Returns: String - A string formatted according to the specified pattern.
+- Throws: None.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const stringToFormat = require("./stringToFormat");
+const { STRING_FORMAT_CNPJ } = require("../constants");
+
+const cnpj = "12345678000195";
+const formattedCnpj = stringToFormat(cnpj, STRING_FORMAT_CNPJ);
+console.log("Formatted CNPJ:", formattedCnpj); // Output: "12.345.678/0001-95"
+```
+
+### stringZLibCompress
+
+- Description: Returns a text compressed using zlib compression.
+- Params:
+  - `text` (String): The text to be compressed.
+  - `raw` (Boolean): Optional. If true, returns the raw zlib compressed data (default: false).
+  - `options` (Object): Optional. The options to customize compression.
+    - `options.level` (Integer): Compression level (default: undefined).
+    - `options.mem` (Integer): Memory usage (default: undefined).
+- Returns: String - The compressed text as a base64 encoded string if `raw` is false, otherwise as a Uint8Array.
+- Throws: Error - If compression fails or any other error occurs.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const stringZLibCompress = require("./stringZLibCompress");
+
+async function compressText() {
+  const text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+  try {
+    const compressedText = await stringZLibCompress(text);
+    console.log("Compressed Text:", compressedText);
+  } catch (error) {
+    console.error("Compression Error:", error);
+  }
+}
+
+compressText();
+```
+
+### stringZLibDecompress
+
+- Description: Returns a text decompressed using zlib decompression.
+- Params:
+  - `zlibbed` (String): The zlib compressed text to be decompressed.
+  - `raw` (Boolean): Optional. If true, indicates that the input `zlibbed` text is base64 encoded (default: false).
+- Returns: String - The decompressed text.
+- Throws: Error - If decompression fails or any other error occurs.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const stringZLibDecompress = require("./stringZLibDecompress");
+
+async function decompressText() {
+  const zlibbedText = "eJzT0yMAAGTvBe8=";
+  try {
+    const decompressedText = await stringZLibDecompress(zlibbedText, true);
+    console.log("Decompressed Text:", decompressedText);
+  } catch (error) {
+    console.error("Decompression Error:", error);
+  }
+}
+
+decompressText();
+```
+
+### toString
+
+- Description: Returns a string representation of a given value.
+- Params:
+  - `textObj` (Any): Value to be converted to a string.
+  - `objectToJSON` (Boolean): Optional. Whether to transform objects to JSON stringified form (default: true).
+- Returns: String - The string representation of the provided value.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const toString = require("./toString");
+
+const obj = { key: 'value' };
+const str = toString(obj);
+console.log(str); // Output: '{"key":"value"}'
+
+const num = 123;
+const numStr = toString(num);
+console.log(numStr); // Output: '123'
+```
+
+### uint8ArrayFromString
+
+- Description: Returns a Uint8Array representation of a string.
+- Params:
+  - `text` (String): Value to be converted to a Uint8Array.
+  - `joinChar` (String): Optional. Character to join Uint8Array elements into a string.
+- Returns: Uint8Array or String - If `joinChar` is provided, returns the joined string representation of Uint8Array; otherwise, returns Uint8Array itself.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const uint8ArrayFromString = require("./uint8ArrayFromString");
+
+const text = "Hello, world!";
+const uint8Array = uint8ArrayFromString(text);
+console.log(uint8Array); // Output: Uint8Array [ 72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33 ]
+
+const joinedString = uint8ArrayFromString(text, '-');
+console.log(joinedString); // Output: '72-101-108-108-111-44-32-119-111-114-108-100-33'
+```
+
+### uint8ArrayToString
+
+- Description: Converts a Uint8Array or an array of bytes into a string.
+- Params:
+  - `uint8Array` (Uint8Array or Array): The Uint8Array or array of bytes to convert to a string.
+  - `splitChar` (String): Optional. Character to split Uint8Array elements before conversion.
+- Returns: String - The converted string representation of the Uint8Array or array of bytes.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const uint8ArrayToString = require("./uint8ArrayToString");
+
+const uint8Array = new Uint8Array([72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33]);
+const text = uint8ArrayToString(uint8Array);
+console.log(text); // Output: 'Hello, world!'
+
+const joinedString = '72-101-108-108-111-44-32-119-111-114-108-100-33';
+const convertedText = uint8ArrayToString(joinedString, '-');
+console.log(convertedText); // Output: 'Hello, world!'
+```
+
 <hr />
 
 ## Validators
 
+### validateCADICMSPR
+
+- Description: Validates a given CADICMS from the Brazilian Paraná State.
+- Params:
+  - `cadicms` (String): The CADICMS value to be validated.
+- Returns: Boolean - Returns true if the CADICMS is valid, otherwise false.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const validateCADICMSPR = require("./validateCADICMSPR");
+
+const validCADICMS = "1234567890";
+const invalidCADICMS = "9876543210";
+
+console.log(validateCADICMSPR(validCADICMS)); // Output: true
+console.log(validateCADICMSPR(invalidCADICMS)); // Output: false
+```
+
+### validateCNPJ
+
+- Description: Validates a given CNPJ (Cadastro Nacional da Pessoa Jurídica, Brazilian corporate taxpayer registry number).
+- Params:
+  - `cnpj` (String): The CNPJ value to be validated.
+- Returns: Boolean - Returns true if the CNPJ is valid, otherwise false.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const validateCNPJ = require("./validateCNPJ");
+
+const validCNPJ = "12.345.678/0001-99";
+const invalidCNPJ = "11.111.111/1111-11";
+
+console.log(validateCNPJ(validCNPJ)); // Output: true
+console.log(validateCNPJ(invalidCNPJ)); // Output: false
+```
+
+### validateCPF
+
+- Description: Validates a given CPF (Cadastro de Pessoas Físicas, Brazilian individual taxpayer registry number).
+- Params:
+  - `cpf` (String): The CPF value to be validated.
+- Returns: Boolean - Returns true if the CPF is valid, otherwise false.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const validateCPF = require("./validateCPF");
+
+const validCPF = "123.456.789-09";
+const invalidCPF = "111.111.111-11";
+
+console.log(validateCPF(validCPF)); // Output: true
+console.log(validateCPF(invalidCPF)); // Output: false
+```
+
+### validateEmail
+
+- Description: Validates a given email address using a regular expression.
+- Params:
+  - `email` (String): The email address to be validated.
+- Returns: Boolean - Returns true if the email address is valid according to the regular expression, otherwise false.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const validateEmail = require("./validateEmail");
+
+const validEmail = "example@email.com";
+const invalidEmail = "example.email.com";
+
+console.log(validateEmail(validEmail)); // Output: true
+console.log(validateEmail(invalidEmail)); // Output: false
+```
 
 <hr />
 

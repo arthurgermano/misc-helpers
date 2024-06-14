@@ -13,6 +13,13 @@ A collection of utility functions and validators for common tasks.
     - [CNPJ and CPF](#cnpj-and-cpf)
   - [Auth](#auth)
     - [WebAuthn](#webauthn)
+      - [convertECDSAASN1Signature](#convertecdsaasn1signature)
+      - [getAuthenticationAuthData](#getauthenticationauthdata)
+      - [getRegistrationAuthData](#getregistrationauthdata)
+      - [getWebAuthnAuthenticationAssertion](#getwebauthnauthenticationassertion)
+      - [getWebAuthnRegistrationCredential](#getwebauthnregistrationcredential)
+      - [validateAuthentication](#validateauthentication)
+      - [validateRPID](#validaterpid)
   - [Crypto](#crypto)
     - [decrypt](#decrypt)
     - [digest](#digest)
@@ -203,100 +210,98 @@ A collection of utility functions and validators for common tasks.
 
 ### WebAuthn
 
-- **convertECDSAASN1Signature**
-  - Description: Converts an ECDSA signature in ASN.1/DER format to a concatenated r|s format.
-  - Returns: The signature in concatenated r|s format.
-  - Params:
-    - `asn1Signature` : ECDSA ASN.1 signature to be converted.
+#### convertECDSAASN1Signature
+- **Description:** Converts an ECDSA signature in ASN.1/DER format to a concatenated r|s format.
+- **Returns:** The signature in concatenated r|s format.
+- **Params:**
+  - `asn1Signature` : ECDSA ASN.1 signature to be converted.
 
-- **getAuthenticationAuthData**
-  - Description: Extracts data from a WebAuthn authentication assertion object.
-  - Returns: An object containing extracted data from the authentication assertion.
-    - `id`: ID of the WebAuthn assertion.
-    - `rawId`: Raw ID of the WebAuthn assertion.
-    - `type`: Type of the WebAuthn assertion.
-    - `authData`: Authenticator data included in the assertion.
-    - `response`: Response object containing additional data related to the assertion.
-    
-  - Params:
-    - `assertion` : The WebAuthn authentication assertion object.
+#### getAuthenticationAuthData
+- **Description:** Extracts data from a WebAuthn authentication assertion object.
+- **Returns:** An object containing extracted data from the authentication assertion.
+  - `id`: ID of the WebAuthn assertion.
+  - `rawId`: Raw ID of the WebAuthn assertion.
+  - `type`: Type of the WebAuthn assertion.
+  - `authData`: Authenticator data included in the assertion.
+  - `response`: Response object containing additional data related to the assertion.
+- **Params:**
+  - `assertion` : The WebAuthn authentication assertion object.
 
-- **getRegistrationAuthData**
-  - Description: Retrieves registration authentication data from a WebAuthn credential.
-  - Params:
-    - `credential` {PublicKeyCredential} : The WebAuthn credential object.
-  - Returns: An object containing registration authentication data extracted from the credential.
-    - `rawId`: Raw ID of the credential.
-    - `id`: ID of the credential.
-    - `type`: Type of the credential.
-    - `authenticatorAttachment`: Authenticator attachment information.
-    - `clientExtensionResults`: Client extension results from the credential.
-    - `authData`: Authenticator data from the credential.
-    - `response`: Object containing various response data:
-      - `attestationObject`: Attestation object from the credential response.
-      - `authenticatorData`: Authenticator data from the credential response.
-      - `clientDataJSONDecoded`: Decoded client data JSON from the credential response.
-      - `clientDataJSON`: Raw client data JSON from the credential response.
-      - `transports`: Transports used by the credential (if available).
-      - `publicKey`: Public key associated with the credential response.
-      - `publicKeyAlgorithm`: Public key algorithm used in the response.
+#### getRegistrationAuthData
+- **Description:** Retrieves registration authentication data from a WebAuthn credential.
+- **Params:**
+  - `credential` {PublicKeyCredential} : The WebAuthn credential object.
+- **Returns:** An object containing registration authentication data extracted from the credential.
+  - `rawId`: Raw ID of the credential.
+  - `id`: ID of the credential.
+  - `type`: Type of the credential.
+  - `authenticatorAttachment`: Authenticator attachment information.
+  - `clientExtensionResults`: Client extension results from the credential.
+  - `authData`: Authenticator data from the credential.
+  - `response`: Object containing various response data:
+    - `attestationObject`: Attestation object from the credential response.
+    - `authenticatorData`: Authenticator data from the credential response.
+    - `clientDataJSONDecoded`: Decoded client data JSON from the credential response.
+    - `clientDataJSON`: Raw client data JSON from the credential response.
+    - `transports`: Transports used by the credential (if available).
+    - `publicKey`: Public key associated with the credential response.
+    - `publicKeyAlgorithm`: Public key algorithm used in the response.
 
-- **getWebAuthnAuthenticationAssertion**
-  - Description: Initiates the WebAuthn authentication process and returns an assertion.
-  - Returns: A Promise that resolves to the obtained PublicKeyCredential or a message indicating that WebAuthn is not supported.
-  - Params:
-    - `props` {Object} : The PublicKeyCredentialRequestOptions object containing the options for requesting an authentication assertion.
-    - `callback` {Function} (optional) : Optional callback function to be called with the obtained assertion.
+#### getWebAuthnAuthenticationAssertion
+- **Description:** Initiates the WebAuthn authentication process and returns an assertion.
+- **Returns:** A Promise that resolves to the obtained PublicKeyCredential or a message indicating that WebAuthn is not supported.
+- **Params:**
+  - `props` {Object} : The PublicKeyCredentialRequestOptions object containing the options for requesting an authentication assertion.
+  - `callback` {Function} (optional) : Optional callback function to be called with the obtained assertion.
 
-- **getWebAuthnRegistrationCredential**
-  - Description: Initiates the WebAuthn registration process and returns a credential.
-  - Returns: A Promise that resolves to the created PublicKeyCredential or a message indicating that WebAuthn is not supported.
-  - Params:
-    - `props` {Object} : The PublicKeyCredentialCreationOptions object containing the options for creating a new credential.
-    - `callback` {Function} (optional) : Optional callback function to be called with the created credential.
-  
+#### getWebAuthnRegistrationCredential
+- **Description:** Initiates the WebAuthn registration process and returns a credential.
+- **Returns:** A Promise that resolves to the created PublicKeyCredential or a message indicating that WebAuthn is not supported.
+- **Params:**
+  - `props` {Object} : The PublicKeyCredentialCreationOptions object containing the options for creating a new credential.
+  - `callback` {Function} (optional) : Optional callback function to be called with the created credential.
 
-- **validateAuthentication**
-  - Description: Asynchronously validates a WebAuthn authentication assertion against the expected properties and the provided credential.
-  - Returns: `Promise<boolean>`: Returns true if the validation is successful.
-  - Params
-    - `credential` (Object):
-      - `id` (string): The credential ID.
-      - `rawId` (string): The raw credential ID.
-      - `type` (string): The credential type, expected to be "public-key".
-      - `publicKeyAlgorithm` (number): The algorithm used for the public key.
-      - `publicKey` (string): The public key in base64 format.
+#### validateAuthentication
+- **Description:** Asynchronously validates a WebAuthn authentication assertion against the expected properties and the provided credential.
+- **Returns:** `Promise<boolean>`: Returns true if the validation is successful.
+- **Params:**
+  - `credential` (Object):
+    - `id` (string): The credential ID.
+    - `rawId` (string): The raw credential ID.
+    - `type` (string): The credential type, expected to be "public-key".
+    - `publicKeyAlgorithm` (number): The algorithm used for the public key.
+    - `publicKey` (string): The public key in base64 format.
 
-    - `assertion` (Object):
-      - `id` (string): The assertion ID.
-      - `rawId` (string): The raw assertion ID.
-      - `type` (string): The assertion type, expected to be "public-key".
-      - `response` (Object): The response from the authenticator.
-        - `clientDataJSONDecoded` (string): The decoded client data JSON.
-        - `authenticatorDataDecoded` (string): The decoded authenticator data.
-        - `signature` (ArrayBuffer): The signature generated by the authenticator.
+  - `assertion` (Object):
+    - `id` (string): The assertion ID.
+    - `rawId` (string): The raw assertion ID.
+    - `type` (string): The assertion type, expected to be "public-key".
+    - `response` (Object): The response from the authenticator.
+      - `clientDataJSONDecoded` (string): The decoded client data JSON.
+      - `authenticatorDataDecoded` (string): The decoded authenticator data.
+      - `signature` (ArrayBuffer): The signature generated by the authenticator.
 
-    - `expectedProps` (Object, optional): The expected properties for validation.
-      - `challenge` (string, optional): The expected challenge.
-      - `origin` (string, optional): The expected origin.
-      - `type` (string, optional): The expected type.
-      - `rpID` (string, optional): The expected relying party ID.
-      - `counterCredential` (number, optional): The expected credential counter.
+  - `expectedProps` (Object, optional): The expected properties for validation.
+    - `challenge` (string, optional): The expected challenge.
+    - `origin` (string, optional): The expected origin.
+    - `type` (string, optional): The expected type.
+    - `rpID` (string, optional): The expected relying party ID.
+    - `counterCredential` (number, optional): The expected credential counter.
 
-    - `incomingProps` (Object, optional): The incoming properties for validation.
-      - `counterAssertion` (number, optional): The incoming assertion counter.
+  - `incomingProps` (Object, optional): The incoming properties for validation.
+    - `counterAssertion` (number, optional): The incoming assertion counter.
 
-    - `publicKeyProps` (Object, optional): The properties for importing the public key.
-      - `importKey` (Object, optional): The import key properties.
-        - `format` (string, optional): The format of the key, default is "spki".
-        - `extractable` (boolean, optional): Whether the key is extractable, default is false.
+  - `publicKeyProps` (Object, optional): The properties for importing the public key.
+    - `importKey` (Object, optional): The import key properties.
+      - `format` (string, optional): The format of the key, default is "spki".
+      - `extractable` (boolean, optional): Whether the key is extractable, default is false.
 
 
-- **validateRPID**
-  - Description: Asynchronously validates relying party identifier (RPID) for WebAuthn.
-  - Returns: `Promise<boolean>`: Returns a promise that resolves to true if the RPID is valid.
-  - Params:
-    - `rpID` : (string): Relying Party Identifier (RPID) to be validated.
+#### validateRPID
+- **Description:** Asynchronously validates relying party identifier (RPID) for WebAuthn.
+- **Returns:** `Promise<boolean>`: Returns a promise that resolves to true if the RPID is valid.
+- **Params:**
+  - `rpID` : (string): Relying Party Identifier (RPID) to be validated.
 
 <hr />
 
@@ -367,9 +372,9 @@ A collection of utility functions and validators for common tasks.
 
 #### setConditionBetweenDates
 
-- Description: Returns the between conditions in an object format based on the provided date parameters.
-- Returns: The modified `object` with between conditions set in an object format.
-- Params:
+- **Description:** Returns the between conditions in an object format based on the provided date parameters.
+- **Returns:** The modified `object` with between conditions set in an object format.
+- **Params:**
   - `object` (Object): The object containing the date values.
   - `fromFormat` (String): Optional. The string format expected for the date (default: "dd-MM-yyyy").
   - `key` (String): Optional. The key name in the object that holds the main date value (default: "created_at").
@@ -391,8 +396,8 @@ setConditionBetweenDates(data); // Modifies 'data' to { created_at: { $and: [ { 
 
 #### setConditionBetweenValues
 
-- Description: Returns the between conditions in an object format based on the provided parameters.
-- Params:
+- **Description:** Returns the between conditions in an object format based on the provided parameters.
+- **Params:**
   - `object` (Object): The object containing the values.
   - `key` (String): Optional. The key name in the object that holds the main value (default: "value").
   - `beforeKey` (String): Optional. The key name in the object that holds the upper limit value (default: "value_until").
@@ -413,8 +418,8 @@ setConditionBetweenValues(data); // Modifies 'data' to { value: { $and: [ { $gte
 
 #### setConditionStringLike
 
-- Description: Returns the string like condition format based on the provided parameters.
-- Params:
+- **Description:** Returns the string like condition format based on the provided parameters.
+- **Params:**
   - `object` (Object): The object containing the values.
   - `key` (String): The key name in the object that holds the value to format.
   - `insensitive` (Boolean): Optional. Indicates whether the condition should be case-insensitive (default: true).
@@ -445,40 +450,40 @@ A utility class for managing asynchronous waiting operations with promises.
 #### Methods
 
 - **`finishWait(name, isSuccessful = true, returnParam)`**
-  - Description: Completes a waiting operation by resolving or rejecting a promise based on the success status.
-  - Params:
+  - **Description:** Completes a waiting operation by resolving or rejecting a promise based on the success status.
+  - **Params:**
     - `name` (string): The identifier for the waiting operation.
     - `isSuccessful` (boolean): Optional. Indicates whether the operation was successful (default: true).
     - `returnParam` (any): Optional. The parameter to be returned or rejected with the promise.
-  - Returns: Returns `true` if the operation completes successfully; otherwise, returns `false` or throws an error.
+  - **Returns:** Returns `true` if the operation completes successfully; otherwise, returns `false` or throws an error.
 
 - **`startWait(name)`**
-  - Description: Initiates a waiting operation by creating a new promise in the wait list.
-  - Params:
+  - **Description:** Initiates a waiting operation by creating a new promise in the wait list.
+  - **Params:**
     - `name` (string): The identifier for the waiting operation.
-  - Returns: Returns a promise associated with the waiting operation.
+  - **Returns:** Returns a promise associated with the waiting operation.
 
 - **`finishAll(isSuccessful, returnParam)`**
-  - Description: Completes all waiting operations in the wait list, resolving or rejecting promises based on the success status.
-  - Params:
+  - **Description:** Completes all waiting operations in the wait list, resolving or rejecting promises based on the success status.
+  - **Params:**
     - `isSuccessful` (boolean): Indicates whether the operations were successful.
     - `returnParam` (any): The parameter to be returned or rejected with each promise.
-  - Returns: undefined
+  - **Returns:** undefined
 
 #### Usage
 
 ```javascript
-const WP = require('./path/to/WaitPlugin');
+const { waitPlugin } = require('misc-helpers');
 
 // Example: Starting a wait operation
 async function exampleWaitOperation() {
   try {
-    await WP.startWait('operationName');
+    await waitPlugin.startWait('operationName');
     // Perform async operation
-    await WP.finishWait('operationName', true, 'Operation successful');
+    await waitPlugin.finishWait('operationName', true, 'Operation successful');
   } catch (error) {
     // Handle error
-    await WP.finishWait('operationName', false, 'Operation failed');
+    await waitPlugin.finishWait('operationName', false, 'Operation failed');
   }
 }
 
@@ -492,9 +497,9 @@ WP.finishAll(true, 'All operations finished successfully');
 
 ### dateCompareAsc
 
-- Description: Returns whether a given dateA is earlier than dateB, considering optional customization options like ignoring errors, considering hours, minutes, and seconds, and whether to consider equality as earlier.
-- Returns: true if dateA is earlier than dateB according to the specified options; otherwise, returns false.
-- Params:
+- **Description:** Returns whether a given dateA is earlier than dateB, considering optional customization options like ignoring errors, considering hours, minutes, and seconds, and whether to consider equality as earlier.
+- **Returns:** true if dateA is earlier than dateB according to the specified options; otherwise, returns false.
+- **Params:**
   - `dateA` (Date): The earlier date to be checked.
   - `dateB` (Date): The later date to be checked.
   - `options` (Object): Optional. The options to customize behavior.
@@ -519,9 +524,9 @@ console.log(result); // Output: true
 
 ### dateCompareDesc
 
-- Description: Returns whether a given dateA is in a later time than dateB, considering optional customization options like ignoring errors, considering hours, minutes, and seconds, and whether to consider equality as later.
-- Returns: true if dateA is in a later time than dateB according to the specified options; otherwise, returns false.
-- Params:
+- **Description:** Returns whether a given dateA is in a later time than dateB, considering optional customization options like ignoring errors, considering hours, minutes, and seconds, and whether to consider equality as later.
+- **Returns:** true if dateA is in a later time than dateB according to the specified options; otherwise, returns false.
+- **Params:**
   - `dateA` (Date): The later date to be checked.
   - `dateB` (Date): The earlier date to be checked.
   - `options` (Object): Optional. The options to customize behavior.
@@ -545,9 +550,9 @@ console.log(result); // Output: true
 
 ### defaultValue
 
-- Description: Returns a default value instead of empty or null.
-- Returns: The provided value (`checkValue`) if it is not null or undefined; otherwise, returns the specified default value.
-- Params:
+- **Description:** Returns a default value instead of empty or null.
+- **Returns:** The provided value (`checkValue`) if it is not null or undefined; otherwise, returns the specified default value.
+- **Params:**
   - `checkValue` (Any): The value to be checked.
   - `defaultValue` (Any): The default value to be returned if `checkValue` is empty or null.
 
@@ -566,9 +571,9 @@ console.log(defaultVal); // Output: 'Default'
 
 ### isInstanceOf
 
-- Description: Checks if a given object is an instance of a specified type.
-- Returns: true if the object provided is an instance of the specified instance type; otherwise, returns false.
-- Params:
+- **Description:** Checks if a given object is an instance of a specified type.
+- **Returns:** true if the object provided is an instance of the specified instance type; otherwise, returns false.
+- **Params:**
   - `object` (Any): The object to be checked.
   - `instanceType` (Any): The type to check against.
 
@@ -593,9 +598,9 @@ console.log(result); // Output: true
 
 ### isNumber
 
-- Description: Checks if a given value is a numeric value.
-- Returns: true if the value provided is numeric; otherwise, returns false.
-- Params:
+- **Description:** Checks if a given value is a numeric value.
+- **Returns:** true if the value provided is numeric; otherwise, returns false.
+- **Params:**
   - `value` (Any): The value to be checked.
 
 #### Example
@@ -614,9 +619,9 @@ console.log(result2); // Output: false
 
 ### isObject
 
-- Description: Checks if a given object is an object.
-- Returns: true if the object provided is an object; otherwise, returns false.
-- Params:
+- **Description:** Checks if a given object is an object.
+- **Returns:** true if the object provided is an object; otherwise, returns false.
+- **Params:**
   - `object` (Any): The object to be checked.
 
 #### Example
@@ -639,9 +644,9 @@ console.log(result2); // Output: false
 
 ### assign
 
-- Description: Returns a new object with the merge of two objects, `target` and `source`.
-- Returns: A new object resulting from merging `target` and `source`.
-- Params:
+- **Description:** Returns a new object with the merge of two objects, `target` and `source`.
+- **Returns:** A new object resulting from merging `target` and `source`.
+- **Params:**
   - `target` (Object): The target object to merge into.
   - `source` (Object): The source object to merge from.
   - `throwsError` (Boolean): Optional. Whether this function should throw errors if `target` or `source` is not an object (default: true).
@@ -662,9 +667,9 @@ console.log(mergedObject); // Output: { a: 1, b: 3, c: 4 }
 
 ### base64From
 
-- Description: Converts a Base64 encoded string to plain text (UTF-8) or a Buffer, depending on the environment and options.
-- Returns: Decoded plain text (UTF-8) string or Buffer.
-- Params:
+- **Description:** Converts a Base64 encoded string to plain text (UTF-8) or a Buffer, depending on the environment and options.
+- **Returns:** Decoded plain text (UTF-8) string or Buffer.
+- **Params:**
   - `text` (string): The Base64 encoded string to decode (default: "").
   - `toString` (boolean): If true and in Node.js environment, decode to UTF-8 string. Default is true.
 
@@ -682,9 +687,9 @@ console.log(decodedText); // Output: "Hello World!"
 
 ### base64FromBuffer
 
-- Description: Converts an ArrayBuffer to a Base64 string.
-- Returns: The Base64-encoded string representation of the ArrayBuffer.
-- Params:
+- **Description:** Converts an ArrayBuffer to a Base64 string.
+- **Returns:** The Base64-encoded string representation of the ArrayBuffer.
+- **Params:**
   - `buffer` (ArrayBuffer): The ArrayBuffer to convert to Base64.
 
 #### Example
@@ -694,7 +699,7 @@ console.log(decodedText); // Output: "Hello World!"
  * Example usage:
  */
 
-const base64To = require("./base64To");
+const { base64To } = require('misc-helpers');
 
 const arrayBuffer = new ArrayBuffer(16);
 const view = new Uint8Array(arrayBuffer);
@@ -708,11 +713,11 @@ console.log('Base64 Encoded:', base64String);
 
 ### base64To
 
-- Description: Returns a text in a base64 format.
-- Params:
+- **Description:** Returns a text in a base64 format.
+- **Params:**
   - `text` (String): The text to be transformed.
   - `fromFormat` (String): From what format to expect (default: utf8).
-- Returns: The text transformed into Base64 format.
+- **Returns:** The text transformed into Base64 format.
 
 #### Example
 
@@ -721,7 +726,7 @@ console.log('Base64 Encoded:', base64String);
  * Example usage:
  */
 
-const toString = require("./toString.js");
+const { toString } = require('misc-helpers');
 
 const base64String = base64To("Hello, world!", "utf8");
 console.log('Base64 Encoded:', base64String);
@@ -729,11 +734,11 @@ console.log('Base64 Encoded:', base64String);
 
 ### base64ToBuffer
 
-- Description: Converts a Base64 encoded string to a binary Buffer or ArrayBuffer.
-- Params:
+- **Description:** Converts a Base64 encoded string to a binary Buffer or ArrayBuffer.
+- **Params:**
   - `base64String` (string): The Base64 encoded string to decode.
   - `toString` (boolean): If true and in Node.js environment, decode to UTF-8 string. Default is true.
-- Returns: Decoded binary Buffer or ArrayBuffer.
+- **Returns:** Decoded binary Buffer or ArrayBuffer.
 
 #### Example
 
@@ -742,7 +747,7 @@ console.log('Base64 Encoded:', base64String);
  * Example usage:
  */
 
-const base64From = require("./base64From");
+const { base64From, base64ToBuffer } = require('misc-helpers');
 
 const base64String = "SGVsbG8sIHdvcmxkIQ=="; // Example Base64 string
 const buffer = base64ToBuffer(base64String);
@@ -752,11 +757,11 @@ console.log('Decoded Buffer:', buffer);
 
 ### bufferCompare
 
-- Description: Compares two ArrayBuffer objects for equality.
-- Params:
+- **Description:** Compares two ArrayBuffer objects for equality.
+- **Params:**
   - `buffer1` (ArrayBuffer): The first ArrayBuffer.
   - `buffer2` (ArrayBuffer): The second ArrayBuffer.
-- Returns: boolean - True if the buffers are equal, false otherwise.
+- **Returns:** boolean - True if the buffers are equal, false otherwise.
 
 #### Example
 
@@ -765,7 +770,7 @@ console.log('Decoded Buffer:', buffer);
  * Example usage:
  */
 
-const bufferCompare = require("./bufferCompare");
+const { bufferCompare } = require('misc-helpers');
 
 const buffer1 = new ArrayBuffer(8);
 const view1 = new Uint8Array(buffer1);
@@ -785,11 +790,11 @@ console.log('Buffers are equal:', isEqual);
 
 ### bufferConcatenate
 
-- Description: Concatenates two ArrayBuffer objects.
-- Params:
+- **Description:** Concatenates two ArrayBuffer objects.
+- **Params:**
   - `buffer1` (ArrayBuffer): The first ArrayBuffer.
   - `buffer2` (ArrayBuffer): The second ArrayBuffer.
-- Returns: ArrayBuffer - The concatenated ArrayBuffer.
+- **Returns:** ArrayBuffer - The concatenated ArrayBuffer.
 
 #### Example
 
@@ -798,7 +803,7 @@ console.log('Buffers are equal:', isEqual);
  * Example usage:
  */
 
-const bufferConcatenate = require("./bufferConcatenate");
+const { bufferConcatenate } = require('misc-helpers');
 
 const buffer1 = new ArrayBuffer(4);
 const view1 = new Uint8Array(buffer1);
@@ -816,11 +821,11 @@ console.log('Concatenated Buffer:', concatenatedView);
 
 ### bufferFromString
 
-- Description: Generates a buffer from a given string in both Node.js and browser environments.
-- Params:
+- **Description:** Generates a buffer from a given string in both Node.js and browser environments.
+- **Params:**
   - `txtString` (string): The string to convert to a buffer.
   - `encoding` (string, optional): The encoding to use (only applicable in Node.js). Default is "utf-8".
-- Returns: Buffer|Uint8Array - The buffer representation of the string.
+- **Returns:** Buffer|Uint8Array - The buffer representation of the string.
 
 #### Example
 
@@ -829,7 +834,7 @@ console.log('Concatenated Buffer:', concatenatedView);
  * Example usage:
  */
 
-const bufferFromString = require("./bufferFromString");
+const { bufferFromString } = require('misc-helpers');
 
 // Node.js usage
 const bufferNode = bufferFromString('Hello, World!', 'utf-8');
@@ -842,11 +847,11 @@ console.log(bufferBrowser);
 
 ### bufferToString
 
-- Description: Generates a string from a buffer in both Node.js and browser environments.
-- Params:
+- **Description:** Generates a string from a buffer in both Node.js and browser environments.
+- **Params:**
   - `buffer` (Buffer|Uint8Array): The buffer to convert to a string.
   - `encoding` (string, optional): The encoding to use (only applicable in Node.js). Default is "utf-8".
-- Returns: string - The string representation of the buffer.
+- **Returns:** string - The string representation of the buffer.
 
 #### Example
 
@@ -855,7 +860,7 @@ console.log(bufferBrowser);
  * Example usage:
  */
 
-const bufferToString = require("./bufferToString");
+const { bufferToString } = require('misc-helpers');
 
 // Node.js usage
 const bufferNode = Buffer.from('Hello, World!');
@@ -870,11 +875,11 @@ console.log(strBrowser); // Output: Hello, World!
 
 ### calculateSecondsInTime
 
-- Description: Returns the time value given the seconds, either adding or subtracting the seconds from the current time.
-- Params:
+- **Description:** Returns the time value given the seconds, either adding or subtracting the seconds from the current time.
+- **Params:**
   - `seconds` (Number): Value to be added or subtracted in seconds.
   - `add` (Boolean, optional): Whether to add (`true`) or subtract (`false`) the seconds from the current time. Default is `true`.
-- Returns: Number - The time value in milliseconds.
+- **Returns:** Number - The time value in milliseconds.
 
 #### Example
 
@@ -883,7 +888,7 @@ console.log(strBrowser); // Output: Hello, World!
  * Example usage:
  */
 
-const calculateSecondsInTime = require("./calculateSecondsInTime");
+const { calculateSecondsInTime } = require('misc-helpers');
 
 // Adding seconds
 const addedTime = calculateSecondsInTime(60); // Adds 60 seconds to the current time
@@ -896,10 +901,10 @@ console.log(subtractedTime); // Output: Current time - 60 seconds
 
 ### currencyBRToFloat
 
-- Description: Returns a float value from a given money string formatted in Brazilian Real (BRL) currency.
-- Params:
+- **Description:** Returns a float value from a given money string formatted in Brazilian Real (BRL) currency.
+- **Params:**
   - `moneyString` (String): The money string to be transformed into a float.
-- Returns: Float - The float representation of the money string, or `false` if conversion fails.
+- **Returns:** Float - The float representation of the money string, or `false` if conversion fails.
 
 #### Example
 
@@ -908,7 +913,7 @@ console.log(subtractedTime); // Output: Current time - 60 seconds
  * Example usage:
  */
 
-const currencyBRToFloat = require("./currencyBRToFloat");
+const { currencyBRToFloat } = require('misc-helpers');
 
 // Valid money string
 const money1 = "R$ 1.234,56";
@@ -928,10 +933,10 @@ console.log(result3); // Output: false (conversion failed)
 
 ### dateFirstHourOfDay
 
-- Description: Returns a new Date object with the hour, minute, second, and millisecond set to 00:00:00.
-- Params:
+- **Description:** Returns a new Date object with the hour, minute, second, and millisecond set to 00:00:00.
+- **Params:**
   - `date` (Date): The date object for which the time should be set to the first hour of the day.
-- Returns: Date - A new Date object with hour, minute, second, and millisecond set to 00:00:00.
+- **Returns:** Date - A new Date object with hour, minute, second, and millisecond set to 00:00:00.
 
 #### Example
 
@@ -940,7 +945,7 @@ console.log(result3); // Output: false (conversion failed)
  * Example usage:
  */
 
-const dateFirstHourOfDay = require("./dateFirstHourOfDay");
+const { dateFirstHourOfDay } = require('misc-helpers');
 
 // Create a new Date object
 const date = new Date();
@@ -952,10 +957,10 @@ console.log(result); // Output: Date object with time set to 00:00:00
 
 ### dateLastHourOfDay
 
-- Description: Returns a new Date object with the hour, minute, second, and millisecond set to 23:59:59.
-- Params:
+- **Description:** Returns a new Date object with the hour, minute, second, and millisecond set to 23:59:59.
+- **Params:**
   - `date` (Date): The date object for which the time should be set to the last hour of the day.
-- Returns: Date - A new Date object with hour, minute, second, and millisecond set to 23:59:59.
+- **Returns:** Date - A new Date object with hour, minute, second, and millisecond set to 23:59:59.
 
 #### Example
 
@@ -964,7 +969,7 @@ console.log(result); // Output: Date object with time set to 00:00:00
  * Example usage:
  */
 
-const dateLastHourOfDay = require("./dateLastHourOfDay");
+const { dateLastHourOfDay } = require('misc-helpers');
 
 // Create a new Date object
 const date = new Date();
@@ -976,11 +981,11 @@ console.log(result); // Output: Date object with time set to 23:59:59
 
 ### dateToFormat
 
-- Description: Returns a formatted string representation of a Date object according to the specified format.
-- Params:
+- **Description:** Returns a formatted string representation of a Date object according to the specified format.
+- **Params:**
   - `date` (Date): The Date object to format.
   - `stringFormat` (String): Optional. The format string in which the Date object should be formatted. Default is `dd-MM-yyyy`.
-- Returns: String - A string formatted according to the specified format.
+- **Returns:** String - A string formatted according to the specified format.
 
 #### Example
 
@@ -989,24 +994,23 @@ console.log(result); // Output: Date object with time set to 23:59:59
  * Example usage:
  */
 
-const dateToFormat = require("./dateToFormat");
-const { DATE_BR_FORMAT_D } = require("../constants");
+const { constants, dateToFormat } = require('misc-helpers');
 
 // Create a new Date object
 const date = new Date();
 
 // Format the date according to the Brazilian date format
-const formattedDate = dateToFormat(date, DATE_BR_FORMAT_D);
+const formattedDate = dateToFormat(date, constants.DATE_BR_FORMAT_D);
 console.log(formattedDate); // Output: Formatted date string according to the format dd-MM-yyyy
 ```
 
 ### debouncer
 
-- Description: Debounces a function until the timeout period has elapsed, ensuring it is executed only once within that period.
-- Params:
+- **Description:** Debounces a function until the timeout period has elapsed, ensuring it is executed only once within that period.
+- **Params:**
   - `callback` (Function): The function to be executed after the timeout period.
   - `timeout` (Integer): Optional. The timeout period in milliseconds. Default is 1000 milliseconds.
-- Returns: Function - A debounced function that delays execution of `callback` until after the timeout period has elapsed.
+- **Returns:** Function - A debounced function that delays execution of `callback` until after the timeout period has elapsed.
 
 #### Example
 
@@ -1015,7 +1019,7 @@ console.log(formattedDate); // Output: Formatted date string according to the fo
  * Example usage:
  */
 
-const debouncer = require("./debouncer");
+const { debouncer } = require('misc-helpers');
 
 // Define a function to be debounced
 function fetchData(query) {
@@ -1041,11 +1045,11 @@ debouncedFetchData("search query 3");
 
 ### deleteKeys
 
-- Description: Removes specified keys from an object.
-- Params:
+- **Description:** Removes specified keys from an object.
+- **Params:**
   - `object` (Object): The object from which keys should be deleted.
   - `keys` (Array): The array of keys to be deleted from the object.
-- Returns: Object - The object with the specified keys removed.
+- **Returns:** Object - The object with the specified keys removed.
 
 #### Example
 
@@ -1054,7 +1058,7 @@ debouncedFetchData("search query 3");
  * Example usage:
  */
 
-const deleteKeys = require("./deleteKeys");
+const { deleteKeys } = require('misc-helpers');
 
 // Example object
 let user = {
@@ -1076,8 +1080,8 @@ console.log(modifiedUser);
 
 ### generateRandomString
 
-- Description: Generates a new random string based on specified size and options.
-- Params:
+- **Description:** Generates a new random string based on specified size and options.
+- **Params:**
   - `size` (Integer): The size of the string to generate (default: 32).
   - `options` (Object): Optional. The options to customize behavior.
     - `options.excludeLowerCaseChars` (Boolean): Whether to exclude lowercase characters (default: false).
@@ -1086,7 +1090,7 @@ console.log(modifiedUser);
     - `options.excludeDigits` (Boolean): Whether to exclude digits (default: false).
     - `options.excludeSymbols` (Boolean): Whether to exclude symbols (default: false).
     - `options.includeSymbols` (String): A string with customized symbols to include.
-- Returns: String - A new random string based on the specified criteria.
+- **Returns:** String - A new random string based on the specified criteria.
 
 #### Example
 
@@ -1095,7 +1099,7 @@ console.log(modifiedUser);
  * Example usage:
  */
 
-const generateRandomString = require("./generateRandomString");
+const { generateRandomString } = require('misc-helpers');
 
 // Generate a random string of size 16 with default options
 const randomString1 = generateRandomString(16);
@@ -1111,11 +1115,11 @@ console.log(randomString2);
 
 ### generateSimpleId
 
-- Description: Returns a new simple string identifier based on a given text and optional separator.
-- Params:
+- **Description:** Returns a new simple string identifier based on a given text and optional separator.
+- **Params:**
   - `id` (String): The string text identifier to incorporate into the new id.
   - `separator` (String): Optional. The separator between id parts (default: "_").
-- Returns: String - A new string identifier combining the given text, current timestamp, and random number.
+- **Returns:** String - A new string identifier combining the given text, current timestamp, and random number.
 
 #### Example
 
@@ -1124,7 +1128,7 @@ console.log(randomString2);
  * Example usage:
  */
 
-const generateSimpleId = require("./generateSimpleId");
+const { generateSimpleId } = require('misc-helpers');
 
 // Generate a simple id with default separator
 const id1 = generateSimpleId("example");
@@ -1137,10 +1141,10 @@ console.log(id2);
 
 ### getExecutionTime
 
-- Description: Returns the elapsed time in milliseconds from a given reference time using Node.js `process.hrtime`.
-- Params:
+- **Description:** Returns the elapsed time in milliseconds from a given reference time using Node.js `process.hrtime`.
+- **Params:**
   - `time` (BigInteger): Optional. The reference time in milliseconds to compare against (default: 0).
-- Returns: BigInteger - The elapsed time in milliseconds from the given time.
+- **Returns:** BigInteger - The elapsed time in milliseconds from the given time.
 
 #### Example
 
@@ -1149,7 +1153,7 @@ console.log(id2);
  * Example usage:
  */
 
-const getExecutionTime = require("./getExecutionTime");
+const { getExecutionTime } = require('misc-helpers');
 
 // Measure execution time of a function
 const start = process.hrtime();
@@ -1160,11 +1164,11 @@ console.log(`Execution time: ${end} ms`);
 
 ### JSONFrom
 
-- Description: Returns an object parsed from a JSON string.
-- Params:
+- **Description:** Returns an object parsed from a JSON string.
+- **Params:**
   - `text` (String): The JSON string to parse into an object.
   - `throwsError` (Boolean): Optional. Whether this function should throw an error on parsing failure (default: true).
-- Returns: Object - The parsed object from the JSON string, or null if parsing fails and `throwsError` is false.
+- **Returns:** Object - The parsed object from the JSON string, or null if parsing fails and `throwsError` is false.
 
 #### Example
 
@@ -1173,7 +1177,7 @@ console.log(`Execution time: ${end} ms`);
  * Example usage:
  */
 
-const JSONFrom = require("./JSONFrom");
+const { JSONFrom } = require('misc-helpers');
 
 const jsonString = '{"key": "value"}';
 const parsedObject = JSONFrom(jsonString);
@@ -1182,11 +1186,11 @@ console.log(parsedObject); // Output: { key: 'value' }
 
 ### JSONTo
 
-- Description: Returns a JSON string representation of an object.
-- Params:
+- **Description:** Returns a JSON string representation of an object.
+- **Params:**
   - `object` (Object): Optional. The object to be transformed into a JSON string (default: {}).
   - `throwsError` (Boolean): Optional. Whether this function should throw an error on stringification failure (default: true).
-- Returns: String - The JSON string representation of the object, or null if stringification fails and `throwsError` is false.
+- **Returns:** String - The JSON string representation of the object, or null if stringification fails and `throwsError` is false.
 
 #### Example
 
@@ -1195,7 +1199,7 @@ console.log(parsedObject); // Output: { key: 'value' }
  * Example usage:
  */
 
-const JSONTo = require("./JSONTo");
+const { JSONTo } = require('misc-helpers');
 
 const obj = { key: 'value' };
 const jsonString = JSONTo(obj);
@@ -1204,15 +1208,15 @@ console.log(jsonString); // Output: '{"key":"value"}'
 
 ### messageDecryptFromChunks
 
-- Description: Decrypts a message from encrypted chunks using RSA-OAEP decryption.
-- Params:
+- **Description:** Decrypts a message from encrypted chunks using RSA-OAEP decryption.
+- **Params:**
   - `privateKey` (string): The RSA private key in PEM format.
   - `messageChunks` (string[]): An array of encrypted message chunks.
   - `props` (Object): Optional. Additional decryption properties (default: {}).
   - `props.algorithm` (string): Optional. Encryption algorithm to use (default: 'RSA-OAEP').
   - `props.inputEncoding` (string): Optional. Input encoding of the encrypted chunks (default: 'base64').
   - `props.outputEncoding` (string): Optional. Output encoding of the decrypted message (default: 'utf8').
-- Returns: Promise<string> - A Promise that resolves to the decrypted message as a string.
+- **Returns:** Promise<string> - A Promise that resolves to the decrypted message as a string.
 - Throws: Error - If decryption fails or any other error occurs.
 
 #### Example
@@ -1222,8 +1226,8 @@ console.log(jsonString); // Output: '{"key":"value"}'
  * Example usage:
  */
 
-const messageDecryptFromChunks = require("./messageDecryptFromChunks");
-const { readFileSync } = require("fs");
+const { messageDecryptFromChunks } = require('misc-helpers');
+const { readFileSync } = require('fs');
 
 async function decryptMessage() {
   const privateKey = readFileSync("private_key.pem", "utf8");
@@ -1246,8 +1250,8 @@ decryptMessage();
 
 ### messageEncryptToChunks
 
-- Description: Encrypts a message into chunks using RSA-OAEP encryption.
-- Params:
+- **Description:** Encrypts a message into chunks using RSA-OAEP encryption.
+- **Params:**
   - `publicKey` (string): The RSA public key in PEM format.
   - `message` (string): The message to encrypt.
   - `props` (Object): Optional. Additional encryption properties (default: {}).
@@ -1255,7 +1259,7 @@ decryptMessage();
   - `props.inputEncoding` (string): Optional. Input encoding of the message (default: 'utf8').
   - `props.outputEncoding` (string): Optional. Output encoding of the encrypted chunks (default: 'base64').
   - `props.chunkSize` (number): Optional. The size of each chunk in bytes (default: 190).
-- Returns: Promise<string[]> - A Promise that resolves to an array of encrypted message chunks.
+- **Returns:** Promise<string[]> - A Promise that resolves to an array of encrypted message chunks.
 - Throws: Error - If encryption fails or any other error occurs.
 
 #### Example
@@ -1265,8 +1269,8 @@ decryptMessage();
  * Example usage:
  */
 
-const messageEncryptToChunks = require("./messageEncryptToChunks");
-const { readFileSync } = require("fs");
+const { messageEncryptToChunks } = require('misc-helpers');
+const { readFileSync } = require('fs');
 
 async function encryptMessage() {
   const publicKey = readFileSync("public_key.pem", "utf8");
@@ -1285,10 +1289,10 @@ encryptMessage();
 
 ### normalize
 
-- Description: Returns a text normalized.
-- Params:
+- **Description:** Returns a text normalized.
+- **Params:**
   - `text` (String): The text to be normalized.
-- Returns: String - The text normalized.
+- **Returns:** String - The text normalized.
 
 #### Example
 
@@ -1297,7 +1301,7 @@ encryptMessage();
  * Example usage:
  */
 
-const normalize = require("./normalize");
+const { normalize } = require('misc-helpers');
 
 const text = "héllõ wórld";
 const normalizedText = normalize(text);
@@ -1306,12 +1310,12 @@ console.log(normalizedText); // Output: "hello world"
 
 ### pushLogMessage
 
-- Description: Pushes a message into a log object with the current time.
-- Params:
+- **Description:** Pushes a message into a log object with the current time.
+- **Params:**
   - `logObj` (Array): The log object array to which the message should be pushed.
   - `message` (Boolean): The message to be pushed.
   - `more_info` (Any): Optional. Additional information to be added to the log message.
-- Returns: Array - The log object array with the new message pushed into it.
+- **Returns:** Array - The log object array with the new message pushed into it.
 
 #### Example
 
@@ -1320,7 +1324,7 @@ console.log(normalizedText); // Output: "hello world"
  * Example usage:
  */
 
-const pushLogMessage = require("./pushLogMessage");
+const { pushLogMessage } = require('misc-helpers');
 
 let log = [];
 log = pushLogMessage(log, "Error occurred", { errorCode: 500 });
@@ -1329,10 +1333,10 @@ console.log(log);
 
 ### regexDigitsOnly
 
-- Description: Returns a string containing only digits from the input text.
-- Params:
+- **Description:** Returns a string containing only digits from the input text.
+- **Params:**
   - `text` (String): The text from which digits should be extracted.
-- Returns: String - The text containing only digits.
+- **Returns:** String - The text containing only digits.
 
 #### Example
 
@@ -1341,7 +1345,7 @@ console.log(log);
  * Example usage:
  */
 
-const regexDigitsOnly = require("./regexDigitsOnly");
+const { regexDigitsOnly } = require('misc-helpers');
 
 const text = "abc123xyz456";
 const digitsOnly = regexDigitsOnly(text);
@@ -1350,10 +1354,10 @@ console.log(digitsOnly); // Output: "123456"
 
 ### regexLettersOnly
 
-- Description: Returns a string containing only letters from the input text.
-- Params:
+- **Description:** Returns a string containing only letters from the input text.
+- **Params:**
   - `text` (String): The text from which letters should be extracted.
-- Returns: String - The text containing only letters.
+- **Returns:** String - The text containing only letters.
 
 #### Example
 
@@ -1362,7 +1366,7 @@ console.log(digitsOnly); // Output: "123456"
  * Example usage:
  */
 
-const regexLettersOnly = require("./regexLettersOnly");
+const { regexLettersOnly } = require('misc-helpers');
 
 const text = "123abc456XYZ!@#";
 const lettersOnly = regexLettersOnly(text);
@@ -1371,12 +1375,12 @@ console.log(lettersOnly); // Output: "abcXYZ"
 
 ### regexReplaceTrim
 
-- Description: Returns a string with specified regex replaced by the provided replacement string.
-- Params:
+- **Description:** Returns a string with specified regex replaced by the provided replacement string.
+- **Params:**
   - `text` (String): String containing values to be replaced.
   - `regex` (String): Optional. The regex pattern to keep (default: "A-Za-zÀ-ú0-9 ").
   - `replacement` (String): Optional. The string to replace matching patterns in the text.
-- Returns: String - The modified string with replacements.
+- **Returns:** String - The modified string with replacements.
 
 #### Example
 
@@ -1385,7 +1389,7 @@ console.log(lettersOnly); // Output: "abcXYZ"
  * Example usage:
  */
 
-const regexReplaceTrim = require("./regexReplaceTrim");
+const { regexReplaceTrim } = require('misc-helpers');
 
 const text = "abc123XYZ456!@#";
 const replacedText = regexReplaceTrim(text, "A-Za-z", "-");
@@ -1394,12 +1398,12 @@ console.log(replacedText); // Output: "---123---456---#"
 
 ### removeDuplicatedStrings
 
-- Description: Returns a string with duplicated substrings removed.
-- Params:
+- **Description:** Returns a string with duplicated substrings removed.
+- **Params:**
   - `text` (String): The string to be checked for duplicates.
   - `splitString` (String): Optional. The character or substring used to split the text into array elements (default: " ").
   - `caseInsensitive` (Boolean): Optional. Whether to remove duplicates case-insensitively (default: false).
-- Returns: String - The modified string with duplicated substrings removed.
+- **Returns:** String - The modified string with duplicated substrings removed.
 
 #### Example
 
@@ -1408,7 +1412,7 @@ console.log(replacedText); // Output: "---123---456---#"
  * Example usage:
  */
 
-const removeDuplicatedStrings = require("./removeDuplicatedStrings");
+const { removeDuplicatedStrings } = require('misc-helpers');
 
 const text = "apple banana apple orange banana";
 const uniqueText = removeDuplicatedStrings(text, " ");
@@ -1417,11 +1421,11 @@ console.log(uniqueText); // Output: "apple banana orange"
 
 ### split
 
-- Description: Returns an array by splitting a string using a specified character.
-- Params:
+- **Description:** Returns an array by splitting a string using a specified character.
+- **Params:**
   - `text` (String): The string to be split.
   - `char` (String): Optional. The character used to split the string (default: " ").
-- Returns: Array - An array of substrings.
+- **Returns:** Array - An array of substrings.
 
 #### Example
 
@@ -1430,7 +1434,7 @@ console.log(uniqueText); // Output: "apple banana orange"
  * Example usage:
  */
 
-const split = require("./split");
+const { split } = require('misc-helpers');
 
 const text = "apple,banana,orange";
 const array = split(text, ",");
@@ -1439,14 +1443,14 @@ console.log(array); // Output: ["apple", "banana", "orange"]
 
 ### stringCompress
 
-- Description: Returns a text compressed using gzip compression.
-- Params:
+- **Description:** Returns a text compressed using gzip compression.
+- **Params:**
   - `text` (String): The text to be compressed.
   - `raw` (Boolean): Optional. If true, returns the compressed data as raw gzip encoding (default: false).
   - `options` (Object): Optional. Additional options for compression.
   - `options.level` (Integer): Optional. Compression level (0-9, where 0 is no compression and 9 is maximum compression) (default: 3).
   - `options.mem` (Integer): Optional. Memory usage parameter (default: 16).
-- Returns: Promise<String | Uint8Array> - A Promise that resolves to the compressed text or raw gzip encoding.
+- **Returns:** Promise<String | Uint8Array> - A Promise that resolves to the compressed text or raw gzip encoding.
 - Throws: Error - If compression fails or any other error occurs.
 
 #### Example
@@ -1456,7 +1460,7 @@ console.log(array); // Output: ["apple", "banana", "orange"]
  * Example usage:
  */
 
-const stringCompress = require("./stringCompress");
+const { stringCompress } = require('misc-helpers');
 
 async function compressText() {
   const text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
@@ -1474,11 +1478,11 @@ compressText();
 
 ### stringDecompress
 
-- Description: Returns a text decompressed from gzip compression.
-- Params:
+- **Description:** Returns a text decompressed from gzip compression.
+- **Params:**
   - `gzipped` (String | Uint8Array): The text or Uint8Array to be decompressed, possibly base64 encoded if `raw` is false.
   - `raw` (Boolean): Optional. If true, expects `gzipped` to be raw Uint8Array data; if false, expects `gzipped` to be base64 encoded (default: false).
-- Returns: Promise<String> - A Promise that resolves to the decompressed text.
+- **Returns:** Promise<String> - A Promise that resolves to the decompressed text.
 - Throws: Error - If decompression fails or any other error occurs.
 
 #### Example
@@ -1488,7 +1492,7 @@ compressText();
  * Example usage:
  */
 
-const stringDecompress = require("./stringDecompress");
+const { stringDecompress } = require('misc-helpers');
 
 async function decompressText() {
   const gzippedText = "H4sIAAAAAAAA/8vJLS5R4EvyKklRjQQAAP//WgkIbAAAA";
@@ -1506,12 +1510,12 @@ decompressText();
 
 ### stringToDate
 
-- Description: Returns a new Date object parsed from a string date representation.
-- Params:
+- **Description:** Returns a new Date object parsed from a string date representation.
+- **Params:**
   - `stringDate` (String): The string date to be parsed.
   - `stringFormat` (String): Optional. The format in which the string date text is provided (default: 'yyyy-MM-dd'T'HH:mm:ss.SSS'Z').
   - `defaultDate` (Date): Optional. The default date to use if parsing fails (default: current date).
-- Returns: Date - A new Date object parsed from the string date, adjusted for timezone.
+- **Returns:** Date - A new Date object parsed from the string date, adjusted for timezone.
 - Throws: None.
 
 #### Example
@@ -1521,22 +1525,21 @@ decompressText();
  * Example usage:
  */
 
-const stringToDate = require("./stringToDate");
-const { DATE_ISO_FORMAT } = require("../constants");
+const { constants, stringToDate } = require('misc-helpers');
 
 const dateString = "2023-06-14T12:00:00.000Z";
-const parsedDate = stringToDate(dateString, DATE_ISO_FORMAT);
+const parsedDate = stringToDate(dateString, constants.DATE_ISO_FORMAT);
 console.log("Parsed Date:", parsedDate);
 ```
 
 ### stringToDateToFormat
 
-- Description: Returns a formatted string date parsed from a string date representation.
-- Params:
+- **Description:** Returns a formatted string date parsed from a string date representation.
+- **Params:**
   - `stringDate` (String): The string date to be parsed.
   - `fromFormat` (String): Optional. The format in which the string date text is provided (default: 'yyyy-MM-dd'T'HH:mm:ss.SSS').
   - `toFormat` (String): Optional. The format to which the parsed date should be formatted (default: 'dd-MM-yyyy HH:mm:ss').
-- Returns: String - A formatted string date representation.
+- **Returns:** String - A formatted string date representation.
 - Throws: None.
 
 #### Example
@@ -1546,24 +1549,23 @@ console.log("Parsed Date:", parsedDate);
  * Example usage:
  */
 
-const stringToDateToFormat = require("./stringToDateToFormat");
-const { DATE_ISO_FORMAT, DATE_BR_HOUR_FORMAT_D } = require("../constants");
+const { constants, stringToDateToFormat} = require('misc-helpers');
 
 const dateString = "2023-06-14T12:00:00.000Z";
-const formattedDate = stringToDateToFormat(dateString, DATE_ISO_FORMAT, DATE_BR_HOUR_FORMAT_D);
+const formattedDate = stringToDateToFormat(dateString, constants.DATE_ISO_FORMAT, constants.DATE_BR_HOUR_FORMAT_D);
 console.log("Formatted Date:", formattedDate);
 ```
 
 ### stringToFormat
 
-- Description: Returns a string formatted according to a given pattern.
-- Params:
+- **Description:** Returns a string formatted according to a given pattern.
+- **Params:**
   - `text` (Any): The text to be formatted.
   - `pattern` (String): Optional. The pattern specifying how the text should be formatted (default: "##.###.###/####-##").
   - `options` (Object): Optional. The options to customize behavior.
     - `options.digitsOnly` (Boolean): Whether to apply digits-only transformation (default: false).
     - `options.paddingChar` (String): The padding character to use (default: '0').
-- Returns: String - A string formatted according to the specified pattern.
+- **Returns:** String - A string formatted according to the specified pattern.
 - Throws: None.
 
 #### Example
@@ -1573,24 +1575,23 @@ console.log("Formatted Date:", formattedDate);
  * Example usage:
  */
 
-const stringToFormat = require("./stringToFormat");
-const { STRING_FORMAT_CNPJ } = require("../constants");
+const { constants, stringToFormat } = require('misc-helpers');
 
 const cnpj = "12345678000195";
-const formattedCnpj = stringToFormat(cnpj, STRING_FORMAT_CNPJ);
+const formattedCnpj = stringToFormat(cnpj, constants.STRING_FORMAT_CNPJ);
 console.log("Formatted CNPJ:", formattedCnpj); // Output: "12.345.678/0001-95"
 ```
 
 ### stringZLibCompress
 
-- Description: Returns a text compressed using zlib compression.
-- Params:
+- **Description:** Returns a text compressed using zlib compression.
+- **Params:**
   - `text` (String): The text to be compressed.
   - `raw` (Boolean): Optional. If true, returns the raw zlib compressed data (default: false).
   - `options` (Object): Optional. The options to customize compression.
     - `options.level` (Integer): Compression level (default: undefined).
     - `options.mem` (Integer): Memory usage (default: undefined).
-- Returns: String - The compressed text as a base64 encoded string if `raw` is false, otherwise as a Uint8Array.
+- **Returns:** String - The compressed text as a base64 encoded string if `raw` is false, otherwise as a Uint8Array.
 - Throws: Error - If compression fails or any other error occurs.
 
 #### Example
@@ -1600,7 +1601,7 @@ console.log("Formatted CNPJ:", formattedCnpj); // Output: "12.345.678/0001-95"
  * Example usage:
  */
 
-const stringZLibCompress = require("./stringZLibCompress");
+const { stringZLibCompress } = require('misc-helpers');
 
 async function compressText() {
   const text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
@@ -1617,11 +1618,11 @@ compressText();
 
 ### stringZLibDecompress
 
-- Description: Returns a text decompressed using zlib decompression.
-- Params:
+- **Description:** Returns a text decompressed using zlib decompression.
+- **Params:**
   - `zlibbed` (String): The zlib compressed text to be decompressed.
   - `raw` (Boolean): Optional. If true, indicates that the input `zlibbed` text is base64 encoded (default: false).
-- Returns: String - The decompressed text.
+- **Returns:** String - The decompressed text.
 - Throws: Error - If decompression fails or any other error occurs.
 
 #### Example
@@ -1631,7 +1632,7 @@ compressText();
  * Example usage:
  */
 
-const stringZLibDecompress = require("./stringZLibDecompress");
+const { stringZLibDecompress } = require('misc-helpers');
 
 async function decompressText() {
   const zlibbedText = "eJzT0yMAAGTvBe8=";
@@ -1648,11 +1649,11 @@ decompressText();
 
 ### toString
 
-- Description: Returns a string representation of a given value.
-- Params:
+- **Description:** Returns a string representation of a given value.
+- **Params:**
   - `textObj` (Any): Value to be converted to a string.
   - `objectToJSON` (Boolean): Optional. Whether to transform objects to JSON stringified form (default: true).
-- Returns: String - The string representation of the provided value.
+- **Returns:** String - The string representation of the provided value.
 
 #### Example
 
@@ -1661,7 +1662,7 @@ decompressText();
  * Example usage:
  */
 
-const toString = require("./toString");
+const { toString } = require('misc-helpers');
 
 const obj = { key: 'value' };
 const str = toString(obj);
@@ -1674,11 +1675,11 @@ console.log(numStr); // Output: '123'
 
 ### uint8ArrayFromString
 
-- Description: Returns a Uint8Array representation of a string.
-- Params:
+- **Description:** Returns a Uint8Array representation of a string.
+- **Params:**
   - `text` (String): Value to be converted to a Uint8Array.
   - `joinChar` (String): Optional. Character to join Uint8Array elements into a string.
-- Returns: Uint8Array or String - If `joinChar` is provided, returns the joined string representation of Uint8Array; otherwise, returns Uint8Array itself.
+- **Returns:** Uint8Array or String - If `joinChar` is provided, returns the joined string representation of Uint8Array; otherwise, returns Uint8Array itself.
 
 #### Example
 
@@ -1687,7 +1688,7 @@ console.log(numStr); // Output: '123'
  * Example usage:
  */
 
-const uint8ArrayFromString = require("./uint8ArrayFromString");
+const { uint8ArrayFromString } = require('misc-helpers');
 
 const text = "Hello, world!";
 const uint8Array = uint8ArrayFromString(text);
@@ -1699,11 +1700,11 @@ console.log(joinedString); // Output: '72-101-108-108-111-44-32-119-111-114-108-
 
 ### uint8ArrayToString
 
-- Description: Converts a Uint8Array or an array of bytes into a string.
-- Params:
+- **Description:** Converts a Uint8Array or an array of bytes into a string.
+- **Params:**
   - `uint8Array` (Uint8Array or Array): The Uint8Array or array of bytes to convert to a string.
   - `splitChar` (String): Optional. Character to split Uint8Array elements before conversion.
-- Returns: String - The converted string representation of the Uint8Array or array of bytes.
+- **Returns:** String - The converted string representation of the Uint8Array or array of bytes.
 
 #### Example
 
@@ -1712,7 +1713,7 @@ console.log(joinedString); // Output: '72-101-108-108-111-44-32-119-111-114-108-
  * Example usage:
  */
 
-const uint8ArrayToString = require("./uint8ArrayToString");
+const { uint8ArrayToString } = require('misc-helpers');
 
 const uint8Array = new Uint8Array([72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33]);
 const text = uint8ArrayToString(uint8Array);
@@ -1729,10 +1730,10 @@ console.log(convertedText); // Output: 'Hello, world!'
 
 ### validateCADICMSPR
 
-- Description: Validates a given CADICMS from the Brazilian Paraná State.
-- Params:
+- **Description:** Validates a given CADICMS from the Brazilian Paraná State.
+- **Params:**
   - `cadicms` (String): The CADICMS value to be validated.
-- Returns: Boolean - Returns true if the CADICMS is valid, otherwise false.
+- **Returns:** Boolean - Returns true if the CADICMS is valid, otherwise false.
 
 #### Example
 
@@ -1741,7 +1742,7 @@ console.log(convertedText); // Output: 'Hello, world!'
  * Example usage:
  */
 
-const validateCADICMSPR = require("./validateCADICMSPR");
+const { validateCADICMSPR } = require('misc-helpers');
 
 const validCADICMS = "1234567890";
 const invalidCADICMS = "9876543210";
@@ -1752,10 +1753,10 @@ console.log(validateCADICMSPR(invalidCADICMS)); // Output: false
 
 ### validateCNPJ
 
-- Description: Validates a given CNPJ (Cadastro Nacional da Pessoa Jurídica, Brazilian corporate taxpayer registry number).
-- Params:
+- **Description:** Validates a given CNPJ (Cadastro Nacional da Pessoa Jurídica, Brazilian corporate taxpayer registry number).
+- **Params:**
   - `cnpj` (String): The CNPJ value to be validated.
-- Returns: Boolean - Returns true if the CNPJ is valid, otherwise false.
+- **Returns:** Boolean - Returns true if the CNPJ is valid, otherwise false.
 
 #### Example
 
@@ -1764,7 +1765,7 @@ console.log(validateCADICMSPR(invalidCADICMS)); // Output: false
  * Example usage:
  */
 
-const validateCNPJ = require("./validateCNPJ");
+const { validateCNPJ } = require('misc-helpers');
 
 const validCNPJ = "12.345.678/0001-99";
 const invalidCNPJ = "11.111.111/1111-11";
@@ -1775,10 +1776,10 @@ console.log(validateCNPJ(invalidCNPJ)); // Output: false
 
 ### validateCPF
 
-- Description: Validates a given CPF (Cadastro de Pessoas Físicas, Brazilian individual taxpayer registry number).
-- Params:
+- **Description:** Validates a given CPF (Cadastro de Pessoas Físicas, Brazilian individual taxpayer registry number).
+- **Params:**
   - `cpf` (String): The CPF value to be validated.
-- Returns: Boolean - Returns true if the CPF is valid, otherwise false.
+- **Returns:** Boolean - Returns true if the CPF is valid, otherwise false.
 
 #### Example
 
@@ -1787,7 +1788,7 @@ console.log(validateCNPJ(invalidCNPJ)); // Output: false
  * Example usage:
  */
 
-const validateCPF = require("./validateCPF");
+const { validateCPF } = require('misc-helpers');
 
 const validCPF = "123.456.789-09";
 const invalidCPF = "111.111.111-11";
@@ -1798,10 +1799,10 @@ console.log(validateCPF(invalidCPF)); // Output: false
 
 ### validateEmail
 
-- Description: Validates a given email address using a regular expression.
-- Params:
+- **Description:** Validates a given email address using a regular expression.
+- **Params:**
   - `email` (String): The email address to be validated.
-- Returns: Boolean - Returns true if the email address is valid according to the regular expression, otherwise false.
+- **Returns:** Boolean - Returns true if the email address is valid according to the regular expression, otherwise false.
 
 #### Example
 
@@ -1810,7 +1811,7 @@ console.log(validateCPF(invalidCPF)); // Output: false
  * Example usage:
  */
 
-const validateEmail = require("./validateEmail");
+const { validateEmail } = require('misc-helpers');
 
 const validEmail = "example@email.com";
 const invalidEmail = "example.email.com";

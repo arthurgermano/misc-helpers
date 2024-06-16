@@ -151,13 +151,14 @@ function getAttestationObject(flags, authData, pointer, dataView) {
   let aaguid = undefined;
   let credentialId = undefined;
   let credentialPublicKey = undefined;
-  if (!flags.at)
+  if (!flags.at) {
     return {
       aaguid,
       credentialId,
       credentialPublicKey,
     };
-
+  }
+  
   aaguid = authData.slice(pointer, (pointer += 16));
 
   const credIDLen = dataView.getUint16(pointer);

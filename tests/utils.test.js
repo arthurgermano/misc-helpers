@@ -1809,6 +1809,87 @@ describe("UTILS - removeDuplicatedStrings", () => {
 
 // ------------------------------------------------------------------------------------------------
 
+describe('UTILS - sleep', () => {
+  // ----------------------------------------------------------------------------------------------
+
+  const sleep = utils.sleep;
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('sleep - should resolve with the default returnValue after the specified delay', async () => {
+    const start = Date.now();
+    const returnValue = await sleep(100);
+    const end = Date.now();
+
+    expect(returnValue).toBe(true);
+    expect(end - start).toBeGreaterThanOrEqual(100);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('sleep - should resolve with the specified returnValue after the specified delay', async () => {
+    const start = Date.now();
+    const returnValue = await sleep(100, 'Hello');
+    const end = Date.now();
+
+    expect(returnValue).toBe('Hello');
+    expect(end - start).toBeGreaterThanOrEqual(95);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('sleep - should reject with the default error after the specified delay if throwError is true', async () => {
+    const start = Date.now();
+    try {
+      await sleep(100, true, true);
+    } catch (error) {
+      const end = Date.now();
+      expect(error).toEqual(new Error('Sleep Error'));
+      expect(end - start).toBeGreaterThanOrEqual(95);
+    }
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('sleep - should reject with the specified returnValue after the specified delay if throwError is true', async () => {
+    const start = Date.now();
+    try {
+      await sleep(100, 'Oops!', true);
+    } catch (error) {
+      const end = Date.now();
+      expect(error).toBe('Oops!');
+      expect(end - start).toBeGreaterThanOrEqual(95);
+    }
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('sleep - should resolve immediately if milliseconds is 0', async () => {
+    const start = Date.now();
+    const returnValue = await sleep(0);
+    const end = Date.now();
+
+    expect(returnValue).toBe(true);
+    expect(end - start).toBeLessThan(10); // Allow a small buffer for execution time
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('sleep - should reject immediately if milliseconds is 0 and throwError is true', async () => {
+    const start = Date.now();
+    try {
+      await sleep(0, 'Immediate error', true);
+    } catch (error) {
+      const end = Date.now();
+      expect(error).toBe('Immediate error');
+      expect(end - start).toBeLessThan(10); // Allow a small buffer for execution time
+    }
+  });
+  // ----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------
+
 describe("UTILS - stringCompress", () => {
   // ----------------------------------------------------------------------------------------------
 

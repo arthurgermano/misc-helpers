@@ -19,6 +19,7 @@ A collection of utility functions and validators for common tasks.
       - [getWebAuthnAuthenticationAssertion](#getwebauthnauthenticationassertion)
       - [getWebAuthnRegistrationCredential](#getwebauthnregistrationcredential)
       - [validateAuthentication](#validateauthentication)
+      - [getWebAuthnRegistrationCredential](#getwebauthnregistrationcredential-1)
       - [validateRPID](#validaterpid)
   - [Crypto](#crypto)
     - [decrypt](#decrypt)
@@ -111,37 +112,39 @@ A collection of utility functions and validators for common tasks.
       - [Example](#example-36)
     - [removeDuplicatedStrings](#removeduplicatedstrings)
       - [Example](#example-37)
-    - [split](#split)
+    - [sleep](#sleep)
       - [Example](#example-38)
-    - [stringCompress](#stringcompress)
+    - [split](#split)
       - [Example](#example-39)
-    - [stringDecompress](#stringdecompress)
+    - [stringCompress](#stringcompress)
       - [Example](#example-40)
-    - [stringToDate](#stringtodate)
+    - [stringDecompress](#stringdecompress)
       - [Example](#example-41)
-    - [stringToDateToFormat](#stringtodatetoformat)
+    - [stringToDate](#stringtodate)
       - [Example](#example-42)
-    - [stringToFormat](#stringtoformat)
+    - [stringToDateToFormat](#stringtodatetoformat)
       - [Example](#example-43)
-    - [stringZLibCompress](#stringzlibcompress)
+    - [stringToFormat](#stringtoformat)
       - [Example](#example-44)
-    - [stringZLibDecompress](#stringzlibdecompress)
+    - [stringZLibCompress](#stringzlibcompress)
       - [Example](#example-45)
-    - [toString](#tostring)
+    - [stringZLibDecompress](#stringzlibdecompress)
       - [Example](#example-46)
-    - [uint8ArrayFromString](#uint8arrayfromstring)
+    - [toString](#tostring)
       - [Example](#example-47)
-    - [uint8ArrayToString](#uint8arraytostring)
+    - [uint8ArrayFromString](#uint8arrayfromstring)
       - [Example](#example-48)
+    - [uint8ArrayToString](#uint8arraytostring)
+      - [Example](#example-49)
   - [Validators](#validators)
     - [validateCADICMSPR](#validatecadicmspr)
-      - [Example](#example-49)
-    - [validateCNPJ](#validatecnpj)
       - [Example](#example-50)
-    - [validateCPF](#validatecpf)
+    - [validateCNPJ](#validatecnpj)
       - [Example](#example-51)
-    - [validateEmail](#validateemail)
+    - [validateCPF](#validatecpf)
       - [Example](#example-52)
+    - [validateEmail](#validateemail)
+      - [Example](#example-53)
 
 <hr />
 
@@ -295,6 +298,20 @@ A collection of utility functions and validators for common tasks.
     - `importKey` (Object, optional): The import key properties.
       - `format` (string, optional): The format of the key, default is "spki".
       - `extractable` (boolean, optional): Whether the key is extractable, default is false.
+
+
+#### getWebAuthnRegistrationCredential
+- **Description:** Validates a WebAuthn registration credential. This function performs a series of validations on the given credential:
+  1. Validates the basic properties of the credential.
+  2. Validates the credential against expected request parameters.
+  3. Extracts and validates the attestation object.
+- **Returns:** A Boolean `true` if the credential is valid, otherwise throws an error.
+- **Params:**
+  - `credential` {Object} : The WebAuthn credential to validate.
+  - `expectedProps` {Object} (optional) : An object containing expected properties for validation.
+    - `challenge` {string} (optional) : The expected challenge.
+    - `origin` {string} (optional) : The expected origin.
+    - `type` {string} (optional) : The expected type.
 
 
 #### validateRPID
@@ -1417,6 +1434,35 @@ const { removeDuplicatedStrings } = require('misc-helpers');
 const text = "apple banana apple orange banana";
 const uniqueText = removeDuplicatedStrings(text, " ");
 console.log(uniqueText); // Output: "apple banana orange"
+```
+
+### sleep
+
+- Description: Creates a delay for a specified number of milliseconds and optionally returns a value or throws an error.
+- Params:
+  - `milliseconds` (Number): The number of milliseconds to sleep.
+  - `returnValue` (Any): The value to be returned or used in the rejection after the sleep. Default is true.
+  - `throwError` (Boolean): Whether to throw an error after the sleep. Default is false.
+- Returns: Promise\<Any> - A promise that resolves to returnValue after the delay or rejects with returnValue if throwError is true.
+
+#### Example
+
+```javascript
+/**
+ * Example usage:
+ */
+
+const sleep = require("./sleep");
+
+// Using sleep to delay for 2 seconds and then log a message
+sleep(2000, "Wake up!").then((message) => {
+  console.log(message); // Output: "Wake up!"
+});
+
+// Using sleep to throw an error after 2 seconds
+sleep(2000, "Error occurred", true).catch((error) => {
+  console.error(error); // Output: "Error occurred"
+});
 ```
 
 ### split

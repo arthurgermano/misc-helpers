@@ -1,5 +1,5 @@
 const verifySignature = require("../../crypto/verifySignature");
-const importKey = require("../../crypto/importPublicKey");
+const importPublicKey = require("../../crypto/importPublicKey");
 const validateRPID = require("./validateRPID");
 const isNumber = require("../../helpers/isNumber");
 const base64ToBuffer = require("../../utils/base64ToBuffer");
@@ -64,7 +64,7 @@ async function validateAuthentication(
     const importPublicKeyAlgorithm = getImportPublicKeyAlgorithm(
       credential.response.publicKeyAlgorithm
     );
-    const publicKey = await importKey(
+    const publicKey = await importPublicKey(
       publicKeyProps?.importKey?.format || "spki",
       base64ToBuffer(credential.response.publicKey, false),
       importPublicKeyAlgorithm,

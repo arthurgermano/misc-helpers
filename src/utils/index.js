@@ -29,6 +29,7 @@ module.exports = {
   regexReplaceTrim: require("./regexReplaceTrim.js"),
   regexLettersOnly: require("./regexLettersOnly.js"),
   removeDuplicatedStrings: require("./removeDuplicatedStrings.js"),
+  sleep: require("./sleep.js"),
   split: require("./split"),
   stringCompress: require("./stringCompress.js"),
   stringDecompress: require("./stringDecompress.js"),

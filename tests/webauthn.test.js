@@ -119,3 +119,27 @@ describe("WEBAUTHN - validateAuthentication", function () {
 });
 
 // ------------------------------------------------------------------------------------------------
+
+describe("WEBAUTHN - validateRegistration", function () {
+  // ----------------------------------------------------------------------------------------------
+
+  const validateRegistration = auth.webAuthn.validateRegistration;
+
+  // ----------------------------------------------------------------------------------------------
+  it("validateRegistration - should validate authentication correctly", function () {
+    // console.log(credential)
+    const isValid = validateRegistration(
+      credential,
+      {
+        challenge: "Ty1idXZna1d3ckw1RXJzUVdfbHpJZ1RWT3VIc1NielI",
+        origin: "https://localhost:3000",
+        type: "webauthn.create",
+      },
+    );
+    expect(isValid).toBe(true);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------

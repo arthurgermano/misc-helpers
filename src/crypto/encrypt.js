@@ -2,7 +2,7 @@ const getCrypto = require("./getCrypto.js");
 const bufferFromString = require("../utils/bufferFromString");
 const base64FromBuffer = require("../utils/base64FromBuffer.js");
 const importCryptoKey = require("./importCryptoKey.js");
-const base64From = require("../utils/base64From.js");
+const base64ToBuffer = require("../utils/base64ToBuffer.js");
 
 // ------------------------------------------------------------------------------------------------
 
@@ -28,7 +28,7 @@ async function encrypt(publicKey, message, props = {}) {
     if (!message) return "";
 
     const crypto = getCrypto();
-    const binaryPublicKey = base64From(
+    const binaryPublicKey = base64ToBuffer(
       publicKey.replace(
         /(-----(BEGIN|END) (RSA )?(PRIVATE|PUBLIC) KEY-----|\s)/g,
         ""
@@ -38,7 +38,7 @@ async function encrypt(publicKey, message, props = {}) {
 
     const importedKey = await importCryptoKey(
       props.format || "spki",
-      new Uint8Array(binaryPublicKey),
+      binaryPublicKey,
       props.algorithm || {
         name: "RSA-OAEP",
         hash: { name: "SHA-256" },

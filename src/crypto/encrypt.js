@@ -38,7 +38,7 @@ async function encrypt(publicKey, message, props = {}) {
 
     const importedKey = await importCryptoKey(
       props.format || "spki",
-      binaryPublicKey,
+      new Uint8Array(binaryPublicKey),
       props.algorithm || {
         name: "RSA-OAEP",
         hash: { name: "SHA-256" },

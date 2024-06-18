@@ -35,7 +35,7 @@ async function decrypt(privateKey, encryptedMessage, props = {}) {
 
     const importedKey = await importCryptoKey(
       props.format || "pkcs8",
-      binaryPrivateKey,
+      new Uint8Array(binaryPrivateKey),
       props.algorithm || {
         name: "RSA-OAEP",
         hash: { name: "SHA-256" },

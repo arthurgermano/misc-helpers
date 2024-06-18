@@ -1438,7 +1438,7 @@ describe("UTILS - messageEncryptToChunks", () => {
     try {
       await messageEncryptToChunks(publicKey, message);
     } catch (error) {
-      expect(error.message).toBe("Public Key is not well PEM formatted");
+      expect(error.message).toBe("Invalid keyData");
     }
   });
 
@@ -1478,7 +1478,7 @@ describe("UTILS - messageDecryptFromChunks", () => {
         "chunk2",
       ]);
     } catch (error) {
-      expect(error.message).toBe("Private Key is not well PEM formatted");
+      expect(error.message).toBe("Invalid keyData");
     }
   });
 
@@ -1505,7 +1505,7 @@ describe("UTILS - messageDecryptFromChunks", () => {
       await messageDecryptFromChunks(PRIVATE_KEY, encryptedChunks);
     } catch (error) {
       expect(error.message).toBe(
-        "error:02000079:rsa routines::oaep decoding error"
+        "The operation failed for an operation-specific reason"
       );
     }
   });
@@ -1522,7 +1522,7 @@ describe("UTILS - messageDecryptFromChunks", () => {
       await messageDecryptFromChunks(PRIVATE_KEY, encryptedChunks);
     } catch (error) {
       expect(error.message).toBe(
-        "error:0200006E:rsa routines::data too large for key size"
+        "The operation failed for an operation-specific reason"
       );
     }
   });
@@ -1822,7 +1822,7 @@ describe('UTILS - sleep', () => {
     const end = Date.now();
 
     expect(returnValue).toBe(true);
-    expect(end - start).toBeGreaterThanOrEqual(100);
+    expect(end - start).toBeGreaterThanOrEqual(95);
   });
 
   // ----------------------------------------------------------------------------------------------

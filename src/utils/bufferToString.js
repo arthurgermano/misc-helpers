@@ -9,7 +9,7 @@
  */
 function bufferToString(buffer, encoding = "utf-8") {
   if (typeof Buffer !== "undefined") {
-    return String.fromCharCode.apply(null, new Uint16Array(buffer));
+    return String.fromCharCode.apply(null, new Uint8Array(buffer));
   }
   return new TextDecoder(encoding).decode(buffer);
 }

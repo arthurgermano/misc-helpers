@@ -1,51 +1,58 @@
 const getCrypto = require("./getCrypto.js");
 const bufferFromString = require("../utils/bufferFromString");
 const base64FromBuffer = require("../utils/base64FromBuffer.js");
+const importCryptoKey = require("./importCryptoKey.js");
+const base64From = require("../utils/base64From.js");
 
 // ------------------------------------------------------------------------------------------------
 
 /**
- * Encrypts a message using RSA-OAEP encryption.
+ * Asynchronously encrypts a message using a provided public key.
+ * 
  * @async
- * @param {string} publicKey - The RSA public key in PEM format.
- * @param {string} message - The message to encrypt.
- * @param {Object} [props={}] - Additional encryption properties.
- * @param {number} [props.padding] - The padding scheme to use (default: RSA_PKCS1_OAEP_PADDING).
- * @param {string} [props.oaepHash] - The hash algorithm to use with OAEP padding (default: "sha256").
- * @returns {Promise<string>} A Promise that resolves to the encrypted message in Base64 encoding.
- * @throws {Error} If the message is empty or the public key is not well-formatted.
+ * @function encrypt
+ * @param {string} publicKey - The PEM-encoded public key to be used for encryption.
+ * @param {string} message - The message to be encrypted.
+ * @param {Object} [props={}] - Optional properties to configure the encryption process.
+ * @param {string} [props.format="spki"] - The format of the public key. Default is "spki".
+ * @param {Object} [props.algorithm={ name: "RSA-OAEP", hash: { name: "SHA-256" }}] - The algorithm to be used for encryption. Default is RSA-OAEP with SHA-256.
+ * @param {boolean} [props.extractable=true] - Indicates whether the key can be extracted from the CryptoKey object. Default is true.
+ * @param {Array} [props.keyUsages=["encrypt"]] - An array of key usages. Default is ["encrypt"].
+ * @param {string} [props.padding="RSA-OAEP"] - The padding scheme to use for encryption. Default is "RSA-OAEP".
+ * @returns {Promise<string>} - A promise that resolves to the encrypted message as a base64 string.
+ * @throws {Error} - Throws an error if encryption fails.
+ * 
  */
 async function encrypt(publicKey, message, props = {}) {
   try {
     if (!message) return "";
-    if (
-      !publicKey ||
-      !publicKey.includes("-----BEGIN PUBLIC KEY-----") ||
-      !publicKey.includes("-----END PUBLIC KEY-----")
-    ) {
-      throw new Error("Public Key is not well PEM formatted");
-    }
-    
-    const crypto = getCrypto();
-    const data = bufferFromString(message);
 
-    let encrypted;
-    if (typeof window !== "undefined") {
-      encrypted = await crypto.subtle.encrypt(
-        { name: props.padding || "RSA-OAEP" },
-        publicKey,
-        data
-      );
-    } else {
-      encrypted = crypto.publicEncrypt(
-        {
-          key: publicKey,
-          padding: props.padding || crypto.constants.RSA_PKCS1_OAEP_PADDING,
-          oaepHash: props.oaepHash || "sha256",
-        },
-        data
-      );
-    }
+    const crypto = getCrypto();
+    const binaryPublicKey = base64From(
+      publicKey.replace(
+        /(-----(BEGIN|END) (RSA )?(PRIVATE|PUBLIC) KEY-----|\s)/g,
+        ""
+      ),
+      false
+    );
+
+    const importedKey = await importCryptoKey(
+      props.format || "spki",
+      binaryPublicKey,
+      props.algorithm || {
+        name: "RSA-OAEP",
+        hash: { name: "SHA-256" },
+      },
+      props.extractable || true,
+      props.keyUsages || ["encrypt"]
+    );
+
+    const data = bufferFromString(message);
+    const encrypted = await crypto.subtle.encrypt(
+      { name: props.padding || "RSA-OAEP" },
+      importedKey,
+      data
+    );
 
     return base64FromBuffer(encrypted);
   } catch (error) {

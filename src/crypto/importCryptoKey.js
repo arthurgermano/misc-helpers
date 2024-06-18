@@ -11,7 +11,7 @@ const getCrypto = require("./getCrypto.js");
  * @returns {Promise<CryptoKey>} A Promise that resolves with the imported CryptoKey object.
  * @throws {Error} If there is an error during key import process.
  */
-async function importPublicKey(
+async function importCryptoKey(
   format,
   keyData,
   algorithm,
@@ -34,6 +34,6 @@ async function importPublicKey(
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = importPublicKey;
+module.exports = importCryptoKey;
 
 // ------------------------------------------------------------------------------------------------

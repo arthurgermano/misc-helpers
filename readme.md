@@ -23,10 +23,12 @@ A collection of utility functions and validators for common tasks.
       - [validateRPID](#validaterpid)
   - [Crypto](#crypto)
     - [decrypt](#decrypt)
+      - [Example Usage](#example-usage)
     - [digest](#digest)
     - [encrypt](#encrypt)
+      - [Example Usage](#example-usage-1)
     - [getCrypto](#getcrypto)
-    - [importPublicKey](#importpublickey)
+    - [importCryptoKey](#importcryptokey)
     - [verifySignature](#verifysignature)
   - [Custom](#custom)
     - [DB Sequelize](#db-sequelize)
@@ -332,8 +334,28 @@ A collection of utility functions and validators for common tasks.
   - `privateKey` (string): The RSA private key in PEM format.
   - `encryptedMessage` (string): The encrypted message to decrypt in Base64 encoding.
   - `props` (Object): Additional decryption properties.
-    - `padding` (number, optional): The padding scheme to use (default: RSA_PKCS1_OAEP_PADDING).
-    - `oaepHash` (string, optional): The hash algorithm to use with OAEP padding (default: "sha256").
+    - `format` (string, optional): The format of the private key (default: "pkcs8").
+    - `algorithm` (Object, optional): The algorithm to be used for decryption (default: `{ name: "RSA-OAEP", hash: { name: "SHA-256" }}`).
+    - `extractable` (boolean, optional): Indicates whether the key can be extracted from the CryptoKey object (default: true).
+    - `keyUsages` (Array, optional): An array of key usages (default: ["decrypt"]).
+    - `padding` (string, optional): The padding scheme to use for decryption (default: "RSA-OAEP").
+
+#### Example Usage
+
+```javascript
+const privateKey = `-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQD...
+-----END PRIVATE KEY-----`;
+const encryptedMessage = 'ENCRYPTED_MESSAGE_BASE64';
+
+decrypt(privateKey, encryptedMessage)
+  .then(decryptedMessage => {
+    console.log(decryptedMessage); // Decrypted message as a string
+  })
+  .catch(error => {
+    console.error('Error decrypting message:', error);
+  });
+```
 
 ### digest
 
@@ -351,15 +373,35 @@ A collection of utility functions and validators for common tasks.
   - `publicKey` (string): The RSA public key in PEM format.
   - `message` (string): The message to encrypt.
   - `props` (Object, optional): Additional encryption properties.
-    - `padding` (number, optional): The padding scheme to use (default: RSA_PKCS1_OAEP_PADDING).
-    - `oaepHash` (string, optional): The hash algorithm to use with OAEP padding (default: "sha256").
+    - `format` (string, optional): The format of the public key (default: "spki").
+    - `algorithm` (Object, optional): The algorithm to be used for encryption (default: `{ name: "RSA-OAEP", hash: { name: "SHA-256" }}`).
+    - `extractable` (boolean, optional): Indicates whether the key can be extracted from the CryptoKey object (default: true).
+    - `keyUsages` (Array, optional): An array of key usages (default: ["encrypt"]).
+    - `padding` (string, optional): The padding scheme to use for encryption (default: "RSA-OAEP").
+
+#### Example Usage
+
+```javascript
+const publicKey = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn...
+-----END PUBLIC KEY-----`;
+const message = 'Hello, World!';
+
+encrypt(publicKey, message)
+  .then(encryptedMessage => {
+    console.log(encryptedMessage); // Encrypted message as a base64 string
+  })
+  .catch(error => {
+    console.error('Error encrypting message:', error);
+  });
+```
 
 ### getCrypto
 
 - **Description:** Retrieves the `crypto` object for cryptographic operations.
 - **Returns:** The `crypto` object for cryptographic operations, compatible with Web Crypto API.
 
-### importPublicKey
+### importCryptoKey
 
 - **Description:** Imports a public key asynchronously using Web Crypto API in browser environment or Node.js crypto module.
 - **Returns:** A Promise that resolves with the imported CryptoKey object.

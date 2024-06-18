@@ -75,7 +75,7 @@ describe("CRYPTO - encrypt", () => {
     try {
       await encrypt(invalidPublicKey, message);
     } catch (error) {
-      expect(error.message).toBe("Public Key is not well PEM formatted");
+      expect(error.message).toBe("Invalid keyData");
     }
   });
 
@@ -94,8 +94,8 @@ describe("CRYPTO - decrypt", () => {
 
   it("decrypt - should decrypt an encrypted message with a valid private key", async () => {
     const message = "Hello, World!";
-    const encryptedMessage = await encrypt(PUBLIC_KEY, message);
-    const decryptedMessage = await decrypt(PRIVATE_KEY, encryptedMessage);
+    const encryptedMessage = await encrypt(PUBLIC_KEY, message, { ok: true });
+    const decryptedMessage = await decrypt(PRIVATE_KEY, encryptedMessage, { ok: true });
 
     assert.strictEqual(decryptedMessage, "Hello, World!");
   });
@@ -113,7 +113,7 @@ describe("CRYPTO - decrypt", () => {
     try {
       await decrypt("invalid_KEY_TEST", "some encrypted message");
     } catch (error) {
-      expect(error.message).toBe("Private Key is not well PEM formatted");
+      expect(error.message).toBe("Invalid keyData");
     }
   });
 
@@ -163,17 +163,17 @@ describe("CRYPTO - digest", () => {
 
 // ------------------------------------------------------------------------------------------------
 
-describe("CRYPTO - importPublicKey", function () {
+describe("CRYPTO - importCryptoKey", function () {
   // ----------------------------------------------------------------------------------------------
 
-  const importPublicKey = crypto.importPublicKey;
+  const importCryptoKey = crypto.importCryptoKey;
   const base64ToBuffer = utils.base64ToBuffer;
 
   // ----------------------------------------------------------------------------------------------
 
-  it("importPublicKey - import key correctly", async function () {
+  it("importCryptoKey - import key correctly", async function () {
     const publicKey = base64ToBuffer(credential.response.publicKey, false);
-    const importedKey = await importPublicKey(
+    const importedKey = await importCryptoKey(
       "spki",
       publicKey,
       {
@@ -195,7 +195,7 @@ describe("CRYPTO - importPublicKey", function () {
 describe("CRYPTO - verifySignature", function () {
   // ----------------------------------------------------------------------------------------------
 
-  const importPublicKey = crypto.importPublicKey;
+  const importCryptoKey = crypto.importCryptoKey;
   const verifySignature = crypto.verifySignature;
   const digest = crypto.digest;
   const base64ToBuffer = utils.base64ToBuffer;
@@ -219,7 +219,7 @@ describe("CRYPTO - verifySignature", function () {
     );
 
     const publicKey = base64ToBuffer(credential.response.publicKey, false);
-    const importedKey = await importPublicKey(
+    const importedKey = await importCryptoKey(
       "spki",
       publicKey,
       {

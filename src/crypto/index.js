@@ -3,6 +3,6 @@ module.exports = {
   decrypt: require("./decrypt"),
   encrypt: require("./encrypt"),
   digest: require("./digest"),
-  importPublicKey: require("./importPublicKey"),
+  importCryptoKey: require("./importCryptoKey"),
   verifySignature: require("./verifySignature"),
 };

@@ -95,7 +95,9 @@ describe("CRYPTO - decrypt", () => {
   it("decrypt - should decrypt an encrypted message with a valid private key", async () => {
     const message = "Hello, World!";
     const encryptedMessage = await encrypt(PUBLIC_KEY, message, { ok: true });
-    const decryptedMessage = await decrypt(PRIVATE_KEY, encryptedMessage, { ok: true });
+    const decryptedMessage = await decrypt(PRIVATE_KEY, encryptedMessage, {
+      ok: true,
+    });
 
     assert.strictEqual(decryptedMessage, "Hello, World!");
   });
@@ -206,12 +208,11 @@ describe("CRYPTO - verifySignature", function () {
 
   it("verifySignature - verify signature correctly", async function () {
     const authenticatorDataBuffer = base64ToBuffer(
-      assertion.response.authenticatorData,
-      false
+      assertion.response.authenticatorData
     );
     const clientDataJSONSHA256Data = await digest(
       "SHA-256",
-      base64ToBuffer(assertion.response.clientDataJSON, false)
+      new Uint8Array(base64ToBuffer(assertion.response.clientDataJSON))
     );
     const dataToVerify = bufferConcatenate(
       authenticatorDataBuffer,

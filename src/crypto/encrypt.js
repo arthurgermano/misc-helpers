@@ -8,7 +8,7 @@ const base64ToBuffer = require("../utils/base64ToBuffer.js");
 
 /**
  * Asynchronously encrypts a message using a provided public key.
- * 
+ *
  * @async
  * @function encrypt
  * @param {string} publicKey - The PEM-encoded public key to be used for encryption.
@@ -21,7 +21,7 @@ const base64ToBuffer = require("../utils/base64ToBuffer.js");
  * @param {string} [props.padding="RSA-OAEP"] - The padding scheme to use for encryption. Default is "RSA-OAEP".
  * @returns {Promise<string>} - A promise that resolves to the encrypted message as a base64 string.
  * @throws {Error} - Throws an error if encryption fails.
- * 
+ *
  */
 async function encrypt(publicKey, message, props = {}) {
   try {
@@ -32,8 +32,7 @@ async function encrypt(publicKey, message, props = {}) {
       publicKey.replace(
         /(-----(BEGIN|END) (RSA )?(PRIVATE|PUBLIC) KEY-----|\s)/g,
         ""
-      ),
-      false
+      )
     );
 
     const importedKey = await importCryptoKey(
@@ -53,7 +52,6 @@ async function encrypt(publicKey, message, props = {}) {
       importedKey,
       data
     );
-
     return base64FromBuffer(encrypted);
   } catch (error) {
     throw error;

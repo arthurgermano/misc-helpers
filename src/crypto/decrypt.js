@@ -7,7 +7,7 @@ const importCryptoKey = require("./importCryptoKey.js");
 
 /**
  * Asynchronously decrypts an encrypted message using a provided private key.
- * 
+ *
  * @async
  * @function decrypt
  * @param {string} privateKey - The PEM-encoded private key to be used for decryption.
@@ -20,16 +20,18 @@ const importCryptoKey = require("./importCryptoKey.js");
  * @param {string} [props.padding="RSA-OAEP"] - The padding scheme to use for decryption. Default is "RSA-OAEP".
  * @returns {Promise<string>} - A promise that resolves to the decrypted message as a string.
  * @throws {Error} - Throws an error if decryption fails.
- * 
+ *
  */
 async function decrypt(privateKey, encryptedMessage, props = {}) {
   try {
     if (!encryptedMessage) return "";
     const crypto = getCrypto();
-    
+
     const binaryPrivateKey = base64ToBuffer(
-      privateKey.replace(/(-----(BEGIN|END) (RSA )?(PRIVATE|PUBLIC) KEY-----|\s)/g, ""),
-      false
+      privateKey.replace(
+        /(-----(BEGIN|END) (RSA )?(PRIVATE|PUBLIC) KEY-----|\s)/g,
+        ""
+      )
     );
 
     const importedKey = await importCryptoKey(

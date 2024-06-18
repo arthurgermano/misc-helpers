@@ -61,12 +61,12 @@ describe("WEBAUTHN - convertECDSAASN1Signature", function () {
   // ----------------------------------------------------------------------------------------------
   it("convertECDSAASN1Signature - should correctly convert valid ASN.1 sequence", function () {
     const signature = new Uint8Array(
-      base64ToBuffer(assertion.response.signature, false)
+      base64ToBuffer(assertion.response.signature)
     );
     const result = convertECDSAASN1Signature(signature);
     // console.log(">>>",base64FromBuffer(result))
     const expected = base64ToBuffer(
-      "FWrDh8KZw6nDgMK8w4cvwo0nAzV6wpUZw6ZawolgbsKxwqccwqDDhsOUO8O2w7Mqw6Qiw4B7w5TDsBzCtnnDicOfJnjChSo1wr7DmcOJSsKbwpDCtGwMwqo5w6Ytw4HCthg6"
+      "FWrHmenAvMcvjScDNXqVGeZaiWBusaccoMbUO/bzKuQiwHvU8By2ecnfJniFKjW+2clKm5C0bAyqOeYtwbYYOg"
     );
     expect(bufferCompare(result, expected)).toBe(true);
   });

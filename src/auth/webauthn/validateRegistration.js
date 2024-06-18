@@ -116,7 +116,7 @@ function validateRequestParams(credential, expectedProps = {}) {
  * @returns {boolean} Returns true if the attestation object is valid.
  */
 function extractAndValidateAttestationObject(credential) {
-	const attestationObjectBuffer = base64ToBuffer(credential.response.attestationObject, false);
+	const attestationObjectBuffer = base64ToBuffer(credential.response.attestationObject);
 	const attestationObject = cbor.decode(new Uint8Array(attestationObjectBuffer));
 
 	if (!attestationObject.fmt) {

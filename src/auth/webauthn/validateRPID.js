@@ -27,7 +27,7 @@ async function validateRPID(originalRPID, verifyRPID, algorithm = "SHA-256") {
       bufferFromString(originalRPID)
     );
 
-    const verifyRPIDBuffer = base64ToBuffer(verifyRPID, false);
+    const verifyRPIDBuffer = base64ToBuffer(verifyRPID);
     const verifyRPIDDigest = verifyRPIDBuffer.slice(0, 32);
 
     if (!bufferCompare(originalRPIDDigest, verifyRPIDDigest)) {

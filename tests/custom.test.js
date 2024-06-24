@@ -350,7 +350,7 @@ describe("CUSTOM - setConditionBetweenDates", () => {
 
 // ------------------------------------------------------------------------------------------------
 
-describe("CUSTOM - setConditionBetweenDates", () => {
+describe("CUSTOM - setConditionBetweenValues", () => {
   // ----------------------------------------------------------------------------------------------
 
   const setConditionBetweenValues =
@@ -593,17 +593,33 @@ describe("WaitPlugin", () => {
 
   it("WaitPlugin - should resolve the promise if successful", async () => {
     const promise = waitPlugin.startWait("testC");
-    setTimeout(() => waitPlugin.finishWait("testC", true), 25);
+    setTimeout(() => waitPlugin.finishWait("testC", true, true), 25);
     await expect(promise).resolves.toBe(true);
   });
+  
+    // ----------------------------------------------------------------------------------------------
 
+    it("WaitPlugin - should resolve the promise if successful with a custom value", async () => {
+      const promise = waitPlugin.startWait("testC");
+      setTimeout(() => waitPlugin.finishWait("testC", true, { a: "my custom value"}), 25);
+      await expect(promise).resolves.toHaveProperty("a", "my custom value");
+    });
+  
   // ----------------------------------------------------------------------------------------------
 
   it("WaitPlugin - should reject the promise if not successful", async () => {
     const promise = waitPlugin.startWait("testD");
-    setTimeout(() => waitPlugin.finishWait("testD", false), 25);
+    setTimeout(() => waitPlugin.finishWait("testD", false, false), 25);
     await expect(promise).rejects.toBe(false);
   });
+
+    // ----------------------------------------------------------------------------------------------
+
+    it("WaitPlugin - should reject the promise if not successful with a custom value", async () => {
+      const promise = waitPlugin.startWait("testD");
+      setTimeout(() => waitPlugin.finishWait("testD", false, { a: "my custom value"}), 25);
+      await expect(promise).rejects.toHaveProperty("a", "my custom value");
+    });
 
   // ----------------------------------------------------------------------------------------------
 

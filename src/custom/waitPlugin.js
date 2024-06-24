@@ -12,9 +12,9 @@ class WaitPlugin {
         return false;
       }
       if (isSuccessful) {
-        return this.waitList[name].resolve(returnParam || true);
+        return this.waitList[name].resolve(returnParam);
       }
-      return this.waitList[name].reject(returnParam || false);
+      return this.waitList[name].reject(returnParam);
     } catch (error) {
       return error;
     } finally {

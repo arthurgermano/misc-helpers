@@ -28,7 +28,7 @@ async function getWebAuthnAuthenticationAssertion(props, callback) {
 
 		return assertion;
 	} catch (error) {
-		handleError(error);
+		throw error;
 	}
 }
 

@@ -60,7 +60,7 @@ function getAuthenticationAuthData(assertion) {
       response,
     };
   } catch (error) {
-    handleError(error);
+    throw error;
   }
 }
 
@@ -141,7 +141,7 @@ function getAuthDataFromAuthentication(authData) {
       extensionsData,
     };
   } catch (error) {
-    handleError(error);
+    throw error;
   }
 }
 

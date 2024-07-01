@@ -3,6 +3,7 @@ const importCryptoKey = require("../../crypto/importCryptoKey");
 const validateRPID = require("./validateRPID");
 const isNumber = require("../../helpers/isNumber");
 const base64ToBuffer = require("../../utils/base64ToBuffer");
+const base64From = require("../../utils/base64From");
 const bufferConcatenate = require("../../utils/bufferConcatenate");
 const convertECDSAASN1Signature = require("./convertECDSAASN1Signature");
 

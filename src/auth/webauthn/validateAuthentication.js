@@ -214,12 +214,9 @@ function validateAssertionProps(assertion) {
  */
 function validateRequestParams(assertion, expectedProps = {}) {
   const clientDataJSON = JSON.parse(assertion.response.clientDataJSONDecoded);
-  if (expectedProps.challenge != clientDataJSON?.challenge) {
-    throw new Error(
-      `Challenge does not match. Provided challenge: ${
-        clientDataJSON?.challenge || "none"
-      }.`
-    );
+  const assertionChallenge = base64From(clientDataJSON?.challenge || "");
+  if (expectedProps.challenge != assertionChallenge) {
+    throw new Error("Challenge provided does not match assertion challenge.");
   }
 
   if (expectedProps.origin != clientDataJSON?.origin) {

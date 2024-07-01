@@ -103,7 +103,7 @@ describe("WEBAUTHN - validateAuthentication", function () {
       {
         rpID: "localhost",
         counterCredential: 1,
-        challenge: "OE9pQ2w4UDNBZnlwMGZtdWI4c2NoalVXTno3eTBuN2I",
+        challenge: "8OiCl8P3Afyp0fmub8schjUWNz7y0n7b",
         origin: "https://localhost:3000",
         type: "webauthn.get",
       },

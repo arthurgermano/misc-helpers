@@ -1,6 +1,7 @@
 module.exports = {
   assign: require("./assign.js"),
   base64From: require("./base64From.js"),
+  base64FromBase64URLSafe: require("./base64FromBase64URLSafe.js"),
   base64FromBuffer: require("./base64FromBuffer.js"),
   base64To: require("./base64To.js"),
   base64ToBuffer: require("./base64ToBuffer.js"),

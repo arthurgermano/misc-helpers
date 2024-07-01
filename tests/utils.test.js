@@ -158,6 +158,56 @@ describe("UTILS - base64From", () => {
 
 // ------------------------------------------------------------------------------------------------
 
+describe("UTILS - base64FromBase64URLSafe", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  const base64FromBase64URLSafe = utils.base64FromBase64URLSafe;
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should convert URL-safe base64 to standard base64', () => {
+    const urlSafeBase64String = 'rqXRQrq_mSFhX4c2wSZJrA';
+    const expectedBase64String = 'rqXRQrq/mSFhX4c2wSZJrA==';
+    expect(base64FromBase64URLSafe(urlSafeBase64String)).toBe(expectedBase64String);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should handle base64 strings with different lengths', () => {
+    const urlSafeBase64String = 'U29tZS1kYXRh';
+    const expectedBase64String = 'U29tZS1kYXRh';
+    expect(base64FromBase64URLSafe(urlSafeBase64String)).toBe(expectedBase64String);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should handle base64 strings with padding characters', () => {
+    const urlSafeBase64String = 'YW55LXN0cmluZw';
+    const expectedBase64String = 'YW55LXN0cmluZw==';
+    expect(base64FromBase64URLSafe(urlSafeBase64String)).toBe(expectedBase64String);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should handle base64 strings without padding characters', () => {
+    const urlSafeBase64String = 'c29tZS1kYXRhLXN0cmluZw';
+    const expectedBase64String = 'c29tZS1kYXRhLXN0cmluZw==';
+    expect(base64FromBase64URLSafe(urlSafeBase64String)).toBe(expectedBase64String);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it('should handle empty strings', () => {
+    const urlSafeBase64String = '';
+    const expectedBase64String = '';
+    expect(base64FromBase64URLSafe(urlSafeBase64String)).toBe(expectedBase64String);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------
+
 describe("UTILS - base64FromBuffer", () => {
   // ----------------------------------------------------------------------------------------------
 

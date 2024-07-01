@@ -25,6 +25,7 @@ module.exports = {
   utils: {
     assign: require("./src/utils/assign.js"),
     base64From: require("./src/utils/base64From.js"),
+    base64FromBase64URLSafe: require("./src/utils/base64FromBase64URLSafe.js"),
     base64FromBuffer: require("./src/utils/base64FromBuffer.js"),
     base64To: require("./src/utils/base64To.js"),
     base64ToBuffer: require("./src/utils/base64ToBuffer.js"),

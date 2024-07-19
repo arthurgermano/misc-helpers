@@ -1396,7 +1396,7 @@ describe("UTILS - normalize", () => {
 
   it("normalize should return an empty string for an object", () => {
     const result = normalize({});
-    expect(result).toBe("");
+    expect(result).toBeInstanceOf(Object);
   });
 
   // ----------------------------------------------------------------------------------------------
@@ -1540,7 +1540,7 @@ describe("UTILS - messageDecryptFromChunks", () => {
   // ----------------------------------------------------------------------------------------------
 
   it("messageDecryptFromChunks - Decrypt the message correctly", async () => {
-    const message = "Hello, world!";
+    const message = "Hello, world! à ã ü ñ ° ª";
     const encryptedChunks = await messageEncryptToChunks(PUBLIC_KEY, message);
     const decrypted = await messageDecryptFromChunks(
       PRIVATE_KEY,

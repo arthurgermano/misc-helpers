@@ -1,4 +1,5 @@
 const { encrypt } = require("../crypto");
+const base64To = require("../utils/base64To");
 
 // ------------------------------------------------------------------------------------------------
 
@@ -16,9 +17,10 @@ async function messageEncryptToChunks(publicKey, message, props = {}) {
   try {
     const chunks = [];
     const chunkSize = props.chunkSize || 190;
-    for (let i = 0; i < message.length; i += chunkSize) {
+    const message64 = base64To(message);
+    for (let i = 0; i < message64.length; i += chunkSize) {
       chunks.push(
-        await encrypt(publicKey, message.substring(i, i + chunkSize), props)
+        await encrypt(publicKey, message64.substring(i, i + chunkSize), props)
       );
     }
     return chunks;

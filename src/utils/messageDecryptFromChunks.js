@@ -1,4 +1,5 @@
 const { decrypt } = require("../crypto");
+const base64From = require("../utils/base64From");
 
 // ------------------------------------------------------------------------------------------------
 
@@ -18,7 +19,7 @@ async function messageDecryptFromChunks(privateKey, messageChunks, props = {}) {
       message.push(await decrypt(privateKey, chunk, props));
     }
 
-    return message.join("");
+    return base64From(message.join(""));
   } catch (error) {
     throw error;
   }

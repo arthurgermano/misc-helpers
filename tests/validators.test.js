@@ -155,6 +155,68 @@ describe("VALIDATORS - validateCNPJ", () => {
 
 // ------------------------------------------------------------------------------------------------
 
+describe("VALIDATORS - validateCNPJ (Alphanumeric)", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  it("validateCNPJ should return true for a valid alphanumeric CNPJ", () => {
+    const validAlphanumericCNPJ = "12.ABC.345/01DE-35";
+    expect(validators.validateCNPJ(validAlphanumericCNPJ)).toBe(true);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("validateCNPJ should return false for an alphanumeric CNPJ with invalid check digits", () => {
+    const invalidCheckDigitsCNPJ = "12.ABC.345/01DE-26";
+    expect(validators.validateCNPJ(invalidCheckDigitsCNPJ)).toBe(false);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("validateCNPJ should return false for an alphanumeric CNPJ with lowercase letters", () => {
+    const lowercaseCNPJ = "a7.2b6.c50/0001-08";
+    expect(validators.validateCNPJ(lowercaseCNPJ)).toBe(false);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("validateCNPJ should return false for an alphanumeric CNPJ with special characters", () => {
+    const specialCharsCNPJ = "1$.ABC.345/01DE-26";
+    expect(validators.validateCNPJ(specialCharsCNPJ)).toBe(false);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("validateCNPJ should return false for an alphanumeric CNPJ with spaces", () => {
+    const spacedCNPJ = "12.ABC .345/01DE-26";
+    expect(validators.validateCNPJ(spacedCNPJ)).toBe(false);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("validateCNPJ should return false for an alphanumeric CNPJ with incorrect length", () => {
+    const shortCNPJ = "12.ABC.345/01DE-262";
+    expect(validators.validateCNPJ(shortCNPJ)).toBe(false);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("validateCNPJ should return false for an alphanumeric CNPJ with all identical characters", () => {
+    const identicalCNPJ = "AAAAAAAAAAAAA-00";
+    expect(validators.validateCNPJ(identicalCNPJ)).toBe(false);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("validateCNPJ should return true for a valid alphanumeric CNPJ in numeric format", () => {
+    const validAlphanumericNumericCNPJ = "12ABC34501DE35";
+    expect(validators.validateCNPJ(validAlphanumericNumericCNPJ)).toBe(true);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------
+
 describe("VALIDATORS - validateCADICMSPR", () => {
   // ----------------------------------------------------------------------------------------------
 

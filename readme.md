@@ -1864,10 +1864,17 @@ console.log(validateCADICMSPR(invalidCADICMS)); // Output: false
 
 ### validateCNPJ
 
-- **Description:** Validates a given CNPJ (Cadastro Nacional da Pessoa Jurídica, Brazilian corporate taxpayer registry number).
+- **Description:** Validates a given CNPJ (Cadastro Nacional da Pessoa Jurídica, Brazilian corporate taxpayer registry number). This function supports both numeric and alphanumeric CNPJs, and allows for custom validation options like padding characters, case sensitivity, and more.
+
 - **Params:**
-  - `cnpj` (String): The CNPJ value to be validated.
-- **Returns:** Boolean - Returns true if the CNPJ is valid, otherwise false.
+  - `cnpj` (String): The CNPJ value to be validated. It can include alphanumeric characters and special characters (like `.`, `/`, and `-`).
+  - `options` (Object) [optional]: Additional validation options:
+    - `addPaddingChar` (String): Character to use for padding if necessary. Defaults to `"0"`.
+    - `weights` (Array<Number>): Custom weight values for validation. Defaults to the constant `WEIGHTS`.
+    - `ignoreToUpperCase` (Boolean): Whether to ignore case when processing alphanumeric CNPJs. If `true`, all characters will be converted to uppercase. Defaults to `true`.
+    - `ignorePadding` (Boolean): Whether to skip padding when the CNPJ is shorter than 14 characters. If `true`, padding will not be applied. Defaults to `false`.
+
+- **Returns:** Boolean - Returns `true` if the CNPJ is valid, otherwise `false`.
 
 #### Example
 
@@ -1883,6 +1890,17 @@ const invalidCNPJ = "11.111.111/1111-11";
 
 console.log(validateCNPJ(validCNPJ)); // Output: true
 console.log(validateCNPJ(invalidCNPJ)); // Output: false
+
+// Example with alphanumeric valid CNPJ
+const alphanumericCNPJ = "12ABC34501DE35";
+console.log(validateCNPJ(alphanumericCNPJ)); // Output: true
+
+// Example with custom options
+const options = {
+  ignoreToUpperCase: true,
+};
+const customCNPJ = "12abc34501de35";
+console.log(validateCNPJ(customCNPJ, options)); // Output: false
 ```
 
 ### validateCPF

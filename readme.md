@@ -1871,7 +1871,7 @@ console.log(validateCADICMSPR(invalidCADICMS)); // Output: false
   - `options` (Object) [optional]: Additional validation options:
     - `addPaddingChar` (String): Character to use for padding if necessary. Defaults to `"0"`.
     - `weights` (Array<Number>): Custom weight values for validation. Defaults to the constant `WEIGHTS`.
-    - `ignoreToUpperCase` (Boolean): Whether to ignore case when processing alphanumeric CNPJs. If `true`, all characters will be converted to uppercase. Defaults to `true`.
+    - `ignoreToUpperCase` (Boolean): Whether to ignore case when processing alphanumeric CNPJs. If `false`, all characters will be converted to uppercase. Defaults to `false`.
     - `ignorePadding` (Boolean): Whether to skip padding when the CNPJ is shorter than 14 characters. If `true`, padding will not be applied. Defaults to `false`.
 
 - **Returns:** Boolean - Returns `true` if the CNPJ is valid, otherwise `false`.

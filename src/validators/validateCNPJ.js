@@ -10,26 +10,26 @@ const WEIGHTS = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
  * @summary Validates a given CNPJ
  * @param {String} cnpj - The CNPJ value to be validated
  * @param {Object} [options={}] - Additional validation options
- * @param {Number} [options.length=14] - Expected length of the CNPJ
  * @param {String} [options.addPaddingChar="0"] - Character to use for padding if necessary
- * @param {Number} [options.noDigitSize=12] - Number of base digits before check digits
  * @param {Array<Number>} [options.weights=WEIGHTS] - Custom weight values for validation
- * @param {Boolean} [options.ignoreCase=true] - Whether to ignore case when processing alphanumeric CNPJs - when true, all characters will be converted to uppercase
+ * @param {Boolean} [options.ignoreToUpperCase=true] - Whether to ignore case when processing alphanumeric CNPJs. If true, all characters will be converted to uppercase.
+ * @param {Boolean} [options.ignorePadding=false] - Whether to skip padding when the CNPJ is shorter than 14 characters. If true, padding will not be applied.
  * @returns {Boolean} - Returns true if the CNPJ is valid, otherwise false
  */
-
 function validateCNPJ(cnpj = "", options = {}) {
   // Normalize input: remove mask characters and apply padding
-  cnpj = toString(cnpj)
-    .replace(/[./-]/g, "")
-    .padStart(options.length || 14, options.addPaddingChar || "0");
+  cnpj = toString(cnpj).replace(/[./-]/g, "");
 
-  if (!options.ignoreCase) {
+  if (!options.ignorePadding) {
+    cnpj = cnpj.padStart(14, options.addPaddingChar || "0");
+  }
+
+  if (!options.ignoreToUpperCase) {
     cnpj = cnpj.toUpperCase();
-  } 
+  }
 
   // Generate a string with all zeros to compare against (invalid case)
-  const zeroedCNPJ = "0".repeat(options.length || 14);
+  const zeroedCNPJ = "00000000000000";
   if (cnpj === zeroedCNPJ) {
     return false;
   }
@@ -41,11 +41,15 @@ function validateCNPJ(cnpj = "", options = {}) {
   }
 
   // Extract base and check digits
-  const baseDigits = cnpj.substring(0, options.noDigitSize || 12);
-  const checkDigits = cnpj.substring(options.noDigitSize || 12);
+  const baseDigits = cnpj.substring(0, 12);
+  const checkDigits = cnpj.substring(12);
 
   // Calculate expected check digits
-  const calculatedDV = calculateDV(baseDigits, options.noDigitSize, options.weights || WEIGHTS);
+  const calculatedDV = calculateDV(
+    baseDigits,
+    options.noDigitSize,
+    options.weights || WEIGHTS
+  );
 
   // Compare calculated check digits with provided ones
   return checkDigits === calculatedDV;
@@ -86,7 +90,6 @@ function calculateDV(cnpj, noDigitSize = 12, weights) {
 module.exports = validateCNPJ;
 
 // ------------------------------------------------------------------------------------------------
-
 
 // const toString = require("../utils/toString.js");
 // // ------------------------------------------------------------------------------------------------

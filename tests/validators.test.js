@@ -217,6 +217,62 @@ describe("VALIDATORS - validateCNPJ (Alphanumeric)", () => {
 
 // ------------------------------------------------------------------------------------------------
 
+
+describe("VALIDATORS - validateCNPJ (With Additional Options)", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  it("validateCNPJ should return true for a valid CNPJ with padding ignored", () => {
+    const cnpjWithPaddingIgnored = "12.ABC.345/01DE-35";
+    const options = { ignorePadding: false };
+    expect(validators.validateCNPJ(cnpjWithPaddingIgnored, options)).toBe(true);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("validateCNPJ should return false for an invalid CNPJ with padding ignored", () => {
+    const invalidCNPJWithPaddingIgnored = "12.ABC.345/01DE-26";
+    const options = { ignorePadding: true };
+    expect(validators.validateCNPJ(invalidCNPJWithPaddingIgnored, options)).toBe(false);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("validateCNPJ should return false for an invalid CNPJ with custom weights", () => {
+    const invalidCNPJWithCustomWeights = "12.ABC.345/01DE-26";
+    const customWeights = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+    const options = { weights: customWeights };
+    expect(validators.validateCNPJ(invalidCNPJWithCustomWeights, options)).toBe(false);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("validateCNPJ should return false for a valid CNPJ with case ignored", () => {
+    const cnpjWithCaseIgnored = "a7.2b6.c50/0001-08";
+    const options = { ignoreToUpperCase: true };
+    expect(validators.validateCNPJ(cnpjWithCaseIgnored, options)).toBe(false);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("validateCNPJ should return false for an alphanumeric CNPJ with lowercase letters and case not ignored", () => {
+    const cnpjWithLowercaseAndCaseNotIgnored = "a7.2b6.c50/0001-08";
+    const options = { ignoreToUpperCase: false };
+    expect(validators.validateCNPJ(cnpjWithLowercaseAndCaseNotIgnored, options)).toBe(false);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("validateCNPJ should return false for a CNPJ with incorrect length when padding is ignored", () => {
+    const invalidCNPJWithIgnorePadding = "12.ABC.345/01DE-262";
+    const options = { ignorePadding: true };
+    expect(validators.validateCNPJ(invalidCNPJWithIgnorePadding, options)).toBe(false);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+});
+
+// ------------------------------------------------------------------------------------------------
+
 describe("VALIDATORS - validateCADICMSPR", () => {
   // ----------------------------------------------------------------------------------------------
 

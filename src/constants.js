@@ -21,8 +21,8 @@ module.exports = {
   DATE_EUA_FORMAT_FS: `yyyy/MM/dd`,
   DATE_EUA_HOUR_FORMAT_D: `yyyy-MM-dd HH:mm:ss`,
   DATE_EUA_HOUR_FORMAT_FS: `yyyy/MM/dd HH:mm:ss`,
-  DATE_BR_MONTH_FORMAT_D: `yyyy-MM`,
-  DATE_BR_MONTH_FORMAT_FS: `yyyy/MM`,
+  DATE_EUA_MONTH_FORMAT_D: `yyyy-MM`,
+  DATE_EUA_MONTH_FORMAT_FS: `yyyy/MM`,
 
   // ----------------------------------------------------------------------------------------------
   // CNPJ and CPF

@@ -2105,7 +2105,7 @@ describe("UTILS - stringToDateToFormat", () => {
       constants.DATE_BR_FORMAT_D,
       constants.DATE_BR_MONTH_FORMAT_FS
     );
-    expect(result).toEqual("2021/05");
+    expect(result).toEqual("05/2021");
   });
 
   // ----------------------------------------------------------------------------------------------

@@ -5,7 +5,9 @@
   "license": "MIT",
   "main": "./index.js",
   "scripts": {
-    "test": "vitest --run --reporter verbose --globals"
+    "test": "vitest --run --reporter verbose --globals",
+    "testWebAuthn2": "vitest --run --reporter verbose --globals ./tests/webauthn2.test.js",
+    "testWebAuthn3": "vitest --run --reporter verbose --globals ./tests/webauthn3.test.js"
   },
   "keywords": [
     "functions",

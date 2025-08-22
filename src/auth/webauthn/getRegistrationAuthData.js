@@ -1,89 +1,117 @@
+/**
+ * @file Módulo para processar e extrair dados de uma credencial de registro WebAuthn.
+ * @author Seu Nome <seu.email@example.com>
+ * @version 1.0.0
+ */
+
 const cbor = require("cbor-x");
 const base64FromBuffer = require("../../utils/base64FromBuffer");
 
 // ------------------------------------------------------------------------------------------------
 
 /**
- * Retrieves registration authentication data from a WebAuthn credential.
+ * Analisa o buffer de dados do autenticador (authData) para extrair o ID da credencial e a chave pública.
+ * A estrutura do buffer `authData` é rigorosamente definida pela especificação WebAuthn.
+ * Esta função decodifica essa estrutura de bytes.
+ * @see https://www.w3.org/TR/webauthn-2/#sctn-authenticator-data
  *
- * @function getRegistrationAuthData
- * @param {PublicKeyCredential} credential - The WebAuthn credential object.
- * @returns {Object} An object containing registration authentication data extracted from the credential.
- *
- * @example
- * // Example usage
- * const credential = ...; // Obtain the WebAuthn credential object
- * const registrationAuthData = getRegistrationAuthData(credential);
- * console.log('Registration Authentication Data:', registrationAuthData);
+ * @private
+ * @param {ArrayBuffer} attestationObjectBuffer - O buffer do objeto de atestado, que contém os dados do autenticador.
+ * @returns {{credentialId: string, publicKeyObject: string}} Um objeto contendo o ID da credencial e a chave pública, ambos codificados em Base64.
  */
-function getRegistrationAuthData(credential) {
-  try {
-    const response = credential.response;
+function parseAuthenticatorData(attestationObjectBuffer) {
+  // 1. Decodifica o objeto de atestado do formato CBOR para acessar seus campos internos.
+  const attestationObject = cbor.decode(new Uint8Array(attestationObjectBuffer));
+  const { authData } = attestationObject;
 
-    // Access rawId ArrayBuffer
-    const rawId = base64FromBuffer(credential.rawId);
+  // 2. Define constantes para os offsets e comprimentos dos campos na estrutura `authData`,
+  // conforme a especificação. Isso substitui "números mágicos" por valores claros e documentados.
+  const RP_ID_HASH_OFFSET = 0;
+  const RP_ID_HASH_LENGTH = 32;
+  const FLAGS_OFFSET = RP_ID_HASH_OFFSET + RP_ID_HASH_LENGTH; // 32
+  const FLAGS_LENGTH = 1;
+  const SIGN_COUNT_OFFSET = FLAGS_OFFSET + FLAGS_LENGTH; // 33
+  const SIGN_COUNT_LENGTH = 4;
 
-    // Access attestationObject ArrayBuffer
-    const attestationObject = base64FromBuffer(response.attestationObject);
-    const authData = parseAuthData(response.attestationObject);
+  // O `attestedCredentialData` é opcional e sua presença é indicada pelo bit 'AT' nas flags.
+  // Seu início é após os campos de cabeçalho.
+  const ATTESTED_CREDENTIAL_DATA_OFFSET = SIGN_COUNT_OFFSET + SIGN_COUNT_LENGTH; // 37
+  const AAGUID_LENGTH = 16;
+  const CREDENTIAL_ID_LENGTH_BYTES = 2;
 
-    // Access client JSON
-    const clientDataJSONDecoded = new TextDecoder().decode(
-      response.clientDataJSON
-    );
-    const clientDataJSON = base64FromBuffer(response.clientDataJSON);
+  const CREDENTIAL_ID_LENGTH_OFFSET = ATTESTED_CREDENTIAL_DATA_OFFSET + AAGUID_LENGTH; // 53
+  const CREDENTIAL_ID_OFFSET = CREDENTIAL_ID_LENGTH_OFFSET + CREDENTIAL_ID_LENGTH_BYTES; // 55
 
-    // Return authenticator data ArrayBuffer
-    const authenticatorData = base64FromBuffer(response.getAuthenticatorData());
+  // 3. Extrai o comprimento do ID da credencial. Este é um inteiro de 2 bytes (Big Endian).
+  // Usamos um DataView para garantir a interpretação correta dos bytes.
+  const idLenBytes = authData.slice(
+    CREDENTIAL_ID_LENGTH_OFFSET,
+    CREDENTIAL_ID_OFFSET
+  );
+  const dataView = new DataView(idLenBytes.buffer);
+  const credentialIdLength = dataView.getUint16(0);
 
-    // Return public key ArrayBuffer
-    const publicKey = base64FromBuffer(response.getPublicKey());
+  // 4. Extrai o ID da credencial e a chave pública usando os comprimentos e offsets calculados.
+  const credentialId = authData.slice(
+    CREDENTIAL_ID_OFFSET,
+    CREDENTIAL_ID_OFFSET + credentialIdLength
+  );
+  const publicKeyBytes = authData.slice(
+    CREDENTIAL_ID_OFFSET + credentialIdLength
+  );
 
-    return {
-      rawId,
-      id: credential.id,
-      type: credential.type,
-      authenticatorAttachment: credential.authenticatorAttachment,
-      clientExtensionResults: credential.getClientExtensionResults(),
-      authData,
-      response: {
-        attestationObject,
-        authenticatorData,
-        clientDataJSONDecoded,
-        clientDataJSON,
-        transports: response.getTransports() || [],
-        publicKey,
-        publicKeyAlgorithm: response.getPublicKeyAlgorithm(),
-      },
-    };
-  } catch (error) {
-    throw error;
-  }
+  // 5. Retorna os dados extraídos, codificados em Base64 para facilitar o transporte e armazenamento.
+  return {
+    credentialId: base64FromBuffer(credentialId.buffer),
+    publicKeyObject: base64FromBuffer(publicKeyBytes.buffer),
+  };
 }
 
 // ------------------------------------------------------------------------------------------------
 
-function parseAuthData(resAttObj) {
-  const attestationObject = cbor.decode(new Uint8Array(resAttObj));
-  const { authData } = attestationObject;
+/**
+ * Extrai e formata os dados de autenticação de registro de uma credencial WebAuthn (`PublicKeyCredential`).
+ * A função processa os vários `ArrayBuffer`s da credencial, convertendo-os para formatos úteis (como Base64)
+ * e decodificando a estrutura de dados interna do autenticador.
+ *
+ * @param {PublicKeyCredential} credential - O objeto de credencial WebAuthn retornado pelo navegador após um registro bem-sucedido.
+ * @returns {object} Um objeto estruturado contendo os dados de registro prontos para serem enviados a um servidor.
+ * @throws {Error} Lança um erro se ocorrer um problema durante o processamento da credencial (ex: formato inválido).
+ */
+function getRegistrationAuthData(credential) {
+  const response = credential.response;
 
-  // get the length of the credential ID
-  const dataView = new DataView(new ArrayBuffer(2));
-  const idLenBytes = authData.slice(53, 55);
-  idLenBytes.forEach((value, index) => dataView.setUint8(index, value));
-  const credentialIdLength = dataView.getUint16();
+  // Analisa a estrutura de bytes do `attestationObject` para extrair dados internos.
+  const parsedAuthData = parseAuthenticatorData(response.attestationObject);
 
-  // get the credential ID
-  const credentialId = authData.slice(55, 55 + credentialIdLength);
+  // Decodifica o `clientDataJSON` de ArrayBuffer para uma string UTF-8 legível.
+  const clientDataJSONDecoded = new TextDecoder().decode(
+    response.clientDataJSON
+  );
 
-  // get the public key object
-  const publicKeyBytes = authData.slice(55 + credentialIdLength);
-
-  const publicKeyObject = base64FromBuffer(publicKeyBytes.buffer);
-
+  // Constrói o objeto de retorno final com todos os dados relevantes convertidos para Base64.
+  // Isso prepara os dados para serem serializados (ex: como JSON) e enviados para o servidor.
   return {
-    credentialId: base64FromBuffer(credentialId),
-    publicKeyObject,
+    // Dados de nível superior da credencial
+    rawId: base64FromBuffer(credential.rawId),
+    id: credential.id,
+    type: credential.type,
+    authenticatorAttachment: credential.authenticatorAttachment,
+    clientExtensionResults: credential.getClientExtensionResults(),
+
+    // Dados extraídos e analisados do `authData`
+    authData: parsedAuthData,
+
+    // Dados da resposta do autenticador, convertidos para formatos apropriados
+    response: {
+      attestationObject: base64FromBuffer(response.attestationObject),
+      authenticatorData: base64FromBuffer(response.getAuthenticatorData()),
+      clientDataJSON: base64FromBuffer(response.clientDataJSON),
+      clientDataJSONDecoded,
+      transports: response.getTransports() || [],
+      publicKey: base64FromBuffer(response.getPublicKey()),
+      publicKeyAlgorithm: response.getPublicKeyAlgorithm(),
+    },
   };
 }
 

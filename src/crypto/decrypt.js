@@ -7,55 +7,83 @@ const importCryptoKey = require("./importCryptoKey.js");
 
 /**
  * Asynchronously decrypts an encrypted message using a provided private key.
+ * 
+ * This function performs RSA-OAEP decryption using the Web Crypto API, supporting both
+ * Node.js and browser environments. It handles PEM-formatted private keys and base64-encoded
+ * encrypted messages, providing a secure and efficient decryption process.
  *
  * @async
  * @function decrypt
- * @param {string} privateKey - The PEM-encoded private key to be used for decryption.
- * @param {string} encryptedMessage - The base64-encoded encrypted message to be decrypted.
- * @param {Object} [props={}] - Optional properties to configure the decryption process.
- * @param {string} [props.format="pkcs8"] - The format of the private key. Default is "pkcs8".
- * @param {Object} [props.algorithm={ name: "RSA-OAEP", hash: { name: "SHA-256" }}] - The algorithm to be used for decryption. Default is RSA-OAEP with SHA-256.
- * @param {boolean} [props.extractable=true] - Indicates whether the key can be extracted from the CryptoKey object. Default is true.
- * @param {Array} [props.keyUsages=["decrypt"]] - An array of key usages. Default is ["decrypt"].
- * @param {string} [props.padding="RSA-OAEP"] - The padding scheme to use for decryption. Default is "RSA-OAEP".
- * @returns {Promise<string>} - A promise that resolves to the decrypted message as a string.
- * @throws {Error} - Throws an error if decryption fails.
- *
+ * @param {string} privateKey - The PEM-encoded private key used for decryption
+ * @param {string} encryptedMessage - The base64-encoded encrypted message to decrypt
+ * @param {Object} [props={}] - Configuration options for the decryption process
+ * @param {string} [props.format="pkcs8"] - Private key format specification
+ * @param {Object} [props.algorithm] - Cryptographic algorithm configuration
+ * @param {string} [props.algorithm.name="RSA-OAEP"] - Algorithm name
+ * @param {Object} [props.algorithm.hash] - Hash algorithm configuration
+ * @param {string} [props.algorithm.hash.name="SHA-256"] - Hash algorithm name
+ * @param {boolean} [props.extractable=true] - Whether the imported key can be extracted
+ * @param {string[]} [props.keyUsages=["decrypt"]] - Permitted key usage operations
+ * @param {string} [props.padding="RSA-OAEP"] - Padding scheme for decryption operation
+ * @returns {Promise<string>} The decrypted message as a UTF-8 string
+ * @throws {Error} When decryption fails due to invalid key, corrupted data, or crypto errors
+ * 
+ * @example
+ * const decryptedText = await decrypt(pemPrivateKey, base64EncryptedMessage);
+ * 
+ * @example
+ * const decryptedText = await decrypt(pemPrivateKey, base64EncryptedMessage, {
+ *   algorithm: { name: "RSA-OAEP", hash: { name: "SHA-1" } },
+ *   extractable: false
+ * });
  */
 async function decrypt(privateKey, encryptedMessage, props = {}) {
-  try {
-    if (!encryptedMessage) return "";
-    const crypto = getCrypto();
-
-    const binaryPrivateKey = base64ToBuffer(
-      privateKey.replace(
-        /(-----(BEGIN|END) (RSA )?(PRIVATE|PUBLIC) KEY-----|\s)/g,
-        ""
-      )
-    );
-
-    const importedKey = await importCryptoKey(
-      props.format || "pkcs8",
-      binaryPrivateKey,
-      props.algorithm || {
-        name: "RSA-OAEP",
-        hash: { name: "SHA-256" },
-      },
-      props.extractable || true,
-      props.keyUsages || ["decrypt"]
-    );
-
-    const data = base64ToBuffer(encryptedMessage);
-    const decrypted = await crypto.subtle.decrypt(
-      { name: props.padding || "RSA-OAEP" },
-      importedKey,
-      data
-    );
-
-    return bufferToString(decrypted);
-  } catch (error) {
-    throw error;
+  // Early return for empty encrypted messages to avoid unnecessary processing
+  if (!encryptedMessage) {
+    return "";
   }
+
+  // Destructure configuration with optimized defaults
+  const {
+    format = "pkcs8",
+    algorithm = { name: "RSA-OAEP", hash: { name: "SHA-256" } },
+    extractable = true,
+    keyUsages = ["decrypt"],
+    padding = "RSA-OAEP"
+  } = props;
+
+  // Get crypto implementation (Node.js or browser)
+  const crypto = getCrypto();
+
+  // Clean and convert PEM private key to binary format
+  // Removes PEM headers, footers, and whitespace in a single operation
+  const cleanedPrivateKey = privateKey.replace(
+    /-----(BEGIN|END) (?:RSA )?(?:PRIVATE|PUBLIC) KEY-----|\s/g,
+    ""
+  );
+  const binaryPrivateKey = base64ToBuffer(cleanedPrivateKey);
+
+  // Import the private key for cryptographic operations
+  const importedKey = await importCryptoKey(
+    format,
+    binaryPrivateKey,
+    algorithm,
+    extractable,
+    keyUsages
+  );
+
+  // Convert base64 encrypted message to binary data
+  const encryptedData = base64ToBuffer(encryptedMessage);
+
+  // Perform decryption using the Web Crypto API
+  const decryptedBuffer = await crypto.subtle.decrypt(
+    { name: padding },
+    importedKey,
+    encryptedData
+  );
+
+  // Convert decrypted binary data back to string
+  return bufferToString(decryptedBuffer);
 }
 
 // ------------------------------------------------------------------------------------------------

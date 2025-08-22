@@ -1,56 +1,80 @@
-// ------------------------------------------------------------------------------------------------
+/**
+ * @file Utilitário para gerar strings aleatórias seguras.
+ * @author Seu Nome <seu.email@example.com>
+ * @version 2.0.0
+ */
+
+// Define os conjuntos de caracteres como constantes para clareza e reutilização.
+const CHAR_SETS = {
+  LOWERCASE: 'abcdefghijklmnopqrstuvwxyz',
+  UPPERCASE: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  ACCENTED: 'àáâãçèéêìíîðñòóôõùúûý',
+  DIGITS: '0123456789',
+  SYMBOLS: '!@#$%^&*-_+=;:,.<>?'
+};
 
 /**
- * @summary. Returns a new random string
- * @param {Integer} size - the size of the string should be
- * @param {Object} options - The options to customize behavior
- * @param {Boolean} options.excludeLowerCaseChars - Whether this function should exclude lower case chars - Default: false
- * @param {Boolean} options.excludeLowerCaseChars - Whether this function should exclude upper case chars - Default: false
- * @param {Boolean} options.excludeAccentedChars - Whether this function should exclude accented chars - Default: false
- * @param {Boolean} options.excludeDigits - Whether this function should exclude digits - Default: false
- * @param {Boolean} options.excludeSymbols - Whether this function should exclude Symbols - Default: false
- * @param {String} options.includeSymbols - A string with all the customized symbols to be added
- * @returns {String} - Returns a new random string
+ * @summary Gera uma string aleatória criptograficamente segura.
+ *
+ * @description
+ * Esta função gera uma string aleatória com um tamanho especificado, usando um conjunto de
+ * caracteres customizável. Ela utiliza a Web Crypto API (`crypto.getRandomValues`),
+ * que está disponível em navegadores modernos e no Node.js, para garantir que os
+ * caracteres sejam selecionados de forma segura e imprevisível, tornando-a adequada
+ * para gerar senhas, tokens ou outros valores sensíveis.
+ *
+ * @param {number} [size=32] - O comprimento da string a ser gerada.
+ * @param {object} [options={}] - Opções para customizar o conjunto de caracteres.
+ * @param {boolean} [options.excludeLowerCaseChars=false] - Excluir caracteres minúsculos.
+ * @param {boolean} [options.excludeUpperCaseChars=false] - Excluir caracteres maiúsculos.
+ * @param {boolean} [options.excludeAccentedChars=false] - Excluir caracteres acentuados.
+ * @param {boolean} [options.excludeDigits=false] - Excluir dígitos numéricos.
+ * @param {boolean} [options.excludeSymbols=false] - Excluir símbolos padrão.
+ * @param {string} [options.includeSymbols=""] - Uma string com símbolos adicionais
+ * para incluir no conjunto de caracteres.
+ *
+ * @returns {string} A string aleatória gerada.
  */
-function generateRandomString(
-  size = 32,
-  options = {
+function generateRandomString(size = 32, options = {}) {
+  // 1. Define as opções padrão e as mescla com as fornecidas pelo usuário.
+  // Isso garante que o envio de opções parciais (ex: { excludeDigits: true }) funcione corretamente.
+  const defaultOptions = {
     excludeLowerCaseChars: false,
     excludeUpperCaseChars: false,
     excludeAccentedChars: false,
     excludeDigits: false,
     excludeSymbols: false,
     includeSymbols: ""
-  }
-) {
-  let validChars = options.includeSymbols || "";
-  let randomString = "";
-  if (!options) {
-    validChars = "àáâãçèéêìíîðñòóôõùúûýúabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*-_+=;:,.<>?"
-  } else {
-    if (!options.excludeLowerCaseChars) {
-      validChars += "abcdefghijklmnopqrstuvwxyz"
-    }
-    if (!options.excludeUpperCaseChars) {
-      validChars += "ABCDEFGHIJKLMNOPQRSTUVWXY"
-    }
-    if (!options.excludeAccentedChars) {
-      validChars += "àáâãçèéêìíîðñòóôõùúûýú"
-    }
-    if (!options.excludeDigits) {
-      validChars += "0123456789"
-    }
-    if (!options.excludeSymbols) {
-      validChars += "!@#$%^&*-_+=;:,.<>?"
-    }
+  };
+  const finalOptions = { ...defaultOptions, ...options };
+
+  // 2. Constrói a string de caracteres válidos com base nas opções.
+  let validChars = finalOptions.includeSymbols;
+  if (!finalOptions.excludeLowerCaseChars) validChars += CHAR_SETS.LOWERCASE;
+  if (!finalOptions.excludeUpperCaseChars) validChars += CHAR_SETS.UPPERCASE;
+  if (!finalOptions.excludeAccentedChars) validChars += CHAR_SETS.ACCENTED;
+  if (!finalOptions.excludeDigits) validChars += CHAR_SETS.DIGITS;
+  if (!finalOptions.excludeSymbols) validChars += CHAR_SETS.SYMBOLS;
+
+  // Se não houver caracteres válidos ou o tamanho for zero, retorna uma string vazia.
+  if (validChars.length === 0 || size <= 0) {
+    return "";
   }
 
+  // 3. Gera a string aleatória usando uma fonte criptograficamente segura.
+  const randomValues = new Uint32Array(size);
+  // `crypto.getRandomValues` preenche o array com números aleatórios seguros.
+  // `globalThis` garante compatibilidade entre Node.js, navegadores e web workers.
+  globalThis.crypto.getRandomValues(randomValues);
+
+  let result = [];
   for (let i = 0; i < size; i++) {
-    const randomIndex = Math.floor(Math.random() * validChars.length);
-    randomString += validChars.charAt(randomIndex);
+    // Usa o operador de módulo para mapear o número aleatório a um índice válido.
+    const randomIndex = randomValues[i] % validChars.length;
+    result.push(validChars[randomIndex]);
   }
 
-  return randomString;
+  return result.join('');
 }
 
 // ------------------------------------------------------------------------------------------------

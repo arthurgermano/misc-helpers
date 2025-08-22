@@ -1,15 +1,30 @@
 const { DATE_ISO_FORMAT, DATE_BR_HOUR_FORMAT_D } = require("../constants.js");
-const { parse } = require("date-fns/parse");
 const stringToDate = require("./stringToDate.js");
 const dateToFormat = require("./dateToFormat.js");
+
 // ------------------------------------------------------------------------------------------------
 
 /**
- * @summary. Returns a formatted string date
- * @param {String} stringDate - the string date text
- * @param {String} fromFormat - the string format in which the string date text is provided - default is yyyy-MM-dd'T'HH:mm:ss.SSS
- * @param {String} toFormat - the string format to be formatted - default is dd-MM-yyyy HH:mm:ss
- * @returns {String} - Returns the new string date formatted
+ * @file Utilitário para re-formatar strings de data.
+ * @author Seu Nome <seu.email@example.com>
+ * @version 2.1.0
+ */
+
+/**
+ * @summary Re-formata uma string de data de um formato de entrada para um de saída.
+ *
+ * @description
+ * Esta função é um utilitário de conveniência que combina a análise e a formatação
+ * de datas em uma única etapa. Ela usa `stringToDate` para converter a string de entrada em um
+ * objeto `Date` e, em seguida, usa `dateToFormat` para converter esse objeto de volta
+ * para uma string no formato de saída desejado.
+ *
+ * @param {string} stringDate - A string da data a ser re-formatada.
+ * @param {string} [fromFormat=DATE_ISO_FORMAT] - O padrão de formatação da string de entrada.
+ * @param {string} [toFormat=DATE_BR_HOUR_FORMAT_D] - O padrão de formatação desejado para a saída.
+ *
+ * @returns {string | false} A nova string de data formatada, ou `false` se a
+ * análise da data de entrada falhar.
  */
 function stringToDateToFormat(
   stringDate,
@@ -17,16 +32,26 @@ function stringToDateToFormat(
   toFormat = DATE_BR_HOUR_FORMAT_D
 ) {
   try {
-    const date = stringToDate(stringDate, fromFormat, false);
-    if (date) {
-      return dateToFormat(new Date(date.getTime() + date.getTimezoneOffset() * 60 * 1000), toFormat);
+    // 1. Converte a string de entrada para um objeto Date.
+    // `stringToDate` retorna um Date cujo tempo UTC corresponde aos números da string.
+    const dateObject = stringToDate(stringDate, fromFormat, false);
+
+    if (dateObject) {
+      // 2. Reverte o ajuste de fuso horário antes de formatar.
+      // `stringToDate` removeu o offset local para tratar a hora como UTC.
+      // Para que `dateToFormat` (que formata em hora local) exiba os números corretos,
+      // é necessário adicionar o offset de volta, criando uma nova data ajustada.
+      const timezoneOffsetMillis = dateObject.getTimezoneOffset() * 60 * 1000;
+      const localDate = new Date(dateObject.getTime() + timezoneOffsetMillis);
+
+      // 3. Formata o objeto Date (agora ajustado para a hora local correta) para a string de saída.
+      return dateToFormat(localDate, toFormat);
     }
   } catch (_) {}
+  // 4. Se a conversão inicial falhou, retorna `false`.
   return false;
 }
 
 // ------------------------------------------------------------------------------------------------
 
 module.exports = stringToDateToFormat;
-
-// ------------------------------------------------------------------------------------------------

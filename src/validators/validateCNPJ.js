@@ -1,163 +1,126 @@
-const toString = require("../utils/toString.js");
-
-// ------------------------------------------------------------------------------------------------
-
-const WEIGHTS = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-
-// ------------------------------------------------------------------------------------------------
+/**
+ * @fileoverview Fornece uma função para validar números de CNPJ (Cadastro Nacional da Pessoa Jurídica).
+ * O código é compatível com ambientes Node.js e navegadores.
+ */
 
 /**
- * @summary Validates a given CNPJ
- * @param {String} cnpj - The CNPJ value to be validated
- * @param {Object} [options={}] - Additional validation options
- * @param {String} [options.addPaddingChar="0"] - Character to use for padding if necessary
- * @param {Array<Number>} [options.weights=WEIGHTS] - Custom weight values for validation
- * @param {Boolean} [options.ignoreToUpperCase=true] - Whether to ignore case when processing alphanumeric CNPJs. If true, all characters will be converted to uppercase.
- * @param {Boolean} [options.ignorePadding=false] - Whether to skip padding when the CNPJ is shorter than 14 characters. If true, padding will not be applied.
- * @returns {Boolean} - Returns true if the CNPJ is valid, otherwise false
+ * Array de pesos utilizado no algoritmo de cálculo dos dígitos verificadores do CNPJ.
+ * @private
+ * @type {number[]}
  */
-function validateCNPJ(cnpj = "", options = {}) {
-  // Normalize input: remove mask characters and apply padding
-  cnpj = toString(cnpj).replace(/[./-]/g, "");
+const DEFAULT_WEIGHTS = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
 
-  if (!options.ignorePadding) {
-    cnpj = cnpj.padStart(14, options.addPaddingChar || "0");
-  }
-
-  if (!options.ignoreToUpperCase) {
-    cnpj = cnpj.toUpperCase();
-  }
-
-  // Generate a string with all zeros to compare against (invalid case)
-  const zeroedCNPJ = "00000000000000";
-  if (cnpj === zeroedCNPJ) {
-    return false;
-  }
-
-  // Validate format: 12 alphanumeric characters followed by 2 numeric check digits
-  const regexCNPJ = /^([A-Z\d]){12}(\d){2}$/;
-  if (!regexCNPJ.test(cnpj)) {
-    return false;
-  }
-
-  // Extract base and check digits
-  const baseDigits = cnpj.substring(0, 12);
-  const checkDigits = cnpj.substring(12);
-
-  // Calculate expected check digits
-  const calculatedDV = calculateDV(
-    baseDigits,
-    options.noDigitSize,
-    options.weights || WEIGHTS
-  );
-
-  // Compare calculated check digits with provided ones
-  return checkDigits === calculatedDV;
+/**
+ * Calcula o valor numérico de um caractere para o algoritmo de soma ponderada.
+ * A conversão é baseada no valor ASCII do caractere, o que resulta em um
+ * mapeamento específico para letras (ex: 'A' => 17, 'B' => 18).
+ *
+ * @private
+ * @param {string} char - O caractere a ser convertido.
+ * @returns {number} O valor numérico correspondente para o cálculo.
+ */
+function _getCharValue(char) {
+  // A subtração do charCode de '0' é o método que define a conversão.
+  return char.charCodeAt(0) - '0'.charCodeAt(0);
 }
 
-// ------------------------------------------------------------------------------------------------
-
 /**
- * @summary Calculates the verification digits for a CNPJ
- * @param {String} cnpj - The CNPJ base (first 12 characters)
- * @param {Number} [noDigitSize=12] - Number of base digits before check digits
- * @param {Array<Number>} weights - Weight values for the calculation
- * @returns {String} - The two verification digits
+ * Calcula os dois dígitos verificadores para uma base de 12 caracteres de um CNPJ.
+ *
+ * @private
+ * @param {string} baseCnpj - Os 12 primeiros caracteres do CNPJ.
+ * @param {number[]} weights - O array de pesos a ser usado no cálculo.
+ * @returns {string} Uma string contendo os dois dígitos verificadores calculados.
  */
-function calculateDV(cnpj, noDigitSize = 12, weights) {
-  let sumDV1 = 0;
-  let sumDV2 = 0;
+function _calculateVerifierDigits(baseCnpj, weights) {
+  /**
+   * Calcula um único dígito verificador a partir do resultado de uma soma ponderada.
+   * @param {number} sum - A soma ponderada.
+   * @returns {number} O dígito verificador (0 a 9).
+   */
+  const getDigit = (sum) => {
+    const remainder = sum % 11;
+    return remainder < 2 ? 0 : 11 - remainder;
+  };
 
-  // Calculate weighted sums for the first and second check digits
-  for (let i = 0; i < noDigitSize; i++) {
-    const digit = cnpj.charCodeAt(i) - "0".charCodeAt(0);
-    sumDV1 += digit * weights[i + 1];
-    sumDV2 += digit * weights[i];
+  let sum1 = 0;
+  let sum2 = 0;
+
+  for (let i = 0; i < baseCnpj.length; i++) {
+    // Converte o caractere para seu valor numérico específico do algoritmo.
+    const value = _getCharValue(baseCnpj[i]);
+    sum1 += value * weights[i + 1];
+    sum2 += value * weights[i];
   }
 
-  // Compute first verification digit
-  const dv1 = sumDV1 % 11 < 2 ? 0 : 11 - (sumDV1 % 11);
-  sumDV2 += dv1 * weights[12];
-
-  // Compute second verification digit
-  const dv2 = sumDV2 % 11 < 2 ? 0 : 11 - (sumDV2 % 11);
+  const dv1 = getDigit(sum1);
+  sum2 += dv1 * weights[baseCnpj.length]; // Adiciona o primeiro dígito ao cálculo do segundo.
+  const dv2 = getDigit(sum2);
 
   return `${dv1}${dv2}`;
 }
 
+/**
+ * Valida um número de CNPJ (Cadastro Nacional da Pessoa Jurídica).
+ *
+ * @summary Valida um CNPJ, com suporte a formatos alfanuméricos.
+ * @description A função suporta o formato numérico padrão e o futuro formato alfanumérico.
+ * A entrada pode conter ou não os caracteres de máscara comuns ('.', '/', '-').
+ *
+ * @param {string | number} cnpj O CNPJ a ser validado.
+ * @param {object} [options={}] Opções de configuração para a validação.
+ * @param {string} [options.addPaddingChar="0"] Caractere a ser usado para preencher a entrada até 14 caracteres.
+ * @param {number[]} [options.weights=DEFAULT_WEIGHTS] Array de pesos para o cálculo dos dígitos verificadores.
+ * @param {boolean} [options.ignoreToUpperCase=true] Se `false`, a entrada é convertida para maiúsculas. Se `true`, a validação diferencia maiúsculas de minúsculas.
+ * @param {boolean} [options.ignorePadding=false] Se `true`, a função não adiciona preenchimento, validando a entrada como está.
+ * @returns {boolean} Retorna `true` se o CNPJ for válido, e `false` caso contrário.
+ */
+function validateCNPJ(cnpj = "", options = {}) {
+  // 1. Normalização e Configuração
+  let processedCnpj = String(cnpj).replace(/[./-]/g, "");
+
+  const finalOptions = {
+    addPaddingChar: "0",
+    weights: DEFAULT_WEIGHTS,
+    ignorePadding: false,
+    ignoreToUpperCase: true,
+    ...options,
+  };
+
+  // A conversão para maiúsculas é um comportamento opcional controlado via `options`.
+  if (finalOptions.ignoreToUpperCase === false) {
+    processedCnpj = processedCnpj.toUpperCase();
+  }
+
+  if (!finalOptions.ignorePadding) {
+    processedCnpj = processedCnpj.padStart(14, finalOptions.addPaddingChar);
+  }
+
+  // 2. Regras de Validação de Formato e Casos Inválidos
+
+  // O CNPJ deve consistir em 12 caracteres alfanuméricos (base) e 2 dígitos (verificadores).
+  const regexCNPJ = /^([A-Z\d]){12}(\d){2}$/;
+  if (!regexCNPJ.test(processedCnpj)) {
+    return false;
+  }
+  
+  // Para CNPJs puramente numéricos, sequências de dígitos repetidos são inválidas (ex: '111...').
+  if (/^\d+$/.test(processedCnpj) && /^(\d)\1{13}$/.test(processedCnpj)) {
+    return false;
+  }
+
+  // 3. Cálculo e Verificação Final
+  const baseDigits = processedCnpj.substring(0, 12);
+  const verifierDigits = processedCnpj.substring(12);
+
+  const calculatedVerifierDigits = _calculateVerifierDigits(baseDigits, finalOptions.weights);
+
+  return verifierDigits === calculatedVerifierDigits;
+}
+
 // ------------------------------------------------------------------------------------------------
 
+// Exporta a função para uso em ambientes Node.js (CommonJS).
 module.exports = validateCNPJ;
 
 // ------------------------------------------------------------------------------------------------
-
-// const toString = require("../utils/toString.js");
-// // ------------------------------------------------------------------------------------------------
-
-// /**
-//  * @summary. Validates a given CNPJ
-//  * @param {String} cnpj - Value to be checked
-//  * @returns {Boolean} - Returns if a given CNPJ is valid or not
-//  */
-// function validateCNPJ(cnpj = "") {
-//   cnpj = toString(cnpj).replace(/[^\d]+/g, "");
-//   if (cnpj == "" || cnpj.length > 14) {
-//     return false;
-//   }
-//   cnpj = cnpj.padStart(14, "0");
-
-//   // Eliminate known invalid CNPJs
-//   if (
-//     cnpj == "00000000000000" ||
-//     cnpj == "11111111111111" ||
-//     cnpj == "22222222222222" ||
-//     cnpj == "33333333333333" ||
-//     cnpj == "44444444444444" ||
-//     cnpj == "55555555555555" ||
-//     cnpj == "66666666666666" ||
-//     cnpj == "77777777777777" ||
-//     cnpj == "88888888888888" ||
-//     cnpj == "99999999999999"
-//   ) {
-//     return false;
-//   }
-
-//   // Validate Verifier Digits
-//   let size = cnpj.length - 2;
-//   let numbers = cnpj.substring(0, size);
-//   let digits = cnpj.substring(size);
-//   let sum = 0;
-//   let pos = size - 7;
-//   for (let i = size; i >= 1; i--) {
-//     sum += numbers.charAt(size - i) * pos--;
-//     if (pos < 2) {
-//       pos = 9;
-//     }
-//   }
-//   let result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
-//   if (result != digits.charAt(0)) {
-//     return false;
-//   }
-
-//   size = size + 1;
-//   numbers = cnpj.substring(0, size);
-//   sum = 0;
-//   pos = size - 7;
-//   for (let i = size; i >= 1; i--) {
-//     sum += numbers.charAt(size - i) * pos--;
-//     if (pos < 2) {
-//       pos = 9;
-//     }
-//   }
-//   result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
-//   if (result != digits.charAt(1)) {
-//     return false;
-//   }
-//   return true;
-// }
-
-// // ------------------------------------------------------------------------------------------------
-
-// module.exports = validateCNPJ;
-
-// // ------------------------------------------------------------------------------------------------

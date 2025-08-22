@@ -881,11 +881,11 @@ describe("UTILS - dateToFormat", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it('dateToFormat should return "false" for an invalid date input', () => {
+  it('dateToFormat should return false for an invalid date input', () => {
     const inputDate = "not a date";
     const result = dateToFormat(inputDate);
 
-    expect(result).toBe("false");
+    expect(result).toBe(false);
   });
 
   // ----------------------------------------------------------------------------------------------
@@ -1955,20 +1955,56 @@ describe("UTILS - stringCompress", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it("stringCompress - should compress the text and return a Base64-encoded string by default", async () => {
-    const text = "Hello, World!";
-    const result = await stringCompress(text);
-    expect(result).to.be.a("string");
-    expect(result).to.not.be.empty;
+  it("deve comprimir uma string para o formato Base64 por padrão", () => {
+    const text = "Este é um teste de compressão.";
+    const result = stringCompress(text);
+
+    expect(typeof result).toBe("string");
+    expect(result.length).toBeGreaterThan(0);
+    // Verifica se a string parece ser Base64 válida
+    expect(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(result)).toBe(true);
   });
 
-  // ----------------------------------------------------------------------------------------------
+  it("deve retornar um Uint8Array quando outputType for 'buffer'", () => {
+    const text = "Este é um teste de buffer.";
+    const result = stringCompress(text, { outputType: 'buffer' });
 
-  it("stringCompress - should compress the text and return a raw zlib-encoded object when raw parameter is true", async () => {
-    const text = "Hello, World!";
-    const result = await stringCompress(text, true);
-    expect(result).to.be.a("Uint8Array");
-    expect(result).to.not.be.empty;
+    expect(result).toBeInstanceOf(Uint8Array);
+    expect(result.length).toBeGreaterThan(0);
+  });
+
+  it("deve lidar corretamente com caracteres unicode e multi-byte", () => {
+    const text = "Compressão com acentuação e emojis 👋 & ✅";
+    const result = stringCompress(text);
+
+    expect(typeof result).toBe("string");
+    expect(result.length).toBeGreaterThan(0);
+  });
+
+  it("deve retornar uma string vazia para entrada de string vazia", () => {
+    expect(stringCompress("")).toBe("");
+  });
+
+  it("deve retornar um Uint8Array vazio para entrada vazia com outputType 'buffer'", () => {
+    const result = stringCompress("", { outputType: 'buffer' });
+    expect(result).toBeInstanceOf(Uint8Array);
+    expect(result.length).toBe(0);
+  });
+
+  it("deve lidar com entradas nulas, indefinidas ou que não são strings", () => {
+    expect(stringCompress(null)).toBe("");
+    expect(stringCompress(undefined)).toBe("");
+    expect(stringCompress(12345)).toBe("");
+  });
+
+  it("deve usar diferentes níveis de compressão e gerar resultados diferentes", () => {
+    const text = "texto repetitivo texto repetitivo texto repetitivo texto repetitivo texto repetitivo";
+    const resultNivel1 = stringCompress(text, { level: 1 });
+    const resultNivel9 = stringCompress(text, { level: 9 });
+
+    expect(resultNivel1).not.toBe(resultNivel9);
+    // Um nível de compressão maior deve resultar em um tamanho menor ou igual
+    expect(resultNivel9.length).toBeLessThanOrEqual(resultNivel1.length);
   });
 
   // ----------------------------------------------------------------------------------------------
@@ -1984,21 +2020,49 @@ describe("UTILS - stringDecompress", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it("stringDecompress - should decompress the gzipped text and return the original text by default", async () => {
-    const originalText = "Hello, World!";
-    const gzippedText = await stringCompress(originalText);
-    const result = await stringDecompress(gzippedText);
-    expect(result).to.equal(originalText);
+  it("deve descomprimir uma string Base64 de volta para o texto original (ciclo completo)", () => {
+    const originalText = "Este é um teste completo de compressão e descompressão!";
+    const compressed = stringCompress(originalText);
+    const decompressed = stringDecompress(compressed);
+    expect(decompressed).toBe(originalText);
   });
 
-  // ----------------------------------------------------------------------------------------------
+  it("deve realizar um ciclo completo com caracteres unicode", () => {
+    const originalText = "Teste com acentuação (áéíóú) e símbolos complexos (👋 & ✅)";
+    const compressed = stringCompress(originalText);
+    const decompressed = stringDecompress(compressed);
+    expect(decompressed).toBe(originalText);
+  });
 
-  it("stringDecompress - should decompress the gzipped text and return the raw zlib-encoded string when raw parameter is true", async () => {
-    const originalText = "Hello, World!";
-    const gzippedText = await stringCompress(originalText, true);
-    const result = await stringDecompress(gzippedText, true);
-    expect(result).to.be.a("string");
-    expect(result).to.not.be.empty;
+  it("deve realizar um ciclo completo usando buffers como formato intermediário", () => {
+    const originalText = "Ciclo completo de buffer para buffer";
+    const compressedBuffer = stringCompress(originalText, { outputType: 'buffer' });
+    const decompressed = stringDecompress(compressedBuffer, { inputType: 'buffer' });
+    expect(decompressed).toBe(originalText);
+  });
+
+  it("deve funcionar independentemente do nível de compressão usado", () => {
+    const originalText = "Testando com nível de compressão 9";
+    const compressed = stringCompress(originalText, { level: 9 });
+    const decompressed = stringDecompress(compressed);
+    expect(decompressed).toBe(originalText);
+  });
+
+  it("deve retornar uma string vazia para entrada vazia ou nula", () => {
+    expect(stringDecompress("")).toBe("");
+    expect(stringDecompress(null)).toBe("");
+    expect(stringDecompress(undefined)).toBe("");
+  });
+
+  it("deve retornar uma string vazia para dados Base64 corrompidos", () => {
+    const corruptBase64 = "isto nao e base64 valida";
+    expect(stringDecompress(corruptBase64)).toBe("");
+  });
+
+  it("deve retornar uma string vazia para um buffer corrompido", () => {
+    const corruptBuffer = new Uint8Array([1, 2, 3, 4, 5]);
+    const result = stringDecompress(corruptBuffer, { inputType: 'buffer' });
+    expect(result).toBe("");
   });
 
   // ----------------------------------------------------------------------------------------------
@@ -2246,20 +2310,56 @@ describe("UTILS - stringZLibCompress", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it("stringZLibCompress - should compress the text and return a Base64-encoded string by default", async () => {
-    const text = "Hello, World!";
-    const result = await stringZLibCompress(text);
-    expect(result).to.be.a("string");
-    expect(result).to.not.be.empty;
+  it("deve comprimir uma string com Zlib para o formato Base64 por padrão", () => {
+    const text = "Este é um teste de compressão Zlib.";
+    const result = stringZLibCompress(text);
+
+    expect(typeof result).toBe("string");
+    expect(result.length).toBeGreaterThan(0);
+    // Verifica se a string parece ser Base64 válida
+    expect(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(result)).toBe(true);
   });
 
-  // ----------------------------------------------------------------------------------------------
+  it("deve retornar um Uint8Array quando outputType for 'buffer'", () => {
+    const text = "Este é um teste de buffer com Zlib.";
+    const result = stringZLibCompress(text, { outputType: 'buffer' });
 
-  it("stringZLibCompress - should compress the text and return a raw zlib-encoded object when raw parameter is true", async () => {
-    const text = "Hello, World!";
-    const result = await stringZLibCompress(text, true);
-    expect(result).to.be.a("Uint8Array");
-    expect(result).to.not.be.empty;
+    expect(result).toBeInstanceOf(Uint8Array);
+    expect(result.length).toBeGreaterThan(0);
+  });
+
+  it("deve lidar corretamente com caracteres unicode e multi-byte", () => {
+    const text = "Compressão Zlib com acentuação e emojis 👋 & ✅";
+    const result = stringZLibCompress(text);
+
+    expect(typeof result).toBe("string");
+    expect(result.length).toBeGreaterThan(0);
+  });
+
+  it("deve retornar uma string vazia para entrada de string vazia", () => {
+    expect(stringZLibCompress("")).toBe("");
+  });
+
+  it("deve retornar um Uint8Array vazio para entrada vazia com outputType 'buffer'", () => {
+    const result = stringZLibCompress("", { outputType: 'buffer' });
+    expect(result).toBeInstanceOf(Uint8Array);
+    expect(result.length).toBe(0);
+  });
+
+  it("deve lidar com entradas nulas, indefinidas ou que não são strings", () => {
+    expect(stringZLibCompress(null)).toBe("");
+    expect(stringZLibCompress(undefined)).toBe("");
+    expect(stringZLibCompress(12345)).toBe("");
+  });
+
+  it("deve usar diferentes níveis de compressão e gerar resultados diferentes", () => {
+    const text = "zlib repetitivo zlib repetitivo zlib repetitivo zlib repetitivo zlib repetitivo";
+    const resultNivel1 = stringZLibCompress(text, { level: 1 });
+    const resultNivel9 = stringZLibCompress(text, { level: 9 });
+
+    expect(resultNivel1).not.toBe(resultNivel9);
+    // Um nível de compressão maior deve resultar em um tamanho menor ou igual
+    expect(resultNivel9.length).toBeLessThanOrEqual(resultNivel1.length);
   });
 
   // ----------------------------------------------------------------------------------------------
@@ -2275,26 +2375,165 @@ describe("UTILS - stringZLibDecompress", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it("stringZLibDecompress - should decompress the zlibbed text and return the original text by default", async () => {
-    const originalText = "HELLO WORLD!!!";
-    const zlibbedText = await stringZLibCompress(originalText);
-    const result = await stringZLibDecompress(zlibbedText);
-    expect(result).to.equal(originalText);
+  it("deve descomprimir uma string Base64 (Zlib) de volta para o texto original", () => {
+    const originalText = "Este é um teste completo de compressão e descompressão Zlib!";
+    const compressed = stringZLibCompress(originalText);
+    const decompressed = stringZLibDecompress(compressed);
+    expect(decompressed).toBe(originalText);
   });
 
-  // ----------------------------------------------------------------------------------------------
+  it("deve realizar um ciclo completo com caracteres unicode", () => {
+    const originalText = "Teste Zlib com acentuação (áéíóú) e símbolos complexos (👋 & ✅)";
+    const compressed = stringZLibCompress(originalText);
+    const decompressed = stringZLibDecompress(compressed);
+    expect(decompressed).toBe(originalText);
+  });
 
-  it("stringZLibDecompress - should decompress the zlibbed text and return the raw zlib-encoded string when raw parameter is true", async () => {
-    const originalText = "Hello, World!";
-    const zlibbedText = await stringZLibCompress(originalText, true);
-    const result = await stringZLibDecompress(zlibbedText, true);
-    expect(result).to.be.a("string");
-    expect(result).to.not.be.empty;
+  it("deve realizar um ciclo completo usando buffers como formato intermediário", () => {
+    const originalText = "Ciclo completo Zlib: de buffer para buffer";
+    const compressedBuffer = stringZLibCompress(originalText, { outputType: 'buffer' });
+    const decompressed = stringZLibDecompress(compressedBuffer, { inputType: 'buffer' });
+    expect(decompressed).toBe(originalText);
+  });
+
+  it("deve funcionar independentemente do nível de compressão usado", () => {
+    const originalText = "Testando Zlib com nível de compressão 9";
+    const compressed = stringZLibCompress(originalText, { level: 9 });
+    const decompressed = stringZLibDecompress(compressed);
+    expect(decompressed).toBe(originalText);
+  });
+
+  it("deve retornar uma string vazia para entrada vazia ou nula", () => {
+    expect(stringZLibDecompress("")).toBe("");
+    expect(stringZLibDecompress(null)).toBe("");
+    expect(stringZLibDecompress(undefined)).toBe("");
+  });
+
+  it("deve retornar uma string vazia para dados Base64 corrompidos", () => {
+    const corruptBase64 = "isto nao e base64 valida para zlib";
+    expect(stringZLibDecompress(corruptBase64)).toBe("");
+  });
+
+  it("deve retornar uma string vazia para um buffer corrompido", () => {
+    const corruptBuffer = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
+    const result = stringZLibDecompress(corruptBuffer, { inputType: 'buffer' });
+    expect(result).toBe("");
   });
 
   // ----------------------------------------------------------------------------------------------
 });
 
+// ------------------------------------------------------------------------------------------------
+
+describe("UTILS - throttle", () => {
+  // ----------------------------------------------------------------------------------------------
+
+  const throttle = utils.throttle;
+  const sleep = utils.sleep;
+  let vi; // Mocking utility from vitest/jest
+
+  beforeEach(() => {
+    // Para ambientes de teste como Vitest/Jest
+    vi = global.vi || global.jest;
+    vi.useFakeTimers(); // Usa timers falsos para controlar o tempo com precisão
+  });
+
+  afterEach(() => {
+    vi.useRealTimers(); // Restaura os timers reais após cada teste
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("deve executar o callback imediatamente na primeira chamada", () => {
+    const mockCallback = vi.fn();
+    const throttledFn = throttle(mockCallback, 100);
+
+    throttledFn();
+
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+  });
+
+  it("deve ignorar chamadas subsequentes dentro do período de espera", () => {
+    const mockCallback = vi.fn();
+    const throttledFn = throttle(mockCallback, 100);
+
+    throttledFn(); // Executa
+    throttledFn(); // Ignorada
+    throttledFn(); // Ignorada
+
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+  });
+
+  it("deve executar novamente após o período de espera ter passado", () => {
+    const mockCallback = vi.fn();
+    const throttledFn = throttle(mockCallback, 100);
+
+    throttledFn();
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+
+    vi.advanceTimersByTime(50);
+    throttledFn();
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+
+    vi.advanceTimersByTime(50);
+    throttledFn();
+    expect(mockCallback).toHaveBeenCalledTimes(2);
+  });
+
+  it("deve passar os argumentos corretamente para o callback", () => {
+    const mockCallback = vi.fn();
+    const throttledFn = throttle(mockCallback, 100);
+    const args = [1, "teste", { data: true }];
+
+    throttledFn(...args);
+
+    expect(mockCallback).toHaveBeenCalledWith(...args);
+  });
+
+  it("deve preservar o contexto 'this' corretamente", () => {
+    const mockCallback = vi.fn();
+    const context = { name: "meuObjeto" };
+    const throttledFn = throttle(mockCallback, 100);
+    
+    throttledFn.call(context);
+
+    // CORREÇÃO: Acessa o array de contextos da chamada mock e verifica o primeiro.
+    // Esta é a forma padrão de verificar o `this` em mocks do Vitest/Jest.
+    expect(mockCallback.mock.contexts[0]).toBe(context);
+  });
+
+  it("deve lançar um erro se o callback não for uma função", () => {
+    const createInvalidThrottle = () => throttle("não é uma função", 100);
+    
+    expect(createInvalidThrottle).toThrow(TypeError);
+    expect(createInvalidThrottle).toThrow("O callback fornecido para o throttle deve ser uma função.");
+  });
+
+  it("deve lançar um erro se o tempo de espera não for um número", () => {
+    const createInvalidThrottle = () => throttle(() => {}, "100");
+    
+    expect(createInvalidThrottle).toThrow(TypeError);
+    // CORREÇÃO: Atualiza a mensagem de erro para corresponder à validação mais robusta da função.
+    expect(createInvalidThrottle).toThrow("O tempo de espera (wait) do throttle deve ser um número não negativo.");
+  });
+
+  it("deve permitir uma nova chamada após uma chamada anterior e um ciclo completo de espera", () => {
+    const mockCallback = vi.fn();
+    const throttledFn = throttle(mockCallback, 100);
+
+    throttledFn(1);
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledWith(1);
+
+    vi.advanceTimersByTime(101);
+
+    throttledFn(2);
+    expect(mockCallback).toHaveBeenCalledTimes(2);
+    expect(mockCallback).toHaveBeenLastCalledWith(2);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+});
 // ------------------------------------------------------------------------------------------------
 
 describe("UTILS - toString", () => {

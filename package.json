@@ -1,23 +1,52 @@
 {
   "name": "misc-helpers",
-  "version": "1.3.16",
+  "version": "2.0.0",
   "author": "Arthur José Germano",
   "license": "MIT",
-  "main": "./index.js",
+  "description": "Uma coleção robusta de helpers, validadores e classes de alta performance para JavaScript/Node.js, incluindo processamento em lote (bulk), validadores de documentos brasileiros e utilitários de criptografia.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
   "scripts": {
+    "test:watch": "vitest",
+    "test:bulk": "NODE_OPTIONS='--expose-gc' vitest run ./tests/bulkProcessor.test.js",
     "test": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals",
     "testUtils": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/utils.test.js",
     "testHelpers": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/helpers.test.js",
     "testWebAuthn2": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/webauthn2.test.js",
     "testWebAuthn3": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/webauthn3.test.js",
     "testBulkProcessor": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/bulkProcessor.test.js",
-    "testBulkProcessor2": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/bulkProcessor2.test.js",
-    "testBulkProcessor3": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/bulkProcessor3.test.js"
+    "build": "tsup"
   },
   "keywords": [
-    "functions",
     "helpers",
-    "validators"
+    "utils",
+    "validators",
+    "bulk",
+    "batch",
+    "async",
+    "performance",
+    "cpf",
+    "cnpj",
+    "pix",
+    "cnh",
+    "renavam",
+    "rg",
+    "webauthn",
+    "crypto",
+    "throttle",
+    "debounce",
+    "date"
   ],
   "repository": {
     "type": "git",
@@ -26,18 +55,20 @@
   "bugs": {
     "url": "https://github.com/arthurgermano/misc-helpers/issues"
   },
+  "homepage": "https://github.com/arthurgermano/misc-helpers#readme",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "sideEffects": false,
   "dependencies": {
-    "cbor-x": "^1.5.9",
-    "date-fns": "^3.6.0",
+    "cbor-x": "^1.6.0",
+    "date-fns": "^4.1.0",
     "fflate": "^0.8.2"
   },
   "devDependencies": {
-    "vite": "^5.2.8",
-    "vitest": "^1.4.0"
-  },
-  "homepage": "https://github.com/arthurgermano/misc-helpers#readme",
-  "description": "Several functions that are always needed in projects",
-  "directories": {
-    "test": "tests"
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.3",
+    "vitest": "^3.2.4"
   }
 }

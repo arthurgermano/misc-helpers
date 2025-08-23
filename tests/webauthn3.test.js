@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { auth } from "../index.js";
+import { auth } from "../src/index.js";
 import { credential, assertion } from "./webauthnTestContent.js";
 
 // Helper para criar cópias profundas dos objetos de teste, evitando que um teste modifique dados de outro.

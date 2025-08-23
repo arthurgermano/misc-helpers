@@ -119,6 +119,13 @@ module.exports = {
   STRING_FORMAT_CNPJ: "##.###.###/####-##",
 
   /**
+   * Máscara para CNPJ Raiz alfanumérico.
+   * 'S' representa um caractere alfanumérico [A-Z0-9] e '#' um dígito [0-9].
+   * @example "AB.123.CD4"
+   */
+  STRING_FORMAT_CNPJ_RAIZ: "##.###.###",
+
+  /**
    * Máscara para CPF.
    * @example "123.456.789-00"
    */
@@ -163,4 +170,84 @@ module.exports = {
    */
   REGEX_UUID_V4:
     /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+
+  /**
+   * Regex para validar um número de telefone brasileiro, com ou sem o código do país (+55).
+   * Aceita números de 10 (fixo) ou 11 (celular) dígitos, além do DDI.
+   * @example /^(?:\+55)?\d{10,11}$/
+   */
+  REGEX_PHONE_BR: /^(?:\+55)?\d{10,11}$/,
+
+  // ==============================================================================================
+  // SEÇÃO: Dados Geográficos - Brasil
+  // ==============================================================================================
+
+  /**
+   * Objeto (chave-valor) com as siglas e nomes de todos os estados brasileiros e o Distrito Federal.
+   * @example { "PR": "Paraná", "SP": "São Paulo", ... }
+   */
+  BRAZILIAN_STATES: {
+    AC: "Acre",
+    AL: "Alagoas",
+    AP: "Amapá",
+    AM: "Amazonas",
+    BA: "Bahia",
+    CE: "Ceará",
+    DF: "Distrito Federal",
+    ES: "Espírito Santo",
+    GO: "Goiás",
+    MA: "Maranhão",
+    MT: "Mato Grosso",
+    MS: "Mato Grosso do Sul",
+    MG: "Minas Gerais",
+    PA: "Pará",
+    PB: "Paraíba",
+    PR: "Paraná",
+    PE: "Pernambuco",
+    PI: "Piauí",
+    RJ: "Rio de Janeiro",
+    RN: "Rio Grande do Norte",
+    RS: "Rio Grande do Sul",
+    RO: "Rondônia",
+    RR: "Roraima",
+    SC: "Santa Catarina",
+    SP: "São Paulo",
+    SE: "Sergipe",
+    TO: "Tocantins",
+  },
+
+  /**
+   * Array com as siglas de todos os estados brasileiros e o Distrito Federal.
+   * Útil para popular seletores (dropdowns) ou para validações.
+   * @example ["AC", "AL", "AP", ...]
+   */
+  BRAZILIAN_STATES_ABBR: [
+    "AC",
+    "AL",
+    "AP",
+    "AM",
+    "BA",
+    "CE",
+    "DF",
+    "ES",
+    "GO",
+    "MA",
+    "MT",
+    "MS",
+    "MG",
+    "PA",
+    "PB",
+    "PR",
+    "PE",
+    "PI",
+    "RJ",
+    "RN",
+    "RS",
+    "RO",
+    "RR",
+    "SC",
+    "SP",
+    "SE",
+    "TO",
+  ],
 };

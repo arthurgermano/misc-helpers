@@ -1,5 +1,5 @@
 import { describe, it } from "vitest";
-import { helpers } from "../index.js";
+import { helpers } from "../src/index.js";
 
 // ------------------------------------------------------------------------------------------------
 

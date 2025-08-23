@@ -5,11 +5,11 @@
   "license": "MIT",
   "main": "./index.js",
   "scripts": {
-    "test": "vitest --run --reporter verbose --globals",
-    "testUtils": "vitest --run --reporter verbose --globals ./tests/utils.test.js",
-    "testHelpers": "vitest --run --reporter verbose --globals ./tests/helpers.test.js",
-    "testWebAuthn2": "vitest --run --reporter verbose --globals ./tests/webauthn2.test.js",
-    "testWebAuthn3": "vitest --run --reporter verbose --globals ./tests/webauthn3.test.js",
+    "test": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals",
+    "testUtils": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/utils.test.js",
+    "testHelpers": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/helpers.test.js",
+    "testWebAuthn2": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/webauthn2.test.js",
+    "testWebAuthn3": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/webauthn3.test.js",
     "testBulkProcessor": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/bulkProcessor.test.js",
     "testBulkProcessor2": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/bulkProcessor2.test.js",
     "testBulkProcessor3": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/bulkProcessor3.test.js"
@@ -29,8 +29,7 @@
   "dependencies": {
     "cbor-x": "^1.5.9",
     "date-fns": "^3.6.0",
-    "fflate": "^0.8.2",
-    "lodash.clonedeep": "^4.5.0"
+    "fflate": "^0.8.2"
   },
   "devDependencies": {
     "vite": "^5.2.8",

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, assert } from "vitest";
-import { constants, auth, utils } from "../index.js";
+import { constants, auth, utils } from "../src/index.js";
 import { credential, assertion } from "./webauthnTestContent.js";
 
 // ------------------------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { custom } from "../index.js";
+import { custom } from "../src/index.js";
 
 const BulkProcessor = custom.bulkProcessor;
 

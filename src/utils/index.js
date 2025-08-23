@@ -25,6 +25,7 @@ module.exports = {
   messageEncryptToChunks: require("./messageEncryptToChunks.js"),
   messageDecryptFromChunks: require("./messageDecryptFromChunks.js"),
   normalize: require("./normalize.js"),
+  pickKeys: require("./pickKeys.js"),
   pushLogMessage: require("./pushLogMessage.js"),
   regexDigitsOnly: require("./regexDigitsOnly.js"),
   regexReplaceTrim: require("./regexReplaceTrim.js"),

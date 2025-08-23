@@ -7,7 +7,7 @@ import {
   beforeEach,
   afterEach,
 } from "vitest";
-import { constants, utils } from "../index.js";
+import { constants, utils } from "../src/index.js";
 import fs from "fs";
 import jsonTest from "./testContent.js";
 
@@ -2913,4 +2913,105 @@ describe("UTILS - timestamp", () => {
     const result = timestamp("YMTDHMN");
     assert.strictEqual(result, "202508221930");
   });
+});
+
+// ------------------------------------------------------------------------------------------------
+
+describe("UTILS - pickKeys", () => {
+  const pickKeys = utils.pickKeys;
+
+  // Objeto base usado na maioria dos testes para consistência.
+  const sourceObject = {
+    id: 123,
+    name: "John Doe",
+    email: "john.doe@example.com",
+    status: "active",
+  };
+  
+  // Adiciona uma propriedade herdada para testar a segurança contra o prototype chain.
+  const sourceWithPrototype = Object.create({ inherited: "should_not_be_picked" });
+  Object.assign(sourceWithPrototype, sourceObject);
+
+  // ----------------------------------------------------------------------------------------------
+  // Casos de Uso Padrão
+  // ----------------------------------------------------------------------------------------------
+
+  it("should pick a subset of existing keys from an object", () => {
+    const keys = ["id", "name"];
+    const result = pickKeys(sourceObject, keys);
+    const expected = { id: 123, name: "John Doe" };
+    expect(result).toEqual(expected);
+  });
+
+  it("should return a new object instance, not a reference to the original", () => {
+    const keys = ["id", "name"];
+    const result = pickKeys(sourceObject, keys);
+    expect(result).not.toBe(sourceObject);
+  });
+
+  it("should pick all keys if all are specified", () => {
+    const keys = ["id", "name", "email", "status"];
+    const result = pickKeys(sourceObject, keys);
+    expect(result).toEqual(sourceObject);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+  // Casos de Borda (Edge Cases)
+  // ----------------------------------------------------------------------------------------------
+
+  it("should return an empty object if the array of keys is empty", () => {
+    const result = pickKeys(sourceObject, []);
+    expect(result).toEqual({});
+  });
+
+  it("should ignore keys that are in the array but not in the source object", () => {
+    const keys = ["id", "nonExistentKey", "email"];
+    const result = pickKeys(sourceObject, keys);
+    const expected = { id: 123, email: "john.doe@example.com" };
+    expect(result).toEqual(expected);
+  });
+
+  it("should return an empty object when picking from an empty source object", () => {
+    const result = pickKeys({}, ["id", "name"]);
+    expect(result).toEqual({});
+  });
+
+  it("should not pick inherited properties from the object's prototype", () => {
+    const keys = ["id", "inherited"];
+    const result = pickKeys(sourceWithPrototype, keys);
+    const expected = { id: 123 };
+    expect(result).toEqual(expected);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+  // Casos com Entradas Inválidas
+  // ----------------------------------------------------------------------------------------------
+
+  it.each([
+    { value: null, description: "null" },
+    { value: undefined, description: "undefined" },
+    { value: "a string", description: "uma string" },
+    { value: 123, description: "um número" },
+    { value: [1, 2, 3], description: "um array" },
+  ])(
+    "should return an empty object if the source is not an object but $description",
+    ({ value }) => {
+      const result = pickKeys(value, ["id"]);
+      expect(result).toEqual({});
+    }
+  );
+
+  it.each([
+    { value: null, description: "null" },
+    { value: undefined, description: "undefined" },
+    { value: "id", description: "uma string" },
+    { value: 123, description: "um número" },
+    { value: { key: "id" }, description: "um objeto" },
+  ])(
+    "should return an empty object if keysToPick is not an array but $description",
+    ({ value }) => {
+      const result = pickKeys(sourceObject, value);
+      expect(result).toEqual({});
+    }
+  );
 });

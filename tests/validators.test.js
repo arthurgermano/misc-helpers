@@ -1,5 +1,5 @@
 import { describe, it } from "vitest";
-import { validators } from "../index.js";
+import { validators } from "../src/index.js";
 
 // ------------------------------------------------------------------------------------------------
 

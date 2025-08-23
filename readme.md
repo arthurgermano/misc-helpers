@@ -37,6 +37,7 @@ const { defaultNumeric, validateCPF } = require('misc-helpers');
     - [Formatos de Data](#formatos-de-data)
     - [Máscaras de Formatação](#máscaras-de-formatação)
     - [Expressões Regulares (Regex)](#expressões-regulares-regex)
+    - [Dados Geográficos](#dados-geográficos)
   - [Auth](#auth)
     - [WebAuthn](#webauthn)
       - [`getWebAuthnRegistrationCredential`](#getwebauthnregistrationcredential)
@@ -96,6 +97,7 @@ const { defaultNumeric, validateCPF } = require('misc-helpers');
     - [`messageDecryptFromChunks`](#messagedecryptfromchunks)
     - [`messageEncryptToChunks`](#messageencrypttochunks)
     - [`normalize`](#normalize)
+    - [`pickKeys`](#pickkeys)
     - [`pushLogMessage`](#pushlogmessage)
     - [`regexDigitsOnly`](#regexdigitsonly)
     - [`regexLettersOnly`](#regexlettersonly)
@@ -136,13 +138,13 @@ const { defaultNumeric, validateCPF } = require('misc-helpers');
 A biblioteca exporta um conjunto de constantes úteis para formatação e validação, como padrões de data para bibliotecas (ex: `date-fns`), máscaras para componentes de UI e expressões regulares comuns.
 
 **Exemplo de Uso:**
-```javascript
+[código javascript]
 const { constants, dateToFormat } = require('misc-helpers');
 
 const today = new Date();
 // Formata a data usando uma constante
 const formatted = dateToFormat(today, constants.DATE_BR_FORMAT_FS); // "23/08/2025"
-```
+[fim do bloco javascript]
 
 ---
 
@@ -166,17 +168,24 @@ const formatted = dateToFormat(today, constants.DATE_BR_FORMAT_FS); // "23/08/20
 ### Máscaras de Formatação
 
 - `STRING_FORMAT_CADICMSPR`: Máscara para CAD/ICMS do Paraná. Ex: `"90312851-11"`
-- `STRING_FORMAT_CNPJ`: Máscara para CNPJ. Ex: `"12.345.678/0001-99"`
-- `STRING_FORMAT_CPF`: Máscara para CPF. Ex: `"123.456.789-00"`
-- `STRING_FORMAT_PROTOCOLPR`: Máscara para Protocolo do Paraná. Ex: `"123.456.789.1"`
 - `STRING_FORMAT_CEP`: Máscara para CEP. Ex: `"80000-000"`
+- `STRING_FORMAT_CNPJ`: Máscara para CNPJ completo. Ex: `"12.345.678/0001-99"`
+- `STRING_FORMAT_CNPJ_RAIZ`: Máscara para a raiz do CNPJ (8 primeiros caracteres). Ex: `"12.345.678"`
+- `STRING_FORMAT_CPF`: Máscara para CPF. Ex: `"123.456.789-00"`
 - `STRING_FORMAT_PHONE`: Máscara para Telefone Celular (9 dígitos + DDD). Ex: `"(41) 98888-8888"`
+- `STRING_FORMAT_PROTOCOLPR`: Máscara para Protocolo do Paraná. Ex: `"123.456.789.1"`
 
 ### Expressões Regulares (Regex)
 
 - `REGEX_CNPJ_ALPHANUMERIC`: Valida a estrutura de um CNPJ alfanumérico (12 caracteres alfanuméricos + 2 dígitos).
 - `REGEX_EMAIL`: Valida um e-mail em formato padrão.
+- `REGEX_PHONE_BR`: Valida um número de telefone brasileiro (10 ou 11 dígitos), com ou sem o DDI `+55`.
 - `REGEX_UUID_V4`: Valida um UUID v4 (usado em Chave Aleatória PIX).
+
+### Dados Geográficos
+
+- `BRAZILIAN_STATES`: Objeto com as siglas e nomes dos estados brasileiros. Ex: `{ "PR": "Paraná" }`
+- `BRAZILIAN_STATES_ABBR`: Array com as siglas dos estados brasileiros. Ex: `["PR", "SP", ...]`
 
 ---
 
@@ -1258,6 +1267,32 @@ const text = "Atenção: João e Maria saíram às 15h.";
 const normalized = normalize(text);
 
 console.log(normalized); // "atencao joao e maria sairam as 15h"
+```
+
+### `pickKeys`
+Cria um novo objeto contendo apenas as chaves especificadas de um objeto de origem. Chaves que não existem no objeto original são simplesmente ignoradas.
+
+**Assinatura:** `pickKeys(sourceObject, keysToPick)`
+**Retorna:** `Object` - Um novo objeto contendo apenas as propriedades selecionadas.
+
+**Exemplo:**
+```javascript
+const { pickKeys } = require('misc-helpers');
+
+const user = {
+  id: 123,
+  name: 'Jane Doe',
+  email: 'jane.doe@example.com',
+  password: 'super_secret_password',
+  isAdmin: false
+};
+
+// Seleciona apenas os campos que são seguros para expor publicamente
+const keysToExpose = ['id', 'name', 'email'];
+const publicUser = pickKeys(user, keysToExpose);
+
+console.log(publicUser);
+// { id: 123, name: 'Jane Doe', email: 'jane.doe@example.com' }
 ```
 
 ---

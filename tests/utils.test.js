@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, assert } from "vitest";
+import { describe, expect, it, vi, assert, beforeEach, afterEach } from "vitest";
 import { constants, utils } from "../index.js";
 import fs from "fs";
 import jsonTest from "./testContent.js";
@@ -2753,3 +2753,120 @@ describe("UTILS - uint8ArrayToString", () => {
 });
 
 // ------------------------------------------------------------------------------------------------
+
+describe("UTILS - timestamp", () => {
+  const timestamp = utils.timestamp;
+
+  // Define uma data e hora fixas para garantir que os testes sejam consistentes.
+  // Horário local de Curitiba (-03:00) para corresponder ao comportamento de new Date().
+  const MOCK_DATE = new Date("2025-08-22T19:30:15.123-03:00");
+
+  // Antes de cada teste, ativamos os timers falsos e fixamos o tempo.
+  beforeEach(() => {
+    // Estas são funções de bibliotecas como Vitest/Jest para simular o tempo
+    // vi.useFakeTimers();
+    // vi.setSystemTime(MOCK_DATE);
+    // Para este exemplo, vamos simular o mock diretamente (não execute este código de mock em um projeto real, use o da sua lib de testes)
+    global.Date = class extends Date {
+      constructor() {
+        super();
+        return MOCK_DATE;
+      }
+    };
+  });
+
+  // Depois de cada teste, restauramos o comportamento normal do Date.
+  afterEach(() => {
+    // vi.useRealTimers();
+    global.Date = Date;
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should use the default format 'D-MT-Y_H:MN:S:MS' when no argument is provided", () => {
+    const result = timestamp();
+    assert.strictEqual(result, "22-08-2025_19:30:15:123");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should format a standard ISO 8601 date format", () => {
+    const result = timestamp('Y-MT-D');
+    assert.strictEqual(result, "2025-08-22");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should format a standard time format", () => {
+    const result = timestamp('H:MN:S');
+    assert.strictEqual(result, "19:30:15");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should format time including milliseconds", () => {
+    const result = timestamp('H:MN:S:MS');
+    assert.strictEqual(result, "19:30:15:123");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should handle custom separators like slashes, spaces, and pipes", () => {
+    const result = timestamp('D/MT/Y | H_MN');
+    assert.strictEqual(result, "22/08/2025 | 19_30");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should correctly format each token individually", () => {
+    assert.strictEqual(timestamp('Y'), "2025", "Test for Y failed");
+    assert.strictEqual(timestamp('MT'), "08", "Test for MT failed");
+    assert.strictEqual(timestamp('D'), "22", "Test for D failed");
+    assert.strictEqual(timestamp('H'), "19", "Test for H failed");
+    assert.strictEqual(timestamp('MN'), "30", "Test for MN failed");
+    assert.strictEqual(timestamp('S'), "15", "Test for S failed");
+    assert.strictEqual(timestamp('MS'), "123", "Test for MS failed");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should return an empty string if the format string is empty", () => {
+    const result = timestamp('');
+    assert.strictEqual(result, "");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should treat non-token strings as literal characters and return them as is", () => {
+    const result = timestamp('GO GO GO [LOG]');
+    assert.strictEqual(result, "GO GO GO [LOG]");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should treat lowercase tokens as literal characters", () => {
+    const result = timestamp('y-mt-d h:mn:s:ms');
+    assert.strictEqual(result, "y-mt-d h:mn:s:ms");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should handle repeated tokens correctly", () => {
+    const result = timestamp('Y/Y/Y H-H');
+    assert.strictEqual(result, "2025/2025/2025 19-19");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should format a full timestamp in reverse order", () => {
+    const result = timestamp('MS:S:MN H D-MT-Y');
+    assert.strictEqual(result, "123:15:30 19 22-08-2025");
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should handle a format with no separators", () => {
+    const result = timestamp('YMTDHMN');
+    assert.strictEqual(result, "202508221930");
+  });
+});

@@ -40,6 +40,7 @@ module.exports = {
   stringZLibCompress: require("./stringZLibCompress.js"),
   stringZLibDecompress: require("./stringZLibDecompress.js"),
   throttle: require("./throttle.js"),
+  timestamp: require("./timestamp.js"),
   toString: require("./toString.js"),
   uint8ArrayFromString: require("./uint8ArrayFromString"),
   uint8ArrayToString: require("./uint8ArrayToString"),

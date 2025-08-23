@@ -7,7 +7,8 @@
   "scripts": {
     "test": "vitest --run --reporter verbose --globals",
     "testWebAuthn2": "vitest --run --reporter verbose --globals ./tests/webauthn2.test.js",
-    "testWebAuthn3": "vitest --run --reporter verbose --globals ./tests/webauthn3.test.js"
+    "testWebAuthn3": "vitest --run --reporter verbose --globals ./tests/webauthn3.test.js",
+    "testBulkProcessor": "vitest --run --reporter verbose --globals ./tests/bulkProcessor.test.js"
   },
   "keywords": [
     "functions",

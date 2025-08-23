@@ -13,6 +13,7 @@ module.exports = {
       },
     },
     waitPlugin: require("./src/custom/waitPlugin"),
+    bulkProcessor: require("./src/custom/bulkProcessor.js"),
   },
   helpers: {
     dateCompareAsc: require("./src/helpers/dateCompareAsc.js"),
@@ -64,6 +65,7 @@ module.exports = {
     stringZLibCompress: require("./src/utils/stringZLibCompress.js"),
     stringZLibDecompress: require("./src/utils/stringZLibDecompress.js"),
     throttle: require("./src/utils/throttle.js"),
+    timestamp: require("./src/utils/timestamp.js"),
     toString: require("./src/utils/toString.js"),
     uint8ArrayFromString: require("./src/utils/uint8ArrayFromString"),
     uint8ArrayToString: require("./src/utils/uint8ArrayToString"),

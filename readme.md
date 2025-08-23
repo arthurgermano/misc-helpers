@@ -34,20 +34,19 @@ const { defaultNumeric, validateCPF } = require('misc-helpers');
   - [Uso Básico](#uso-básico)
   - [Table of Contents](#table-of-contents)
   - [Constants](#constants)
-    - [Date Formats](#date-formats)
-    - [Brazilian Formats](#brazilian-formats)
-    - [EUA Formats](#eua-formats)
-    - [CNPJ and CPF](#cnpj-and-cpf)
+    - [Formatos de Data](#formatos-de-data)
+    - [Máscaras de Formatação](#máscaras-de-formatação)
+    - [Expressões Regulares (Regex)](#expressões-regulares-regex)
   - [Auth](#auth)
     - [WebAuthn](#webauthn)
-      - [convertECDSAASN1Signature](#convertecdsaasn1signature)
-      - [getAuthenticationAuthData](#getauthenticationauthdata)
-      - [getRegistrationAuthData](#getregistrationauthdata)
-      - [getWebAuthnAuthenticationAssertion](#getwebauthnauthenticationassertion)
-      - [getWebAuthnRegistrationCredential](#getwebauthnregistrationcredential)
-      - [validateAuthentication](#validateauthentication)
-      - [getWebAuthnRegistrationCredential](#getwebauthnregistrationcredential-1)
-      - [validateRPID](#validaterpid)
+      - [`getWebAuthnRegistrationCredential`](#getwebauthnregistrationcredential)
+      - [`getWebAuthnAuthenticationAssertion`](#getwebauthnauthenticationassertion)
+      - [`validateRegistration`](#validateregistration)
+      - [`validateAuthentication`](#validateauthentication)
+      - [`validateRPID`](#validaterpid)
+      - [`convertECDSAASN1Signature`](#convertecdsaasn1signature)
+      - [`getRegistrationAuthData`](#getregistrationauthdata)
+      - [`getAuthenticationAuthData`](#getauthenticationauthdata)
   - [Crypto](#crypto)
     - [decrypt](#decrypt)
       - [Example Usage](#example-usage)
@@ -189,177 +188,187 @@ const { defaultNumeric, validateCPF } = require('misc-helpers');
 
 
 ## Constants
-### Date Formats
 
-- **DATE_ISO_FORMAT_TZ**: `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`
-  - ISO date format with timezone.
+A biblioteca exporta um conjunto de constantes úteis para formatação e validação, como padrões de data para bibliotecas (ex: `date-fns`), máscaras para componentes de UI e expressões regulares comuns.
 
-- **DATE_ISO_FORMAT**: `yyyy-MM-dd'T'HH:mm:ss.SSS`
-  - ISO date format without timezone.
+**Exemplo de Uso:**
+[código javascript]
+const { constants, dateToFormat } = require('misc-helpers');
 
-### Brazilian Formats
+const today = new Date();
+// Formata a data usando uma constante
+const formatted = dateToFormat(today, constants.DATE_BR_FORMAT_FS); // "23/08/2025"
+[fim do bloco javascript]
 
-- **DATE_BR_FORMAT_D**: `dd-MM-yyyy`
-  - Brazilian date format (day/month/year).
+---
 
-- **DATE_BR_FORMAT_FS**: `dd/MM/yyyy`
-  - Brazilian date format with slashes (day/month/year).
+### Formatos de Data
 
-- **DATE_BR_HOUR_FORMAT_D**: `dd-MM-yyyy HH:mm:ss`
-  - Brazilian date and time format (day/month/year hour:minute:second).
+- `DATE_ISO_FORMAT_TZ`: Formato ISO 8601 completo com timezone (UTC/Zulu). Ex: `"2025-08-18T20:49:08.123Z"`
+- `DATE_ISO_FORMAT`: Formato ISO 8601 sem timezone. Ex: `"2025-08-18T20:49:08.123"`
+- `DATE_BR_FORMAT_D`: Formato de data brasileiro (dia-mês-ano). Ex: `"18-08-2025"`
+- `DATE_BR_FORMAT_FS`: Formato de data brasileiro com barras. Ex: `"18/08/2025"`
+- `DATE_BR_HOUR_FORMAT_D`: Formato de data e hora brasileiro. Ex: `"18-08-2025 20:49:08"`
+- `DATE_BR_HOUR_FORMAT_FS`: Formato de data e hora brasileiro com barras. Ex: `"18/08/2025 20:49:08"`
+- `DATE_BR_MONTH_FORMAT_D`: Formato de mês e ano brasileiro. Ex: `"08-2025"`
+- `DATE_BR_MONTH_FORMAT_FS`: Formato de mês e ano brasileiro com barras. Ex: `"08/2025"`
+- `DATE_EUA_FORMAT_D`: Formato de data americano (ano-mês-dia). Ex: `"2025-08-18"`
+- `DATE_EUA_FORMAT_FS`: Formato de data americano com barras. Ex: `"2025/08/18"`
+- `DATE_EUA_HOUR_FORMAT_D`: Formato de data e hora americano. Ex: `"2025-08-18 20:49:08"`
+- `DATE_EUA_HOUR_FORMAT_FS`: Formato de data e hora americano com barras. Ex: `"2025/08/18 20:49:08"`
+- `DATE_EUA_MONTH_FORMAT_D`: Formato de ano e mês americano. Ex: `"2025-08"`
+- `DATE_EUA_MONTH_FORMAT_FS`: Formato de ano e mês americano com barras. Ex: `"2025/08"`
 
-- **DATE_BR_HOUR_FORMAT_FS**: `dd/MM/yyyy HH:mm:ss`
-  - Brazilian date and time format with slashes (day/month/year hour:minute:second).
+### Máscaras de Formatação
 
-- **DATE_BR_MONTH_FORMAT_D**: `MM-yyyy`
-  - Brazilian month and year format (month/year).
+- `STRING_FORMAT_CADICMSPR`: Máscara para CAD/ICMS do Paraná. Ex: `"90312851-11"`
+- `STRING_FORMAT_CNPJ`: Máscara para CNPJ. Ex: `"12.345.678/0001-99"`
+- `STRING_FORMAT_CPF`: Máscara para CPF. Ex: `"123.456.789-00"`
+- `STRING_FORMAT_PROTOCOLPR`: Máscara para Protocolo do Paraná. Ex: `"123.456.789.1"`
+- `STRING_FORMAT_CEP`: Máscara para CEP. Ex: `"80000-000"`
+- `STRING_FORMAT_PHONE`: Máscara para Telefone Celular (9 dígitos + DDD). Ex: `"(41) 98888-8888"`
 
-- **DATE_BR_MONTH_FORMAT_FS**: `MM/yyyy`
-  - Brazilian month and year format with slashes (month/year).
+### Expressões Regulares (Regex)
 
-### EUA Formats
+- `REGEX_CNPJ_ALPHANUMERIC`: Valida a estrutura de um CNPJ alfanumérico (12 caracteres alfanuméricos + 2 dígitos).
+- `REGEX_EMAIL`: Valida um e-mail em formato padrão.
+- `REGEX_UUID_V4`: Valida um UUID v4 (usado em Chave Aleatória PIX).
 
-- **DATE_EUA_FORMAT_D**: `yyyy-MM-dd`
-  - USA date format (year-month-day).
-
-- **DATE_EUA_FORMAT_FS**: `yyyy/MM/dd`
-  - USA date format with slashes (year/month/day).
-
-- **DATE_EUA_HOUR_FORMAT_D**: `yyyy-MM-dd HH:mm:ss`
-  - USA date and time format (year-month-day hour:minute:second).
-
-- **DATE_EUA_HOUR_FORMAT_FS**: `yyyy-MM-dd HH:mm:ss`
-  - USA date and time format with slashes (year-month-day hour:minute:second).
-
-### CNPJ and CPF
-
-- **STRING_FORMAT_CADICMSPR**: `########-##`
-  - Format for CADICMSPR string (8 digits, dash, 2 digits).
-
-- **STRING_FORMAT_CNPJ**: `##.###.###/####-##`
-  - Format for CNPJ string (2 digits, dot, 3 digits, dot, 3 digits, slash, 4 digits, dash, 2 digits).
-
-- **STRING_FORMAT_CPF**: `###.###.###-##`
-  - Format for CPF string (3 digits, dot, 3 digits, dot, 3 digits, dash, 2 digits).
-
-- **STRING_FORMAT_PROTOCOLPR**: `###.###.###.#`
-  - Format for ProtocolPR string (9 digits, dot, 1 digit).
-
-<hr />
-
+---
 
 ## Auth
 
 ### WebAuthn
 
-#### convertECDSAASN1Signature
-- **Description:** Converts an ECDSA signature in ASN.1/DER format to a concatenated r|s format.
-- **Returns:** The signature in concatenated r|s format.
-- **Params:**
-  - `asn1Signature` : ECDSA ASN.1 signature to be converted.
+Utilitários para implementar a autenticação **WebAuthn (FIDO2)**, cobrindo tanto o fluxo de registro (client-side) quanto a validação das credenciais (server-side).
 
-#### getAuthenticationAuthData
-- **Description:** Extracts data from a WebAuthn authentication assertion object.
-- **Returns:** An object containing extracted data from the authentication assertion.
-  - `id`: ID of the WebAuthn assertion.
-  - `rawId`: Raw ID of the WebAuthn assertion.
-  - `type`: Type of the WebAuthn assertion.
-  - `authData`: Authenticator data included in the assertion.
-  - `response`: Response object containing additional data related to the assertion.
-- **Params:**
-  - `assertion` : The WebAuthn authentication assertion object.
+#### `getWebAuthnRegistrationCredential`
+Inicia o processo de registro WebAuthn no navegador para criar uma nova credencial.
 
-#### getRegistrationAuthData
-- **Description:** Retrieves registration authentication data from a WebAuthn credential.
-- **Params:**
-  - `credential` {PublicKeyCredential} : The WebAuthn credential object.
-- **Returns:** An object containing registration authentication data extracted from the credential.
-  - `rawId`: Raw ID of the credential.
-  - `id`: ID of the credential.
-  - `type`: Type of the credential.
-  - `authenticatorAttachment`: Authenticator attachment information.
-  - `clientExtensionResults`: Client extension results from the credential.
-  - `authData`: Authenticator data from the credential.
-  - `response`: Object containing various response data:
-    - `attestationObject`: Attestation object from the credential response.
-    - `authenticatorData`: Authenticator data from the credential response.
-    - `clientDataJSONDecoded`: Decoded client data JSON from the credential response.
-    - `clientDataJSON`: Raw client data JSON from the credential response.
-    - `transports`: Transports used by the credential (if available).
-    - `publicKey`: Public key associated with the credential response.
-    - `publicKeyAlgorithm`: Public key algorithm used in the response.
+**Assinatura:** `getWebAuthnRegistrationCredential(props, callback?)`
 
-#### getWebAuthnAuthenticationAssertion
-- **Description:** Initiates the WebAuthn authentication process and returns an assertion.
-- **Returns:** A Promise that resolves to the obtained PublicKeyCredential or a message indicating that WebAuthn is not supported.
-- **Params:**
-  - `props` {Object} : The PublicKeyCredentialRequestOptions object containing the options for requesting an authentication assertion.
-  - `callback` {Function} (optional) : Optional callback function to be called with the obtained assertion.
+**Exemplo:**
+[código javascript]
+const { getWebAuthnRegistrationCredential } = require('misc-helpers');
 
-#### getWebAuthnRegistrationCredential
-- **Description:** Initiates the WebAuthn registration process and returns a credential.
-- **Returns:** A Promise that resolves to the created PublicKeyCredential or a message indicating that WebAuthn is not supported.
-- **Params:**
-  - `props` {Object} : The PublicKeyCredentialCreationOptions object containing the options for creating a new credential.
-  - `callback` {Function} (optional) : Optional callback function to be called with the created credential.
+// Opções recebidas do servidor
+const creationOptions = {
+  challenge: new Uint8Array([...]),
+  rp: { name: "My App", id: "localhost" },
+  user: { id: new Uint8Array([...]), name: "user@email.com", displayName: "User" },
+  pubKeyCredParams: [{ type: "public-key", alg: -7 }]
+};
 
-#### validateAuthentication
-- **Description:** Asynchronously validates a WebAuthn authentication assertion against the expected properties and the provided credential.
-- **Returns:** `Promise<boolean>`: Returns true if the validation is successful.
-- **Params:**
-  - `credential` (Object):
-    - `id` (string): The credential ID.
-    - `rawId` (string): The raw credential ID.
-    - `type` (string): The credential type, expected to be "public-key".
-    - `publicKeyAlgorithm` (number): The algorithm used for the public key.
-    - `publicKey` (string): The public key in base64 format.
+getWebAuthnRegistrationCredential(creationOptions)
+  .then(credential => {
+    // Enviar 'credential' para o servidor para validação
+    console.log('Credencial criada:', credential);
+  });
+[fim do bloco javascript]
 
-  - `assertion` (Object):
-    - `id` (string): The assertion ID.
-    - `rawId` (string): The raw assertion ID.
-    - `type` (string): The assertion type, expected to be "public-key".
-    - `response` (Object): The response from the authenticator.
-      - `clientDataJSONDecoded` (string): The decoded client data JSON.
-      - `authenticatorDataDecoded` (string): The decoded authenticator data.
-      - `signature` (ArrayBuffer): The signature generated by the authenticator.
+#### `getWebAuthnAuthenticationAssertion`
+Inicia o processo de autenticação WebAuthn no navegador para obter uma asserção de login.
 
-  - `expectedProps` (Object, optional): The expected properties for validation.
-    - `challenge` (string, optional): The expected challenge.
-    - `origin` (string, optional): The expected origin.
-    - `type` (string, optional): The expected type.
-    - `rpID` (string, optional): The expected relying party ID.
-    - `counterCredential` (number, optional): The expected credential counter.
+**Assinatura:** `getWebAuthnAuthenticationAssertion(props, callback?)`
 
-  - `incomingProps` (Object, optional): The incoming properties for validation.
-    - `counterAssertion` (number, optional): The incoming assertion counter.
+**Exemplo:**
+[código javascript]
+const { getWebAuthnAuthenticationAssertion } = require('misc-helpers');
 
-  - `publicKeyProps` (Object, optional): The properties for importing the public key.
-    - `importKey` (Object, optional): The import key properties.
-      - `format` (string, optional): The format of the key, default is "spki".
-      - `extractable` (boolean, optional): Whether the key is extractable, default is false.
+// Opções recebidas do servidor
+const requestOptions = {
+  challenge: new Uint8Array([...]),
+  rpId: "localhost",
+  allowCredentials: [{
+    type: "public-key",
+    id: new Uint8Array([...])
+  }]
+};
 
+getWebAuthnAuthenticationAssertion(requestOptions)
+  .then(assertion => {
+    // Enviar 'assertion' para o servidor para validação
+    console.log('Asserção de login obtida:', assertion);
+  });
+[fim do bloco javascript]
 
-#### getWebAuthnRegistrationCredential
-- **Description:** Validates a WebAuthn registration credential. This function performs a series of validations on the given credential:
-  1. Validates the basic properties of the credential.
-  2. Validates the credential against expected request parameters.
-  3. Extracts and validates the attestation object.
-- **Returns:** A Boolean `true` if the credential is valid, otherwise throws an error.
-- **Params:**
-  - `credential` {Object} : The WebAuthn credential to validate.
-  - `expectedProps` {Object} (optional) : An object containing expected properties for validation.
-    - `challenge` {string} (optional) : The expected challenge.
-    - `origin` {string} (optional) : The expected origin.
-    - `type` {string} (optional) : The expected type.
+#### `validateRegistration`
+Valida uma credencial de registro WebAuthn recém-criada (server-side). Verifica a estrutura, o challenge, a origem e a assinatura.
 
+**Assinatura:** `validateRegistration(credential, expectedProps?)`
 
-#### validateRPID
-- **Description:** Asynchronously validates relying party identifier (RPID) for WebAuthn.
-- **Returns:** `Promise<boolean>`: Returns a promise that resolves to true if the RPID is valid.
-- **Params:**
-  - `rpID` : (string): Relying Party Identifier (RPID) to be validated.
+**Exemplo:**
+[código javascript]
+const { validateRegistration } = require('misc-helpers');
 
-<hr />
+// 'credential' recebido do client-side
+const credentialFromClient = { /* ... objeto da credencial ... */ };
+
+// Propriedades esperadas que foram salvas na sessão do servidor
+const expectedProps = {
+  challenge: 'base64_encoded_challenge',
+  origin: 'https://minha-app.com',
+  rpID: 'minha-app.com'
+};
+
+try {
+  const isValid = await validateRegistration(credentialFromClient, expectedProps);
+  console.log('Registro Válido:', isValid); // true
+} catch (e) {
+  console.error('Falha na validação do registro:', e);
+}
+[fim do bloco javascript]
+
+#### `validateAuthentication`
+Valida uma asserção de autenticação WebAuthn (server-side). Verifica a assinatura, o challenge, a origem e o contador de segurança.
+
+**Assinatura:** `validateAuthentication(credential, assertion, expectedProps?)`
+
+**Exemplo:**
+[código javascript]
+const { validateAuthentication } = require('misc-helpers');
+
+// 'credential' salvo no banco de dados
+const userCredential = { /* ... objeto da credencial do usuário ... */ };
+// 'assertion' recebido do client-side
+const assertionFromClient = { /* ... objeto da asserção de login ... */ };
+
+const expectedProps = {
+  challenge: 'base64_encoded_challenge_de_login',
+  origin: 'https://minha-app.com',
+  rpID: 'minha-app.com',
+  counterCredential: 123 // Último contador conhecido
+};
+
+try {
+  const isValid = await validateAuthentication(userCredential, assertionFromClient, expectedProps);
+  console.log('Autenticação Válida:', isValid); // true
+} catch (e) {
+  console.error('Falha na validação da autenticação:', e);
+}
+[fim do bloco javascript]
+
+#### `validateRPID`
+Valida o Relying Party ID (RPID) para garantir que corresponde ao domínio esperado.
+
+**Assinatura:** `validateRPID(rpID)`
+
+#### `convertECDSAASN1Signature`
+Converte uma assinatura ECDSA do formato ASN.1/DER para o formato concatenado r|s, necessário para validações criptográficas.
+
+**Assinatura:** `convertECDSAASN1Signature(asn1Signature)`
+
+#### `getRegistrationAuthData`
+Função auxiliar para extrair e decodificar dados de uma credencial de registro WebAuthn.
+
+**Assinatura:** `getRegistrationAuthData(credential)`
+
+#### `getAuthenticationAuthData`
+Função auxiliar para extrair e decodificar dados de uma asserção de autenticação WebAuthn.
+
+**Assinatura:** `getAuthenticationAuthData(assertion)`
+
+---
 
 ## Crypto
 

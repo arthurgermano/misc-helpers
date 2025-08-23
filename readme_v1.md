@@ -1,37 +1,10 @@
 # Miscellaneous Helpers
 
-Uma coleção robusta de classes, funções utilitárias e validadores de alta performance para tarefas comuns no ecossistema JavaScript/Node.js.
-
-[![NPM Version](https://img.shields.io/npm/v/misc-helpers.svg)](https://www.npmjs.com/package/misc-helpers)
-[![License](https://img.shields.io/npm/l/misc-helpers.svg)](https://github.com/arthurgermano/misc-helpers/blob/main/LICENSE)
-
-## Instalação
-
-```bash
-npm install misc-helpers
-```
-
-## Uso Básico
-
-A biblioteca exporta módulos aninhados e também nivela a maioria das funções no nível raiz para facilitar o acesso.
-
-```javascript
-// Acesso aninhado (recomendado para clareza)
-const { custom, helpers, validators } = require('misc-helpers');
-
-const processor = new custom.bulkProcessor({ limit: 100, onFlush: myFlushLogic });
-const numericValue = helpers.defaultNumeric("abc", 1);
-const isValid = validators.validateCPF("123.456.789-00");
-
-// Acesso direto (disponível para helpers, utils e validators)
-const { defaultNumeric, validateCPF } = require('misc-helpers');
-```
+A collection of utility functions and validators for common tasks.
 
 ## Table of Contents
 
 - [Miscellaneous Helpers](#miscellaneous-helpers)
-  - [Instalação](#instalação)
-  - [Uso Básico](#uso-básico)
   - [Table of Contents](#table-of-contents)
   - [Constants](#constants)
     - [Date Formats](#date-formats)
@@ -58,7 +31,6 @@ const { defaultNumeric, validateCPF } = require('misc-helpers');
     - [importCryptoKey](#importcryptokey)
     - [verifySignature](#verifysignature)
   - [Custom](#custom)
-    - [`BulkProcessor` - Processador de Lotes Assíncrono](#bulkprocessor---processador-de-lotes-assíncrono)
     - [DB Sequelize](#db-sequelize)
       - [setConditionBetweenDates](#setconditionbetweendates)
         - [Example](#example)
@@ -75,7 +47,6 @@ const { defaultNumeric, validateCPF } = require('misc-helpers');
       - [Example](#example-3)
     - [dateCompareDesc](#datecomparedesc)
       - [Example](#example-4)
-    - [defaultNumeric](#defaultnumeric)
     - [defaultValue](#defaultvalue)
       - [Example](#example-5)
     - [isInstanceOf](#isinstanceof)
@@ -163,9 +134,6 @@ const { defaultNumeric, validateCPF } = require('misc-helpers');
       - [Example](#example-46)
     - [stringZLibDecompress](#stringzlibdecompress)
       - [Example](#example-47)
-    - [throttle](#throttle)
-    - [timestamp](#timestamp)
-    - [Outros Utilitários](#outros-utilitários)
     - [toString](#tostring)
       - [Example](#example-48)
     - [uint8ArrayFromString](#uint8arrayfromstring)
@@ -173,17 +141,14 @@ const { defaultNumeric, validateCPF } = require('misc-helpers');
     - [uint8ArrayToString](#uint8arraytostring)
       - [Example](#example-50)
   - [Validators](#validators)
-    - [`validateCADICMSPR`](#validatecadicmspr)
-    - [`validateCEP`](#validatecep)
-    - [`validateChavePix`](#validatechavepix)
-    - [`validateCNH`](#validatecnh)
-    - [`validateCNPJ`](#validatecnpj)
-    - [`validateCPF`](#validatecpf)
-    - [`validateEmail`](#validateemail)
-    - [`validatePISPASEPNIT`](#validatepispasepnit)
-    - [`validateRenavam`](#validaterenavam)
-    - [`validateRG`](#validaterg)
-    - [`validateTituloEleitor`](#validatetituloeleitor)
+    - [validateCADICMSPR](#validatecadicmspr)
+      - [Example](#example-51)
+    - [validateCNPJ](#validatecnpj)
+      - [Example](#example-52)
+    - [validateCPF](#validatecpf)
+      - [Example](#example-53)
+    - [validateEmail](#validateemail)
+      - [Example](#example-54)
 
 <hr />
 
@@ -464,60 +429,6 @@ encrypt(publicKey, message)
 
 ## Custom
 
-### `BulkProcessor` - Processador de Lotes Assíncrono
-
-Uma classe de alta performance para processamento de dados em lote (`bulk`). Ela abstrai a complexidade de acumular itens, enviá-los em batches, e gerenciar concorrência, retries e finalização segura.
-
-É ideal para otimizar operações de I/O, como inserções em banco de dados ou chamadas para APIs, com recursos avançados de resiliência.
-
-**Exemplo de Uso:**
-
-```javascript
-const { custom } = require('misc-helpers');
-
-const processor = new custom.bulkProcessor({
-  limit: 100, // Envia o lote quando atingir 100 itens
-  maxConcurrentFlushes: 5, // Processa até 5 lotes em paralelo
-  retries: 2, // Tenta reprocessar um lote falho até 2 vezes
-  onFlush: async ({ batch }) => {
-    console.log(`Processando ${batch.length} itens...`);
-    // await database.insertMany(batch);
-  },
-  onFlushFailure: async ({ batch, error }) => {
-    console.error(`Falha definitiva ao processar lote de ${batch.length} itens.`, error);
-    // Salvar em uma "dead-letter queue"
-  }
-});
-
-async function main() {
-  for (let i = 0; i < 1000; i++) {
-    await processor.add({ id: i, data: `item-${i}` });
-  }
-  await processor.end(); // Essencial para garantir que todos os itens sejam processados
-}
-
-main();
-```
-
-**Opções do Construtor:**
-
-| Opção | Descrição | Padrão |
-| :--- | :--- | :--- |
-| `limit` | Nº de itens para acionar um `flush`. | `1000` |
-| `maxBufferSize` | Tamanho máx. do buffer antes de ativar backpressure. | `limit * 2` |
-| `maxConcurrentFlushes` | Nº de `onFlush` que podem rodar em paralelo. | `3` |
-| `retries` | Nº de novas tentativas para um `onFlush` falho. | `0` |
-| `retryDelayMs` | Atraso em ms entre as tentativas. | `1000` |
-| `flushTimeoutMs` | Timeout em ms para uma única operação `onFlush`. | `30000` |
-| `onFlush` | `(async ({ batch }) => {})` - Callback para processar o lote. | `undefined` |
-| `onFlushFailure` | `(async ({ batch, error }) => {})` - Callback para falha definitiva. | `undefined` |
-| `onBackpressure` | `(async ({ bufferSize }) => {})` - Callback para quando o backpressure é ativado. | `undefined` |
-| `logger` | Objeto de logger (ex: `console`). | Logger silencioso |
-| `payload` | Objeto estático passado para todos os callbacks. | `{}` |
-| `serviceContext`| Contexto dinâmico passado para todos os callbacks. | `null` |
-
----
-
 ### DB Sequelize
 
 #### setConditionBetweenDates
@@ -697,28 +608,6 @@ const earlierDate = new Date('2023-01-01T12:00:00Z');
 const result = dateCompareDesc(laterDate, earlierDate);
 console.log(result); // Output: true
 ```
-
-### defaultNumeric
-Retorna um valor numérico válido ou o valor padrão (`defaultValue`) caso o valor verificado (`checkValue`) não seja um número finito (ex: `NaN`, `Infinity`).
-
-**Assinatura:** `defaultNumeric(checkValue, defaultValue)`
-
-**Exemplo:**
-```javascript
-const { defaultNumeric } = require('misc-helpers');
-
-// Casos de substituição
-defaultNumeric("abc", 10);     // Retorna 10
-defaultNumeric(NaN, 5);        // Retorna 5
-defaultNumeric(Infinity, 2);   // Retorna 2
-
-// Casos válidos
-defaultNumeric(7, 1);          // Retorna 7
-defaultNumeric("-12", 1);      // Retorna -12
-defaultNumeric(1.9, 1);        // Retorna 1.9
-```
-
----
 
 ### defaultValue
 
@@ -1868,49 +1757,6 @@ async function decompressText() {
 
 decompressText();
 ```
----
-
-### throttle
-Cria uma versão de uma função que limita sua frequência de execução, garantindo que seja executada no máximo uma vez a cada `wait` milissegundos. Ideal para eventos de scroll, resize, etc.
-
-**Assinatura:** `throttle(callback, wait)`
-
-**Exemplo:**
-```javascript
-const { throttle } = require('misc-helpers');
-
-const heavyFunction = () => console.log('Executou!');
-const throttledFunction = throttle(heavyFunction, 500);
-
-// Em um evento de scroll, por exemplo:
-// window.addEventListener('scroll', throttledFunction);
-```
-
----
-
-### timestamp
-Gera uma string de timestamp customizável e formatada com base em um padrão.
-
-**Assinatura:** `timestamp(format = 'D-MT-Y_H:MN:S:MS')`
-
-**Exemplo:**
-```javascript
-const { timestamp } = require('misc-helpers');
-
-// Formato padrão
-timestamp(); // "23-08-2025_16:29:45:456"
-
-// Formato ISO para data
-timestamp('Y-MT-D'); // "2025-08-23"
-
-// Formato simples para hora
-timestamp('H:MN:S'); // "16:29:45"
-```
-
-### Outros Utilitários
-A biblioteca inclui dezenas de outras funções úteis na categoria `utils`, como `debouncer`, `currencyBRToFloat`, `stringCompress`, `normalize`, `sleep`, entre outras. Consulte a Tabela de Conteúdos para a lista completa.
-
----
 
 ### toString
 
@@ -1993,174 +1839,115 @@ console.log(convertedText); // Output: 'Hello, world!'
 
 ## Validators
 
-A biblioteca oferece um conjunto completo de validadores para documentos e formatos brasileiros comuns. Todos eles removem automaticamente máscaras e pontuações para facilitar o uso.
+### validateCADICMSPR
 
-### `validateCADICMSPR`
-Valida um número de CAD/ICMS do estado do Paraná.
+- **Description:** Validates a given CADICMS from the Brazilian Paraná State.
+- **Params:**
+  - `cadicms` (String): The CADICMS value to be validated.
+- **Returns:** Boolean - Returns true if the CADICMS is valid, otherwise false.
 
-**Assinatura:** `validateCADICMSPR(cadicms)`
+#### Example
 
-**Exemplo:**
 ```javascript
+/**
+ * Example usage:
+ */
+
 const { validateCADICMSPR } = require('misc-helpers');
 
-console.log(validateCADICMSPR("1234567850")); // true
-console.log(validateCADICMSPR("9876543210")); // false
+const validCADICMS = "1234567890";
+const invalidCADICMS = "9876543210";
+
+console.log(validateCADICMSPR(validCADICMS)); // Output: true
+console.log(validateCADICMSPR(invalidCADICMS)); // Output: false
 ```
 
-<hr />
+### validateCNPJ
 
-### `validateCEP`
-Valida se um CEP (Código de Endereçamento Postal) possui 8 dígitos.
+- **Description:** Validates a given CNPJ (Cadastro Nacional da Pessoa Jurídica, Brazilian corporate taxpayer registry number). This function supports both numeric and alphanumeric CNPJs, and allows for custom validation options like padding characters, case sensitivity, and more.
 
-**Assinatura:** `validateCEP(cep)`
+- **Params:**
+  - `cnpj` (String): The CNPJ value to be validated. It can include alphanumeric characters and special characters (like `.`, `/`, and `-`).
+  - `options` (Object) [optional]: Additional validation options:
+    - `addPaddingChar` (String): Character to use for padding if necessary. Defaults to `"0"`.
+    - `weights` (Array<Number>): Custom weight values for validation. Defaults to the constant `WEIGHTS`.
+    - `ignoreToUpperCase` (Boolean): Whether to ignore case when processing alphanumeric CNPJs. If `false`, all characters will be converted to uppercase. Defaults to `false`.
+    - `ignorePadding` (Boolean): Whether to skip padding when the CNPJ is shorter than 14 characters. If `true`, padding will not be applied. Defaults to `false`.
 
-**Exemplo:**
+- **Returns:** Boolean - Returns `true` if the CNPJ is valid, otherwise `false`.
+
+#### Example
+
 ```javascript
-const { validateCEP } = require('misc-helpers');
+/**
+ * Example usage:
+ */
 
-console.log(validateCEP("80000-123")); // true
-console.log(validateCEP("1234567"));   // false
-```
-
-<hr />
-
-### `validateChavePix`
-Valida uma Chave PIX de qualquer tipo (CPF, CNPJ, E-mail, Telefone ou Chave Aleatória).
-
-**Assinatura:** `validateChavePix(chave)`
-
-**Exemplo:**
-```javascript
-const { validateChavePix } = require('misc-helpers');
-
-console.log(validateChavePix("meu.email@valido.com")); // true
-console.log(validateChavePix("11122233344"));         // true (se for um CPF válido)
-console.log(validateChavePix("+5511987654321"));      // true (celular)
-console.log(validateChavePix("a2f7b764-2b73-4b9c-852c-15a052e43c43")); // true (chave aleatória)
-```
-
-<hr />
-
-### `validateCNH`
-Valida um número de CNH (Carteira Nacional de Habilitação) através do seu algoritmo de dígitos verificadores.
-
-**Assinatura:** `validateCNH(cnh)`
-
-**Exemplo:**
-```javascript
-const { validateCNH } = require('misc-helpers');
-
-console.log(validateCNH("43369372175")); // true
-console.log(validateCNH("11111111111")); // false
-```
-
-<hr />
-
-### `validateCNPJ`
-Valida um CNPJ (Cadastro Nacional da Pessoa Jurídica), com suporte a CNPJs alfanuméricos e opções customizadas.
-
-**Assinatura:** `validateCNPJ(cnpj, options)`
-
-**Exemplo:**
-```javascript
 const { validateCNPJ } = require('misc-helpers');
 
-console.log(validateCNPJ("12.345.678/0001-99")); // true
-console.log(validateCNPJ("11.111.111/1111-11")); // false
+const validCNPJ = "12.345.678/0001-99";
+const invalidCNPJ = "11.111.111/1111-11";
+
+console.log(validateCNPJ(validCNPJ)); // Output: true
+console.log(validateCNPJ(invalidCNPJ)); // Output: false
+
+// Example with alphanumeric valid CNPJ
+const alphanumericCNPJ = "12ABC34501DE35";
+console.log(validateCNPJ(alphanumericCNPJ)); // Output: true
+
+// Example with custom options
+const options = {
+  ignoreToUpperCase: true,
+};
+const customCNPJ = "12abc34501de35";
+console.log(validateCNPJ(customCNPJ, options)); // Output: false
 ```
 
-<hr />
+### validateCPF
 
-### `validateCPF`
-Valida um CPF (Cadastro de Pessoas Físicas) através do seu algoritmo de dígitos verificadores.
+- **Description:** Validates a given CPF (Cadastro de Pessoas Físicas, Brazilian individual taxpayer registry number).
+- **Params:**
+  - `cpf` (String): The CPF value to be validated.
+- **Returns:** Boolean - Returns true if the CPF is valid, otherwise false.
 
-**Assinatura:** `validateCPF(cpf)`
+#### Example
 
-**Exemplo:**
 ```javascript
+/**
+ * Example usage:
+ */
+
 const { validateCPF } = require('misc-helpers');
 
-console.log(validateCPF("123.456.789-09")); // true (se os DVs estiverem corretos)
-console.log(validateCPF("111.111.111-11")); // false
+const validCPF = "123.456.789-09";
+const invalidCPF = "111.111.111-11";
+
+console.log(validateCPF(validCPF)); // Output: true
+console.log(validateCPF(invalidCPF)); // Output: false
 ```
 
-<hr />
+### validateEmail
 
-### `validateEmail`
-Valida se uma string corresponde a um formato de e-mail padrão.
+- **Description:** Validates a given email address using a regular expression.
+- **Params:**
+  - `email` (String): The email address to be validated.
+- **Returns:** Boolean - Returns true if the email address is valid according to the regular expression, otherwise false.
 
-**Assinatura:** `validateEmail(email)`
+#### Example
 
-**Exemplo:**
 ```javascript
+/**
+ * Example usage:
+ */
+
 const { validateEmail } = require('misc-helpers');
 
-console.log(validateEmail("example@email.com")); // true
-console.log(validateEmail("example.email.com")); // false
+const validEmail = "example@email.com";
+const invalidEmail = "example.email.com";
+
+console.log(validateEmail(validEmail)); // Output: true
+console.log(validateEmail(invalidEmail)); // Output: false
 ```
 
 <hr />
 
-### `validatePISPASEPNIT`
-Valida um número de PIS/PASEP/NIT através do seu algoritmo de dígito verificador.
-
-**Assinatura:** `validatePISPASEPNIT(pis)`
-
-**Exemplo:**
-```javascript
-const { validatePISPASEPNIT } = require('misc-helpers');
-
-console.log(validatePISPASEPNIT("120.12345.67-8")); // true
-console.log(validatePISPASEPNIT("11111111111"));    // false
-```
-
-<hr />
-
-### `validateRenavam`
-Valida um código RENAVAM (Registro Nacional de Veículos Automotores).
-
-**Assinatura:** `validateRENAVAM(renavam)`
-
-**Exemplo:**
-```javascript
-const { validateRENAVAM } = require('misc-helpers');
-
-console.log(validateRENAVAM("00639884962")); // true
-console.log(validateRENAVAM("12345678901")); // false
-```
-
-<hr />
-
-### `validateRG`
-Valida um número de RG (Registro Geral) brasileiro usando o algoritmo de módulo 11, aceitando o dígito 'X'.
-
-**Assinatura:** `validateRG(rg)`
-
-**Exemplo:**
-```javascript
-const { validateRG } = require('misc-helpers');
-
-console.log(validateRG('24.678.131-4')); // true
-console.log(validateRG('37.606.335-X')); // true
-console.log(validateRG('24678131X'));   // false (dígito verificador incorreto)
-```
-
-<hr />
-
-### `validateTituloEleitor`
-Valida um número de Título de Eleitor, considerando as regras especiais de cálculo baseadas no estado de emissão.
-
-**Assinatura:** `validateTituloEleitor(titulo)`
-
-**Exemplo:**
-```javascript
-const { validateTituloEleitor } = require('misc-helpers');
-
-// Exemplo para o estado de São Paulo (código 01)
-console.log(validateTituloEleitor("367499990151")); // true
-// Exemplo para o estado do Paraná (código 08)
-console.log(validateTituloEleitor("095708360694")); // true
-```
-
-<hr />

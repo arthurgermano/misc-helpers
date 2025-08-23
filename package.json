@@ -6,9 +6,13 @@
   "main": "./index.js",
   "scripts": {
     "test": "vitest --run --reporter verbose --globals",
+    "testUtils": "vitest --run --reporter verbose --globals ./tests/utils.test.js",
+    "testHelpers": "vitest --run --reporter verbose --globals ./tests/helpers.test.js",
     "testWebAuthn2": "vitest --run --reporter verbose --globals ./tests/webauthn2.test.js",
     "testWebAuthn3": "vitest --run --reporter verbose --globals ./tests/webauthn3.test.js",
-    "testBulkProcessor": "vitest --run --reporter verbose --globals ./tests/bulkProcessor.test.js"
+    "testBulkProcessor": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/bulkProcessor.test.js",
+    "testBulkProcessor2": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/bulkProcessor2.test.js",
+    "testBulkProcessor3": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/bulkProcessor3.test.js"
   },
   "keywords": [
     "functions",

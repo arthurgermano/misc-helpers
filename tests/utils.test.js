@@ -1,4 +1,12 @@
-import { describe, expect, it, vi, assert, beforeEach, afterEach } from "vitest";
+import {
+  describe,
+  expect,
+  it,
+  vi,
+  assert,
+  beforeEach,
+  afterEach,
+} from "vitest";
 import { constants, utils } from "../index.js";
 import fs from "fs";
 import jsonTest from "./testContent.js";
@@ -165,42 +173,52 @@ describe("UTILS - base64FromBase64URLSafe", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should convert URL-safe base64 to standard base64', () => {
-    const urlSafeBase64String = 'rqXRQrq_mSFhX4c2wSZJrA';
-    const expectedBase64String = 'rqXRQrq/mSFhX4c2wSZJrA==';
-    expect(base64FromBase64URLSafe(urlSafeBase64String)).toBe(expectedBase64String);
+  it("should convert URL-safe base64 to standard base64", () => {
+    const urlSafeBase64String = "rqXRQrq_mSFhX4c2wSZJrA";
+    const expectedBase64String = "rqXRQrq/mSFhX4c2wSZJrA==";
+    expect(base64FromBase64URLSafe(urlSafeBase64String)).toBe(
+      expectedBase64String
+    );
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should handle base64 strings with different lengths', () => {
-    const urlSafeBase64String = 'U29tZS1kYXRh';
-    const expectedBase64String = 'U29tZS1kYXRh';
-    expect(base64FromBase64URLSafe(urlSafeBase64String)).toBe(expectedBase64String);
+  it("should handle base64 strings with different lengths", () => {
+    const urlSafeBase64String = "U29tZS1kYXRh";
+    const expectedBase64String = "U29tZS1kYXRh";
+    expect(base64FromBase64URLSafe(urlSafeBase64String)).toBe(
+      expectedBase64String
+    );
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should handle base64 strings with padding characters', () => {
-    const urlSafeBase64String = 'YW55LXN0cmluZw';
-    const expectedBase64String = 'YW55LXN0cmluZw==';
-    expect(base64FromBase64URLSafe(urlSafeBase64String)).toBe(expectedBase64String);
+  it("should handle base64 strings with padding characters", () => {
+    const urlSafeBase64String = "YW55LXN0cmluZw";
+    const expectedBase64String = "YW55LXN0cmluZw==";
+    expect(base64FromBase64URLSafe(urlSafeBase64String)).toBe(
+      expectedBase64String
+    );
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should handle base64 strings without padding characters', () => {
-    const urlSafeBase64String = 'c29tZS1kYXRhLXN0cmluZw';
-    const expectedBase64String = 'c29tZS1kYXRhLXN0cmluZw==';
-    expect(base64FromBase64URLSafe(urlSafeBase64String)).toBe(expectedBase64String);
+  it("should handle base64 strings without padding characters", () => {
+    const urlSafeBase64String = "c29tZS1kYXRhLXN0cmluZw";
+    const expectedBase64String = "c29tZS1kYXRhLXN0cmluZw==";
+    expect(base64FromBase64URLSafe(urlSafeBase64String)).toBe(
+      expectedBase64String
+    );
   });
 
   // ----------------------------------------------------------------------------------------------
 
-  it('should handle empty strings', () => {
-    const urlSafeBase64String = '';
-    const expectedBase64String = '';
-    expect(base64FromBase64URLSafe(urlSafeBase64String)).toBe(expectedBase64String);
+  it("should handle empty strings", () => {
+    const urlSafeBase64String = "";
+    const expectedBase64String = "";
+    expect(base64FromBase64URLSafe(urlSafeBase64String)).toBe(
+      expectedBase64String
+    );
   });
 
   // ----------------------------------------------------------------------------------------------
@@ -881,7 +899,7 @@ describe("UTILS - dateToFormat", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it('dateToFormat should return false for an invalid date input', () => {
+  it("dateToFormat should return false for an invalid date input", () => {
     const inputDate = "not a date";
     const result = dateToFormat(inputDate);
 
@@ -1962,12 +1980,16 @@ describe("UTILS - stringCompress", () => {
     expect(typeof result).toBe("string");
     expect(result.length).toBeGreaterThan(0);
     // Verifica se a string parece ser Base64 válida
-    expect(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(result)).toBe(true);
+    expect(
+      /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(
+        result
+      )
+    ).toBe(true);
   });
 
   it("deve retornar um Uint8Array quando outputType for 'buffer'", () => {
     const text = "Este é um teste de buffer.";
-    const result = stringCompress(text, { outputType: 'buffer' });
+    const result = stringCompress(text, { outputType: "buffer" });
 
     expect(result).toBeInstanceOf(Uint8Array);
     expect(result.length).toBeGreaterThan(0);
@@ -1986,7 +2008,7 @@ describe("UTILS - stringCompress", () => {
   });
 
   it("deve retornar um Uint8Array vazio para entrada vazia com outputType 'buffer'", () => {
-    const result = stringCompress("", { outputType: 'buffer' });
+    const result = stringCompress("", { outputType: "buffer" });
     expect(result).toBeInstanceOf(Uint8Array);
     expect(result.length).toBe(0);
   });
@@ -1998,7 +2020,8 @@ describe("UTILS - stringCompress", () => {
   });
 
   it("deve usar diferentes níveis de compressão e gerar resultados diferentes", () => {
-    const text = "texto repetitivo texto repetitivo texto repetitivo texto repetitivo texto repetitivo";
+    const text =
+      "texto repetitivo texto repetitivo texto repetitivo texto repetitivo texto repetitivo";
     const resultNivel1 = stringCompress(text, { level: 1 });
     const resultNivel9 = stringCompress(text, { level: 9 });
 
@@ -2021,14 +2044,16 @@ describe("UTILS - stringDecompress", () => {
   // ----------------------------------------------------------------------------------------------
 
   it("deve descomprimir uma string Base64 de volta para o texto original (ciclo completo)", () => {
-    const originalText = "Este é um teste completo de compressão e descompressão!";
+    const originalText =
+      "Este é um teste completo de compressão e descompressão!";
     const compressed = stringCompress(originalText);
     const decompressed = stringDecompress(compressed);
     expect(decompressed).toBe(originalText);
   });
 
   it("deve realizar um ciclo completo com caracteres unicode", () => {
-    const originalText = "Teste com acentuação (áéíóú) e símbolos complexos (👋 & ✅)";
+    const originalText =
+      "Teste com acentuação (áéíóú) e símbolos complexos (👋 & ✅)";
     const compressed = stringCompress(originalText);
     const decompressed = stringDecompress(compressed);
     expect(decompressed).toBe(originalText);
@@ -2036,8 +2061,12 @@ describe("UTILS - stringDecompress", () => {
 
   it("deve realizar um ciclo completo usando buffers como formato intermediário", () => {
     const originalText = "Ciclo completo de buffer para buffer";
-    const compressedBuffer = stringCompress(originalText, { outputType: 'buffer' });
-    const decompressed = stringDecompress(compressedBuffer, { inputType: 'buffer' });
+    const compressedBuffer = stringCompress(originalText, {
+      outputType: "buffer",
+    });
+    const decompressed = stringDecompress(compressedBuffer, {
+      inputType: "buffer",
+    });
     expect(decompressed).toBe(originalText);
   });
 
@@ -2061,7 +2090,7 @@ describe("UTILS - stringDecompress", () => {
 
   it("deve retornar uma string vazia para um buffer corrompido", () => {
     const corruptBuffer = new Uint8Array([1, 2, 3, 4, 5]);
-    const result = stringDecompress(corruptBuffer, { inputType: 'buffer' });
+    const result = stringDecompress(corruptBuffer, { inputType: "buffer" });
     expect(result).toBe("");
   });
 
@@ -2317,12 +2346,16 @@ describe("UTILS - stringZLibCompress", () => {
     expect(typeof result).toBe("string");
     expect(result.length).toBeGreaterThan(0);
     // Verifica se a string parece ser Base64 válida
-    expect(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(result)).toBe(true);
+    expect(
+      /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(
+        result
+      )
+    ).toBe(true);
   });
 
   it("deve retornar um Uint8Array quando outputType for 'buffer'", () => {
     const text = "Este é um teste de buffer com Zlib.";
-    const result = stringZLibCompress(text, { outputType: 'buffer' });
+    const result = stringZLibCompress(text, { outputType: "buffer" });
 
     expect(result).toBeInstanceOf(Uint8Array);
     expect(result.length).toBeGreaterThan(0);
@@ -2341,7 +2374,7 @@ describe("UTILS - stringZLibCompress", () => {
   });
 
   it("deve retornar um Uint8Array vazio para entrada vazia com outputType 'buffer'", () => {
-    const result = stringZLibCompress("", { outputType: 'buffer' });
+    const result = stringZLibCompress("", { outputType: "buffer" });
     expect(result).toBeInstanceOf(Uint8Array);
     expect(result.length).toBe(0);
   });
@@ -2353,7 +2386,8 @@ describe("UTILS - stringZLibCompress", () => {
   });
 
   it("deve usar diferentes níveis de compressão e gerar resultados diferentes", () => {
-    const text = "zlib repetitivo zlib repetitivo zlib repetitivo zlib repetitivo zlib repetitivo";
+    const text =
+      "zlib repetitivo zlib repetitivo zlib repetitivo zlib repetitivo zlib repetitivo";
     const resultNivel1 = stringZLibCompress(text, { level: 1 });
     const resultNivel9 = stringZLibCompress(text, { level: 9 });
 
@@ -2376,14 +2410,16 @@ describe("UTILS - stringZLibDecompress", () => {
   // ----------------------------------------------------------------------------------------------
 
   it("deve descomprimir uma string Base64 (Zlib) de volta para o texto original", () => {
-    const originalText = "Este é um teste completo de compressão e descompressão Zlib!";
+    const originalText =
+      "Este é um teste completo de compressão e descompressão Zlib!";
     const compressed = stringZLibCompress(originalText);
     const decompressed = stringZLibDecompress(compressed);
     expect(decompressed).toBe(originalText);
   });
 
   it("deve realizar um ciclo completo com caracteres unicode", () => {
-    const originalText = "Teste Zlib com acentuação (áéíóú) e símbolos complexos (👋 & ✅)";
+    const originalText =
+      "Teste Zlib com acentuação (áéíóú) e símbolos complexos (👋 & ✅)";
     const compressed = stringZLibCompress(originalText);
     const decompressed = stringZLibDecompress(compressed);
     expect(decompressed).toBe(originalText);
@@ -2391,8 +2427,12 @@ describe("UTILS - stringZLibDecompress", () => {
 
   it("deve realizar um ciclo completo usando buffers como formato intermediário", () => {
     const originalText = "Ciclo completo Zlib: de buffer para buffer";
-    const compressedBuffer = stringZLibCompress(originalText, { outputType: 'buffer' });
-    const decompressed = stringZLibDecompress(compressedBuffer, { inputType: 'buffer' });
+    const compressedBuffer = stringZLibCompress(originalText, {
+      outputType: "buffer",
+    });
+    const decompressed = stringZLibDecompress(compressedBuffer, {
+      inputType: "buffer",
+    });
     expect(decompressed).toBe(originalText);
   });
 
@@ -2416,7 +2456,7 @@ describe("UTILS - stringZLibDecompress", () => {
 
   it("deve retornar uma string vazia para um buffer corrompido", () => {
     const corruptBuffer = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
-    const result = stringZLibDecompress(corruptBuffer, { inputType: 'buffer' });
+    const result = stringZLibDecompress(corruptBuffer, { inputType: "buffer" });
     expect(result).toBe("");
   });
 
@@ -2494,7 +2534,7 @@ describe("UTILS - throttle", () => {
     const mockCallback = vi.fn();
     const context = { name: "meuObjeto" };
     const throttledFn = throttle(mockCallback, 100);
-    
+
     throttledFn.call(context);
 
     // CORREÇÃO: Acessa o array de contextos da chamada mock e verifica o primeiro.
@@ -2504,17 +2544,21 @@ describe("UTILS - throttle", () => {
 
   it("deve lançar um erro se o callback não for uma função", () => {
     const createInvalidThrottle = () => throttle("não é uma função", 100);
-    
+
     expect(createInvalidThrottle).toThrow(TypeError);
-    expect(createInvalidThrottle).toThrow("O callback fornecido para o throttle deve ser uma função.");
+    expect(createInvalidThrottle).toThrow(
+      "O callback fornecido para o throttle deve ser uma função."
+    );
   });
 
   it("deve lançar um erro se o tempo de espera não for um número", () => {
     const createInvalidThrottle = () => throttle(() => {}, "100");
-    
+
     expect(createInvalidThrottle).toThrow(TypeError);
     // CORREÇÃO: Atualiza a mensagem de erro para corresponder à validação mais robusta da função.
-    expect(createInvalidThrottle).toThrow("O tempo de espera (wait) do throttle deve ser um número não negativo.");
+    expect(createInvalidThrottle).toThrow(
+      "O tempo de espera (wait) do throttle deve ser um número não negativo."
+    );
   });
 
   it("deve permitir uma nova chamada após uma chamada anterior e um ciclo completo de espera", () => {
@@ -2791,82 +2835,82 @@ describe("UTILS - timestamp", () => {
   // ----------------------------------------------------------------------------------------------
 
   it("should format a standard ISO 8601 date format", () => {
-    const result = timestamp('Y-MT-D');
+    const result = timestamp("Y-MT-D");
     assert.strictEqual(result, "2025-08-22");
   });
 
   // ----------------------------------------------------------------------------------------------
 
   it("should format a standard time format", () => {
-    const result = timestamp('H:MN:S');
+    const result = timestamp("H:MN:S");
     assert.strictEqual(result, "19:30:15");
   });
 
   // ----------------------------------------------------------------------------------------------
 
   it("should format time including milliseconds", () => {
-    const result = timestamp('H:MN:S:MS');
+    const result = timestamp("H:MN:S:MS");
     assert.strictEqual(result, "19:30:15:123");
   });
 
   // ----------------------------------------------------------------------------------------------
 
   it("should handle custom separators like slashes, spaces, and pipes", () => {
-    const result = timestamp('D/MT/Y | H_MN');
+    const result = timestamp("D/MT/Y | H_MN");
     assert.strictEqual(result, "22/08/2025 | 19_30");
   });
 
   // ----------------------------------------------------------------------------------------------
 
   it("should correctly format each token individually", () => {
-    assert.strictEqual(timestamp('Y'), "2025", "Test for Y failed");
-    assert.strictEqual(timestamp('MT'), "08", "Test for MT failed");
-    assert.strictEqual(timestamp('D'), "22", "Test for D failed");
-    assert.strictEqual(timestamp('H'), "19", "Test for H failed");
-    assert.strictEqual(timestamp('MN'), "30", "Test for MN failed");
-    assert.strictEqual(timestamp('S'), "15", "Test for S failed");
-    assert.strictEqual(timestamp('MS'), "123", "Test for MS failed");
+    assert.strictEqual(timestamp("Y"), "2025", "Test for Y failed");
+    assert.strictEqual(timestamp("MT"), "08", "Test for MT failed");
+    assert.strictEqual(timestamp("D"), "22", "Test for D failed");
+    assert.strictEqual(timestamp("H"), "19", "Test for H failed");
+    assert.strictEqual(timestamp("MN"), "30", "Test for MN failed");
+    assert.strictEqual(timestamp("S"), "15", "Test for S failed");
+    assert.strictEqual(timestamp("MS"), "123", "Test for MS failed");
   });
 
   // ----------------------------------------------------------------------------------------------
 
   it("should return an empty string if the format string is empty", () => {
-    const result = timestamp('');
+    const result = timestamp("");
     assert.strictEqual(result, "");
   });
 
   // ----------------------------------------------------------------------------------------------
 
   it("should treat non-token strings as literal characters and return them as is", () => {
-    const result = timestamp('GO GO GO [LOG]');
+    const result = timestamp("GO GO GO [LOG]");
     assert.strictEqual(result, "GO GO GO [LOG]");
   });
 
   // ----------------------------------------------------------------------------------------------
 
   it("should treat lowercase tokens as literal characters", () => {
-    const result = timestamp('y-mt-d h:mn:s:ms');
+    const result = timestamp("y-mt-d h:mn:s:ms");
     assert.strictEqual(result, "y-mt-d h:mn:s:ms");
   });
 
   // ----------------------------------------------------------------------------------------------
 
   it("should handle repeated tokens correctly", () => {
-    const result = timestamp('Y/Y/Y H-H');
+    const result = timestamp("Y/Y/Y H-H");
     assert.strictEqual(result, "2025/2025/2025 19-19");
   });
 
   // ----------------------------------------------------------------------------------------------
 
   it("should format a full timestamp in reverse order", () => {
-    const result = timestamp('MS:S:MN H D-MT-Y');
+    const result = timestamp("MS:S:MN H D-MT-Y");
     assert.strictEqual(result, "123:15:30 19 22-08-2025");
   });
 
   // ----------------------------------------------------------------------------------------------
 
   it("should handle a format with no separators", () => {
-    const result = timestamp('YMTDHMN');
+    const result = timestamp("YMTDHMN");
     assert.strictEqual(result, "202508221930");
   });
 });

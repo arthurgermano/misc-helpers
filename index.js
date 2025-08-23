@@ -18,6 +18,7 @@ module.exports = {
   helpers: {
     dateCompareAsc: require("./src/helpers/dateCompareAsc.js"),
     dateCompareDesc: require("./src/helpers/dateCompareDesc.js"),
+    defaultNumeric: require("./src/helpers/defaultNumeric.js"),
     defaultValue: require("./src/helpers/defaultValue.js"),
     isInstanceOf: require("./src/helpers/isInstanceOf.js"),
     isNumber: require("./src/helpers/isNumber.js"),

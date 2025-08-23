@@ -440,4 +440,104 @@ describe("HELPERS - dateCompareDesc", () => {
   // ----------------------------------------------------------------------------------------------
 });
 
+describe("HELPERS - defaultNumeric", () => {
+  const defaultNumeric = helpers.defaultNumeric;
+
+  // ----------------------------------------------------------------------------------------------
+  // Testes para valores que devem passar na verificação e ser retornados.
+  // ----------------------------------------------------------------------------------------------
+  describe("Casos Válidos (Valores que Devem Ser Retornados)", () => {
+    it("deve retornar o próprio número para um inteiro positivo", () => {
+      expect(defaultNumeric(42, 10)).toBe(42);
+    });
+
+    it("deve retornar o próprio número para um inteiro negativo", () => {
+      expect(defaultNumeric(-7, 10)).toBe(-7);
+    });
+
+    it("deve retornar o próprio número para um float", () => {
+      expect(defaultNumeric(3.14, 10)).toBe(3.14);
+    });
+
+    it("deve retornar zero quando o valor é zero", () => {
+      expect(defaultNumeric(0, 10)).toBe(0);
+    });
+
+    it("deve converter e retornar um número a partir de uma string numérica", () => {
+      expect(defaultNumeric("123", 10)).toBe(123);
+    });
+
+    it("deve converter e retornar um número a partir de uma string de float", () => {
+      expect(defaultNumeric("99.9", 10)).toBe(99.9);
+    });
+
+    it("deve retornar 0 para um array vazio, pois Number([]) é 0", () => {
+      expect(defaultNumeric([], 10)).toBe(0);
+    });
+
+    it("deve retornar 0 para null, pois Number(null) é 0", () => {
+      expect(defaultNumeric(null, 10)).toBe(0);
+    });
+  });
+
+  // ----------------------------------------------------------------------------------------------
+  // Testes para valores que devem falhar na verificação e retornar o valor padrão.
+  // ----------------------------------------------------------------------------------------------
+  describe("Casos Inválidos (Valores que Devem Retornar o Padrão)", () => {
+    it.each([
+      { value: "abc", description: "string não numérica" },
+      { value: NaN, description: "NaN" },
+      { value: Infinity, description: "Infinity" },
+      { value: -Infinity, description: "-Infinity" },
+      { value: undefined, description: "undefined" },
+      { value: {}, description: "objeto vazio" },
+      { value: { a: 1 }, description: "objeto preenchido" },
+      { value: () => {}, description: "função" },
+    ])("deve retornar o valor padrão para o tipo $description", ({ value }) => {
+      expect(defaultNumeric(value, 99)).toBe(99);
+    });
+  });
+
+  // ----------------------------------------------------------------------------------------------
+  // Testes para cenários específicos e de borda.
+  // ----------------------------------------------------------------------------------------------
+  describe("Casos de Borda e Especiais", () => {
+    it("deve retornar um defaultValue que é zero", () => {
+      expect(defaultNumeric("inválido", 0)).toBe(0);
+    });
+
+    it("deve retornar um defaultValue que é um número negativo", () => {
+      expect(defaultNumeric("inválido", -50)).toBe(-50);
+    });
+
+    it("deve retornar undefined se o defaultValue for undefined", () => {
+      expect(defaultNumeric("inválido", undefined)).toBe(undefined);
+    });
+
+    it("deve lançar um TypeError se o input for um Symbol", () => {
+      // O comportamento padrão de Number(Symbol) é lançar um erro.
+      // O teste confirma que a função não trata essa exceção.
+      expect(() => defaultNumeric(Symbol("id"), 10)).toThrow(TypeError);
+    });
+  });
+
+  // ----------------------------------------------------------------------------------------------
+  // Testes que validam o comportamento real do código em contraste com a documentação.
+  // Isso é útil para identificar a necessidade de atualizar o código ou a documentação.
+  // ----------------------------------------------------------------------------------------------
+  describe("Discrepâncias com a Documentação (Comportamento Atual do Código)", () => {
+    it("NÃO retorna o valor padrão para números negativos (ao contrário do exemplo JSDoc)", () => {
+      // O JSDoc diz: defaultNumeric(-3, 1) -> Retorna 1
+      // O código atual retorna: -3
+      expect(defaultNumeric(-3, 1)).toBe(-3);
+    });
+
+    it("NÃO arredonda floats para baixo (ao contrário do exemplo JSDoc)", () => {
+      // O JSDoc diz: defaultNumeric(1.9, 1) -> Retorna 1
+      // O código atual retorna: 1.9
+      expect(defaultNumeric(1.9, 1)).toBe(1.9);
+    });
+  });
+});
+
 // ------------------------------------------------------------------------------------------------

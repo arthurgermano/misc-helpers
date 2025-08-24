@@ -1,11 +1,9 @@
-const toString = require("./toString.js");
+import toString from "./toString.js";
 
 // ------------------------------------------------------------------------------------------------
 
 /**
  * @file Utilitário para extrair apenas letras de um valor.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -42,4 +40,4 @@ function regexLettersOnly(text = "") {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = regexLettersOnly;
+export default regexLettersOnly;

@@ -1,12 +1,10 @@
-const toString = require("./toString.js");
-const isNumber = require("../helpers/isNumber.js");
+import toString from "./toString.js";
+import isNumber from "../helpers/isNumber.js";
 
 // ------------------------------------------------------------------------------------------------
 
 /**
  * @file Utilitário para converter strings de moeda brasileira (BRL) para um número.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.1.0
  */
 
 /**
@@ -74,4 +72,4 @@ function currencyBRToFloat(moneyValue) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = currencyBRToFloat;
+export default currencyBRToFloat;

@@ -1,11 +1,9 @@
-const toString = require("./toString.js");
+import toString from "./toString.js";
 
 // ------------------------------------------------------------------------------------------------
 
 /**
  * @file Utilitário para extrair apenas dígitos de um valor.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -44,4 +42,4 @@ function regexDigitsOnly(text = "") {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = regexDigitsOnly;
+export default regexDigitsOnly;

@@ -37,6 +37,6 @@ function validateEmail(email = "") {
 // ------------------------------------------------------------------------------------------------
 
 // Exporta a função para uso em ambientes Node.js (CommonJS).
-module.exports = validateEmail;
+export default validateEmail;
 
 // ------------------------------------------------------------------------------------------------

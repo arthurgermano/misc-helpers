@@ -42,24 +42,35 @@
  */
 function getCrypto() {
   // Check for browser environment by testing window object availability
-  if (typeof window !== 'undefined') {
-    // Validate that Web Crypto API is available in the browser context
-    if (!window.crypto) {
-      throw new Error(
-        'window.crypto is not defined - Only works with HTTPS Protocol'
-      );
-    }
-    
+  if (typeof window !== "undefined" && typeof window.crypto !== "undefined") {
     // Return browser's Web Crypto API
     return window.crypto;
   }
   
   // Server-side environment detected - load Node.js crypto module
-  // Using direct require since we're already in Node.js context
-  return require('crypto');
+  try {
+    // Try different methods to load crypto module for maximum compatibility
+    
+    // Method 1: Try global require (CommonJS or Node.js with createRequire)
+    if (typeof require !== 'undefined') {
+      return require('crypto');
+    }
+    
+    // ESM in Node.js (no require available)
+    if (typeof module !== "undefined" && module.createRequire) {
+      const require = module.createRequire(import.meta.url);
+      return require("crypto");
+    }
+    
+    // If all methods fail, throw descriptive error
+    throw new Error('No method available to load crypto module in current environment');
+    
+  } catch (error) {
+    throw new Error(`Failed to load crypto module: ${error.message}`);
+  }
 }
 
 // ------------------------------------------------------------------------------------------------
 
-// Export for CommonJS compatibility (Node.js)
-module.exports = getCrypto;
+// Export for ESM
+export default getCrypto;

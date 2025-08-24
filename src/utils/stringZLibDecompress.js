@@ -1,11 +1,9 @@
-const { unzlibSync, strFromU8 } = require("fflate");
+import { unzlibSync, strFromU8 } from "fflate";
 
 // ------------------------------------------------------------------------------------------------
 
 /**
  * @file Utilitário cross-platform para descompressão de strings com Zlib.
- * @author Seu Nome <seu.email@example.com>
- * @version 1.0.0
  */
 
 /**
@@ -95,4 +93,4 @@ function stringZLibDecompress(compressedData, options = {}) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = stringZLibDecompress;
+export default stringZLibDecompress;

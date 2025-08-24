@@ -1,7 +1,5 @@
 /**
  * @file Utilitário para concatenação de objetos "buffer-like".
- * @author Seu Nome <seu.email@example.com>
- * @version 2.3.0
  */
 
 /**
@@ -57,4 +55,4 @@ function bufferConcatenate(buffer1, buffer2) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = bufferConcatenate;
+export default bufferConcatenate;

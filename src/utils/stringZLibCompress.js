@@ -1,11 +1,9 @@
-const { zlibSync, strToU8 } = require("fflate");
+import { zlibSync, strToU8 } from "fflate";
 
 // ------------------------------------------------------------------------------------------------
 
 /**
  * @file Utilitário cross-platform para compressão de strings com Zlib.
- * @author Seu Nome <seu.email@example.com>
- * @version 1.0.0
  */
 
 /**
@@ -86,4 +84,4 @@ function stringZLibCompress(text, options = {}) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = stringZLibCompress;
+export default stringZLibCompress;

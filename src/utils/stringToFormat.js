@@ -1,13 +1,11 @@
-const toString = require("./toString.js");
-const regexDigitsOnly = require("./regexDigitsOnly");
-const { STRING_FORMAT_CNPJ } = require("../constants.js");
+import toString from "./toString.js";
+import regexDigitsOnly from "./regexDigitsOnly";
+import { STRING_FORMAT_CNPJ } from "../constants.js";
 
 // ------------------------------------------------------------------------------------------------
 
 /**
  * @file Utilitário para aplicar máscaras de formatação a strings.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -75,4 +73,4 @@ function stringToFormat(
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = stringToFormat;
+export default stringToFormat;

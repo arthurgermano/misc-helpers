@@ -1,13 +1,11 @@
-const { DATE_ISO_FORMAT, DATE_BR_HOUR_FORMAT_D } = require("../constants.js");
-const stringToDate = require("./stringToDate.js");
-const dateToFormat = require("./dateToFormat.js");
+import { DATE_ISO_FORMAT, DATE_BR_HOUR_FORMAT_D } from "../constants.js";
+import stringToDate from "./stringToDate.js";
+import dateToFormat from "./dateToFormat.js";
 
 // ------------------------------------------------------------------------------------------------
 
 /**
  * @file Utilitário para re-formatar strings de data.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.1.0
  */
 
 /**
@@ -54,4 +52,4 @@ function stringToDateToFormat(
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = stringToDateToFormat;
+export default stringToDateToFormat;

@@ -1,7 +1,5 @@
 /**
  * @file Utilitário para criar uma função "throttled" (limitada por frequência).
- * @author Seu Nome <seu.email@example.com>
- * @version 1.0.0
  */
 
 /**
@@ -82,4 +80,4 @@ function throttle(callback, wait) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = throttle
+export default throttle

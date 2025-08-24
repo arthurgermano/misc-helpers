@@ -1,11 +1,9 @@
-const toString = require("./toString.js");
+import toString from "./toString.js";
 
 // ------------------------------------------------------------------------------------------------
 
 /**
  * @file Utilitário para substituir caracteres em uma string com base em um conjunto permitido.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.1.0
  */
 
 /**
@@ -65,4 +63,4 @@ function regexReplaceTrim(
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = regexReplaceTrim;
+export default regexReplaceTrim;

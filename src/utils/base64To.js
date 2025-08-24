@@ -1,7 +1,5 @@
 /**
  * @file Utilitário cross-environment para codificação em Base64.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -64,4 +62,4 @@ function base64To(text = "", fromFormat) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = base64To;
+export default base64To;

@@ -1,12 +1,10 @@
-const toString = require("./toString.js");
-const isObject = require("../helpers/isObject");
+import toString from "./toString.js";
+import isObject from "../helpers/isObject";
 
 // ------------------------------------------------------------------------------------------------
 
 /**
  * @file Utilitário para remover substrings duplicadas de uma string.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.2.0
  */
 
 /**
@@ -79,4 +77,4 @@ function removeDuplicatedStrings(
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = removeDuplicatedStrings;
+export default removeDuplicatedStrings;

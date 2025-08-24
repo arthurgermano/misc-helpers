@@ -1,11 +1,9 @@
-const toString = require("./toString");
+import toString from "./toString";
 
 // ------------------------------------------------------------------------------------------------
 
 /**
  * @file Utilitário para gerar um ID de string simples.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -65,4 +63,4 @@ function generateSimpleId(id, separator = "_") {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = generateSimpleId;
+export default generateSimpleId;

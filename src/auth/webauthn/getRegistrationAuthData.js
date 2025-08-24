@@ -1,11 +1,9 @@
 /**
  * @file Módulo para processar e extrair dados de uma credencial de registro WebAuthn.
- * @author Seu Nome <seu.email@example.com>
- * @version 1.0.0
  */
 
-const cbor = require("cbor-x");
-const base64FromBuffer = require("../../utils/base64FromBuffer");
+import { decode } from "cbor-x";
+import base64FromBuffer from "../../utils/base64FromBuffer";
 
 // ------------------------------------------------------------------------------------------------
 
@@ -21,7 +19,7 @@ const base64FromBuffer = require("../../utils/base64FromBuffer");
  */
 function parseAuthenticatorData(attestationObjectBuffer) {
   // 1. Decodifica o objeto de atestado do formato CBOR para acessar seus campos internos.
-  const attestationObject = cbor.decode(new Uint8Array(attestationObjectBuffer));
+  const attestationObject = decode(new Uint8Array(attestationObjectBuffer));
   const { authData } = attestationObject;
 
   // 2. Define constantes para os offsets e comprimentos dos campos na estrutura `authData`,
@@ -39,8 +37,10 @@ function parseAuthenticatorData(attestationObjectBuffer) {
   const AAGUID_LENGTH = 16;
   const CREDENTIAL_ID_LENGTH_BYTES = 2;
 
-  const CREDENTIAL_ID_LENGTH_OFFSET = ATTESTED_CREDENTIAL_DATA_OFFSET + AAGUID_LENGTH; // 53
-  const CREDENTIAL_ID_OFFSET = CREDENTIAL_ID_LENGTH_OFFSET + CREDENTIAL_ID_LENGTH_BYTES; // 55
+  const CREDENTIAL_ID_LENGTH_OFFSET =
+    ATTESTED_CREDENTIAL_DATA_OFFSET + AAGUID_LENGTH; // 53
+  const CREDENTIAL_ID_OFFSET =
+    CREDENTIAL_ID_LENGTH_OFFSET + CREDENTIAL_ID_LENGTH_BYTES; // 55
 
   // 3. Extrai o comprimento do ID da credencial. Este é um inteiro de 2 bytes (Big Endian).
   // Usamos um DataView para garantir a interpretação correta dos bytes.
@@ -117,6 +117,6 @@ function getRegistrationAuthData(credential) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = getRegistrationAuthData;
+export default getRegistrationAuthData;
 
 // ------------------------------------------------------------------------------------------------

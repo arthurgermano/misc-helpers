@@ -78,6 +78,6 @@ function validateCPF(cpf = "") {
 // ------------------------------------------------------------------------------------------------
 
 // Exporta a função para uso em ambientes Node.js (CommonJS).
-module.exports = validateCPF;
+export default validateCPF;
 
 // ------------------------------------------------------------------------------------------------

@@ -1,7 +1,7 @@
-const getCrypto = require("./getCrypto");
-const bufferToString = require("../utils/bufferToString");
-const base64ToBuffer = require("../utils/base64ToBuffer");
-const importCryptoKey = require("./importCryptoKey.js");
+import getCrypto from "./getCrypto";
+import bufferToString from "../utils/bufferToString";
+import base64ToBuffer from "../utils/base64ToBuffer";
+import importCryptoKey from "./importCryptoKey.js";
 
 // ------------------------------------------------------------------------------------------------
 
@@ -88,6 +88,6 @@ async function decrypt(privateKey, encryptedMessage, props = {}) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = decrypt;
+export default decrypt;
 
 // ------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-const getCrypto = require('./getCrypto.js');
+import getCrypto from './getCrypto.js';
 
 // ------------------------------------------------------------------------------------------------
 
@@ -108,4 +108,4 @@ async function importCryptoKey(format, keyData, algorithm, extractable, keyUsage
 // ------------------------------------------------------------------------------------------------
 
 // Export for CommonJS compatibility (Node.js)
-module.exports = importCryptoKey;
+export default importCryptoKey;

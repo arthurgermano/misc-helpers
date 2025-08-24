@@ -1,4 +1,4 @@
-const getCrypto = require('./getCrypto');
+import getCrypto from './getCrypto';
 
 // ------------------------------------------------------------------------------------------------
 
@@ -121,4 +121,4 @@ async function verifySignature(algorithm, key, signature, data) {
 // ------------------------------------------------------------------------------------------------
 
 // Export for CommonJS compatibility (Node.js)
-module.exports = verifySignature;
+export default verifySignature;

@@ -1,7 +1,5 @@
 /**
  * @file Módulo para mesclar objetos de forma imutável.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -132,6 +130,6 @@ function assign(target = {}, source = {}, throwsError = true) {
 // ------------------------------------------------------------------------------------------------
 
 // Garante compatibilidade com o sistema de módulos CommonJS (Node.js).
-module.exports = assign;
+export default assign;
 
 // ------------------------------------------------------------------------------------------------

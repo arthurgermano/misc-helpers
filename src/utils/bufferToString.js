@@ -1,7 +1,5 @@
 /**
  * @file Utilitário para converter um buffer de bytes para uma string.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -59,4 +57,4 @@ function bufferToString(buffer, encoding = "utf-8") {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = bufferToString;
+export default bufferToString;

@@ -1,7 +1,5 @@
 /**
  * @file Utilitário para gerar strings aleatórias seguras.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 // Define os conjuntos de caracteres como constantes para clareza e reutilização.
@@ -79,4 +77,4 @@ function generateRandomString(size = 32, options = {}) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = generateRandomString;
+export default generateRandomString;

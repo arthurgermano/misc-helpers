@@ -1,15 +1,13 @@
 /**
  * @file Módulo para validação de RPID (Relying Party ID) usando dependências específicas.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 // Importa as utilidades necessárias de outros módulos.
 // A responsabilidade pela implementação de baixo nível é delegada a essas funções.
-const base64ToBuffer = require("../../utils/base64ToBuffer");
-const bufferCompare = require("../../utils/bufferCompare");
-const bufferFromString = require("../../utils/bufferFromString");
-const getCrypto = require("../../crypto/getCrypto.js");
+import base64ToBuffer from "../../utils/base64ToBuffer";
+import bufferCompare from "../../utils/bufferCompare";
+import bufferFromString from "../../utils/bufferFromString";
+import getCrypto from "../../crypto/getCrypto.js";
 
 // ------------------------------------------------------------------------------------------------
 /**
@@ -85,6 +83,6 @@ async function validateRPID(originalRPID, verifyRPID, algorithm = "SHA-256") {
 /**
  * Exporta a função `validateRPID` para uso em módulos CommonJS (padrão do Node.js).
  */
-module.exports = validateRPID;
+export default validateRPID;
 
 // ------------------------------------------------------------------------------------------------

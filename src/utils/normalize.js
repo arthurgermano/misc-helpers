@@ -1,11 +1,9 @@
-const isNumber = require("../helpers/isNumber");
+import isNumber from "../helpers/isNumber";
 
 // ------------------------------------------------------------------------------------------------
 
 /**
  * @file Utilitário para normalizar strings, removendo acentos.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -51,4 +49,4 @@ function normalize(text = "") {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = normalize;
+export default normalize;

@@ -1,7 +1,5 @@
 /**
  * @file Módulo para iniciar o processo de registro WebAuthn no navegador.
- * @author Seu Nome <seu.email@example.com>
- * @version 1.0.0
  */
 
 // ------------------------------------------------------------------------------------------------
@@ -112,6 +110,6 @@ async function getWebAuthnRegistrationCredential(props = {}, callback) {
 /**
  * Exporta a função para uso em módulos CommonJS.
  */
-module.exports = getWebAuthnRegistrationCredential;
+export default getWebAuthnRegistrationCredential;
 
 // ------------------------------------------------------------------------------------------------

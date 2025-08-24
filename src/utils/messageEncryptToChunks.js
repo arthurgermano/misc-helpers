@@ -1,5 +1,5 @@
-const { encrypt } = require("../crypto");
-const base64To = require("../utils/base64To");
+import encrypt from "../crypto/encrypt";
+import base64To from "../utils/base64To";
 
 // ------------------------------------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ async function messageEncryptToChunks(publicKey, message, props = {}) {
   }
 
   // 3. Cria um array de Promises para encriptar cada pedaço da string Base64.
-  const encryptionPromises = chunks.map(chunk => 
+  const encryptionPromises = chunks.map((chunk) =>
     encrypt(publicKey, chunk, props)
   );
 
@@ -43,4 +43,4 @@ async function messageEncryptToChunks(publicKey, message, props = {}) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = messageEncryptToChunks;
+export default messageEncryptToChunks;

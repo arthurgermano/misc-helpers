@@ -68,5 +68,5 @@ function setConditionBetweenValues(
 }
 
 // ------------------------------------------------------------------------------------------------
-module.exports = setConditionBetweenValues;
+export default setConditionBetweenValues;
 // ------------------------------------------------------------------------------------------------

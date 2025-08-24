@@ -1,7 +1,5 @@
 /**
  * @file Utilitário para criar uma função "debounced".
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -71,4 +69,4 @@ function debouncer(callback, timeout = 1000) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = debouncer;
+export default debouncer;

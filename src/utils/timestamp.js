@@ -68,4 +68,4 @@ function timestamp(format = 'D-MT-Y_H:MN:S:MS') {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = timestamp;
+export default timestamp;

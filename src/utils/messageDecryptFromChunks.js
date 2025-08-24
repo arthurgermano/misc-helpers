@@ -1,5 +1,5 @@
-const { decrypt } = require("../crypto");
-const base64From = require("../utils/base64From");
+import decrypt from "../crypto/decrypt";
+import base64From from "../utils/base64From";
 
 // ------------------------------------------------------------------------------------------------
 
@@ -35,4 +35,4 @@ async function messageDecryptFromChunks(privateKey, messageChunks, props = {}) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = messageDecryptFromChunks;
+export default messageDecryptFromChunks;

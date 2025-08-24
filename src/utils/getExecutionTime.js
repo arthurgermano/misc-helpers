@@ -1,7 +1,5 @@
 /**
  * @file Utilitário de alta precisão para medir o tempo de execução.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -77,4 +75,4 @@ function getExecutionTime(time) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = getExecutionTime;
+export default getExecutionTime;

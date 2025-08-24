@@ -1,4 +1,4 @@
-const base64FromBuffer = require("../../utils/base64FromBuffer");
+import base64FromBuffer from "../../utils/base64FromBuffer";
 
 // ------------------------------------------------------------------------------------------------
 
@@ -201,6 +201,6 @@ function parseExtensionData(flags, authData, pointer) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = getAuthenticationAuthData;
+export default getAuthenticationAuthData;
 
 // ------------------------------------------------------------------------------------------------

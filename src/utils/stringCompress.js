@@ -1,11 +1,9 @@
-const { compressSync, strToU8 } = require("fflate");
+import { compressSync, strToU8 } from "fflate";
 
 // ------------------------------------------------------------------------------------------------
 
 /**
  * @file Utilitário cross-platform e performático para compressão de strings.
- * @author Seu Nome <seu.email@example.com>
- * @version 3.0.0
  */
 
 /**
@@ -90,4 +88,4 @@ function stringCompress(text, options = {}) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = stringCompress;
+export default stringCompress;

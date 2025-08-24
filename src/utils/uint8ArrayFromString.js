@@ -1,7 +1,5 @@
 /**
  * @file Utilitário cross-platform para converter strings UTF-8 para Uint8Array.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.1.0
  */
 
 /**
@@ -61,4 +59,4 @@ function uint8ArrayFromString(text = "", joinChar) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = uint8ArrayFromString;
+export default uint8ArrayFromString;

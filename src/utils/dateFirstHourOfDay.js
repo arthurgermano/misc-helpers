@@ -1,11 +1,9 @@
-const isInstanceOf = require("../helpers/isInstanceOf.js");
+import isInstanceOf from "../helpers/isInstanceOf.js";
 
 // ------------------------------------------------------------------------------------------------
 
 /**
  * @file Utilitário para obter o início de um dia a partir de um objeto Date.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.1.0
  */
 
 /**
@@ -49,4 +47,4 @@ function dateFirstHourOfDay(date) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = dateFirstHourOfDay;
+export default dateFirstHourOfDay;

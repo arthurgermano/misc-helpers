@@ -1,11 +1,9 @@
 /**
  * @file Módulo otimizado para validação de credencial de registro WebAuthn.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
-const base64ToBuffer = require("../../utils/base64ToBuffer");
-const cbor = require("cbor-x");
+import base64ToBuffer from "../../utils/base64ToBuffer";
+import { decode } from "cbor-x";
 
 // ------------------------------------------------------------------------------------------------
 
@@ -77,7 +75,7 @@ function validateRegistration(credential, expectedProps = {}) {
     credential.response.attestationObject
   );
   // A biblioteca `cbor.decode` é altamente otimizada para essa operação.
-  const attestationObject = cbor.decode(new Uint8Array(attestationObjectBuffer));
+  const attestationObject = decode(new Uint8Array(attestationObjectBuffer));
 
   if (!attestationObject.fmt) {
     throw new Error("Missing attestation object format");
@@ -100,6 +98,6 @@ function validateRegistration(credential, expectedProps = {}) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = validateRegistration;
+export default validateRegistration;
 
 // ------------------------------------------------------------------------------------------------

@@ -1,11 +1,9 @@
-const base64To = require("./base64To");
+import base64To from "./base64To";
 
 // ------------------------------------------------------------------------------------------------
 
 /**
  * @file Utilitário para conversão de ArrayBuffer para Base64.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -64,4 +62,4 @@ function base64FromBuffer(buffer) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = base64FromBuffer;
+export default base64FromBuffer;

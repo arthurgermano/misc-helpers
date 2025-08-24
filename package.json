@@ -1,20 +1,23 @@
 {
   "name": "misc-helpers",
-  "version": "2.0.2",
+  "version": "2.0.10",
   "author": "Arthur José Germano",
   "license": "MIT",
   "description": "Uma coleção robusta de helpers, validadores e classes de alta performance para JavaScript/Node.js, incluindo processamento em lote (bulk), validadores de documentos brasileiros e utilitários de criptografia.",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
   "files": [
-    "dist"
+    "dist",
+    "readme.md",
+    "LICENSE"
   ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
   },
   "scripts": {
@@ -26,7 +29,11 @@
     "testWebAuthn2": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/webauthn2.test.js",
     "testWebAuthn3": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/webauthn3.test.js",
     "testBulkProcessor": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/bulkProcessor.test.js",
-    "build": "tsup"
+    "build": "tsup",
+    "build:debug": "tsup --minify false --sourcemap",
+    "dev": "tsup --watch",
+    "prepublishOnly": "npm run test && npm run build",
+    "check-exports": "node -e \"console.log(Object.keys(require('./dist/index.js')))\""
   },
   "keywords": [
     "helpers",

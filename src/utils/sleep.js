@@ -1,7 +1,5 @@
 /**
  * @file Utilitário para criar um atraso (delay) programático.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -66,4 +64,4 @@ function sleep(milliseconds, returnValue = true, throwError = false) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = sleep;
+export default sleep;

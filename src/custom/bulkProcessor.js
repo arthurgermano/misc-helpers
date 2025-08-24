@@ -4,7 +4,7 @@
 //               em lote (bulk). Abstrai a complexidade de acumular itens, enviá-los em
 //               batches, e gerenciar concorrência e finalização segura.
 // =================================================================================================
-const defaultNumeric = require("../helpers/defaultNumeric.js");
+import defaultNumeric from "../helpers/defaultNumeric.js";
 
 /**
  * @typedef {object} Logger
@@ -487,4 +487,4 @@ class BulkProcessor {
 // Exportação da classe para o sistema de módulos do Node.js (CommonJS).
 // Permite que a classe seja importada e instanciada em outros arquivos via `require` ou `import`.
 // =================================================================================================
-module.exports = BulkProcessor;
+export default BulkProcessor;

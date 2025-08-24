@@ -4,10 +4,10 @@
  */
 
 // --- Dependências do Módulo ---
-const { DATE_BR_FORMAT_D } = require("../../../constants.js");
-const stringToDate = require("../../../utils/stringToDate.js");
-const dateFirstHourOfDay = require("../../../utils/dateFirstHourOfDay.js");
-const dateLastHourOfDay = require("../../../utils/dateLastHourOfDay.js");
+import { DATE_BR_FORMAT_D } from "../../../constants.js";
+import stringToDate from "../../../utils/stringToDate.js";
+import dateFirstHourOfDay from "../../../utils/dateFirstHourOfDay.js";
+import dateLastHourOfDay from "../../../utils/dateLastHourOfDay.js";
 
 // ------------------------------------------------------------------------------------------------
 
@@ -101,5 +101,5 @@ function setConditionBetweenDates(
 }
 
 // ------------------------------------------------------------------------------------------------
-module.exports = setConditionBetweenDates;
+export default setConditionBetweenDates;
 // ------------------------------------------------------------------------------------------------

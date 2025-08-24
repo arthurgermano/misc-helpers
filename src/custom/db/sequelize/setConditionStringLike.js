@@ -50,5 +50,5 @@ function setConditionStringLike(object, key, insensitive = true) {
 }
 
 // ------------------------------------------------------------------------------------------------
-module.exports = setConditionStringLike;
+export default setConditionStringLike;
 // ------------------------------------------------------------------------------------------------

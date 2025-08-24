@@ -1,7 +1,5 @@
 /**
  * @file Utilitário seguro para analisar (parse) strings JSON.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -67,4 +65,4 @@ function JSONFrom(text, throwsError = true) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = JSONFrom;
+export default JSONFrom;

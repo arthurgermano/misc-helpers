@@ -1,7 +1,5 @@
 /**
  * @file Utilitário seguro e robusto para conversão de valores para string.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.1.0
  */
 
 /**
@@ -61,4 +59,4 @@ function toString(textObj = "", objectToJSON = true) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = toString;
+export default toString;

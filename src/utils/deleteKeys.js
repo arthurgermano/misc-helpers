@@ -1,11 +1,9 @@
-const isObject = require("../helpers/isObject.js");
+import isObject from "../helpers/isObject.js";
 
 // ------------------------------------------------------------------------------------------------
 
 /**
  * @file Utilitário para remover chaves de um objeto de forma não-mutável.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -61,4 +59,4 @@ function deleteKeys(object = {}, keys = []) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = deleteKeys;
+export default deleteKeys;

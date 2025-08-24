@@ -1,17 +1,15 @@
 /**
  * @file Módulo otimizado para validação de asserção de autenticação WebAuthn.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.2.0
  */
 
-const verifySignature = require("../../crypto/verifySignature");
-const importCryptoKey = require("../../crypto/importCryptoKey");
-const validateRPID = require("./validateRPID");
-const isNumber = require("../../helpers/isNumber");
-const base64ToBuffer = require("../../utils/base64ToBuffer");
-const base64From = require("../../utils/base64From");
-const bufferConcatenate = require("../../utils/bufferConcatenate");
-const convertECDSAASN1Signature = require("./convertECDSAASN1Signature");
+import verifySignature from "../../crypto/verifySignature";
+import importCryptoKey from "../../crypto/importCryptoKey";
+import validateRPID from "./validateRPID";
+import isNumber from "../../helpers/isNumber";
+import base64ToBuffer from "../../utils/base64ToBuffer";
+import base64From from "../../utils/base64From";
+import bufferConcatenate from "../../utils/bufferConcatenate";
+import convertECDSAASN1Signature from "./convertECDSAASN1Signature";
 
 // ------------------------------------------------------------------------------------------------
 /**
@@ -206,6 +204,6 @@ async function validateAuthentication(
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = validateAuthentication;
+export default validateAuthentication;
 
 // ------------------------------------------------------------------------------------------------

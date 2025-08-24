@@ -1,7 +1,5 @@
 /**
  * @file Módulo para iniciar o processo de autenticação WebAuthn no navegador.
- * @author Seu Nome <seu.email@example.com>
- * @version 1.0.0
  */
 
 // ------------------------------------------------------------------------------------------------
@@ -87,6 +85,6 @@ async function getWebAuthnAuthenticationAssertion(props, callback) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = getWebAuthnAuthenticationAssertion;
+export default getWebAuthnAuthenticationAssertion;
 
 // ------------------------------------------------------------------------------------------------

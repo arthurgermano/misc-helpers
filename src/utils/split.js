@@ -1,7 +1,5 @@
 /**
  * @file Utilitário seguro para dividir (split) strings.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -44,4 +42,4 @@ function split(text, char = " ") {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = split;
+export default split;

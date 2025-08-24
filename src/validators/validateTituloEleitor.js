@@ -88,5 +88,5 @@ function validateTituloEleitor(titulo = "") {
 }
 
 // ------------------------------------------------------------------------------------------------
-module.exports = validateTituloEleitor;
+export default validateTituloEleitor;
 // ------------------------------------------------------------------------------------------------

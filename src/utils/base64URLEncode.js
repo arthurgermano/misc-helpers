@@ -1,12 +1,10 @@
-const toString = require("./toString");
-const base64To = require("./base64To");
+import toString from "./toString";
+import base64To from "./base64To";
 
 // ------------------------------------------------------------------------------------------------
 
 /**
  * @file Utilitário para codificação no formato Base64URL.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -45,4 +43,4 @@ function base64URLEncode(text = "", fromFormat = "utf8") {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = base64URLEncode;
+export default base64URLEncode;

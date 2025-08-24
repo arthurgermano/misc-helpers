@@ -1,11 +1,9 @@
-const { decompressSync, strFromU8 } = require("fflate");
+import { decompressSync, strFromU8 } from "fflate";
 
 // ------------------------------------------------------------------------------------------------
 
 /**
  * @file Utilitário cross-platform e performático para descompressão de strings.
- * @author Seu Nome <seu.email@example.com>
- * @version 3.0.0
  */
 
 /**
@@ -99,4 +97,4 @@ function stringDecompress(compressedData, options = {}) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = stringDecompress;
+export default stringDecompress;

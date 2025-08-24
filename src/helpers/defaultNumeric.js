@@ -33,5 +33,5 @@ function defaultNumeric(checkValue, defaultValue) {
 }
 
 // ------------------------------------------------------------------------------------------------
-module.exports = defaultNumeric;
+export default defaultNumeric;
 // ------------------------------------------------------------------------------------------------

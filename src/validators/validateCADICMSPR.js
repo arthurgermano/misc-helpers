@@ -91,6 +91,6 @@ function validateCADICMSPR(cadicms) {
 
 // Mantém a exportação no padrão CommonJS para compatibilidade com Node.js.
 // Em um ambiente de navegador, esta linha será ignorada.
-module.exports = validateCADICMSPR;
+export default validateCADICMSPR;
 
 // ------------------------------------------------------------------------------------------------

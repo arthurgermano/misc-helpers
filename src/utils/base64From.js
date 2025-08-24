@@ -1,7 +1,5 @@
 /**
  * @file Utilitário cross-environment para decodificação de Base64.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -66,4 +64,4 @@ function base64From(text = "") {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = base64From;
+export default base64From;

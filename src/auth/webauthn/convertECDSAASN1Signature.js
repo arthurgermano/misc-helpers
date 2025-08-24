@@ -1,4 +1,4 @@
-const bufferConcatenate = require("../../utils/bufferConcatenate");
+import bufferConcatenate from "../../utils/bufferConcatenate";
 
 // ------------------------------------------------------------------------------------------------
 
@@ -124,6 +124,6 @@ function readASN1IntegerSequence(input) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = convertECDSAASN1Signature;
+export default convertECDSAASN1Signature;
 
 // ------------------------------------------------------------------------------------------------

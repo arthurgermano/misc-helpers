@@ -1,7 +1,5 @@
 /**
  * @file Utilitário para conversão de Base64URL para Base64 padrão.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -50,4 +48,4 @@ function base64FromBase64URLSafe(urlSafeBase64 = "") {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = base64FromBase64URLSafe;
+export default base64FromBase64URLSafe;

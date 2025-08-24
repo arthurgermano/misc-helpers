@@ -121,6 +121,6 @@ function validateCNPJ(cnpj = "", options = {}) {
 // ------------------------------------------------------------------------------------------------
 
 // Exporta a função para uso em ambientes Node.js (CommonJS).
-module.exports = validateCNPJ;
+export default validateCNPJ;
 
 // ------------------------------------------------------------------------------------------------

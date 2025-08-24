@@ -1,12 +1,10 @@
 /**
  * @fileoverview Fornece uma função para validar Chaves PIX.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.5.0
  */
 
-const validateCNPJ = require("./validateCNPJ");
-const validateCPF = require("./validateCPF");
-const validateEmail = require("./validateEmail");
+import validateCNPJ from "./validateCNPJ";
+import validateCPF from "./validateCPF";
+import validateEmail from "./validateEmail";
 
 /**
  * Regex para validar um UUID v4 (formato da Chave Aleatória PIX).
@@ -66,4 +64,4 @@ function validateChavePix(chave = "") {
 }
 
 // ------------------------------------------------------------------------------------------------
-module.exports = validateChavePix;
+export default validateChavePix;

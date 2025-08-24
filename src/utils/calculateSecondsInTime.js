@@ -1,7 +1,5 @@
 /**
  * @file Utilitário para calcular timestamps baseados em segundos.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -51,4 +49,4 @@ function calculateSecondsInTime(seconds, add = true) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = calculateSecondsInTime;
+export default calculateSecondsInTime;

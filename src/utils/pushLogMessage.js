@@ -1,7 +1,5 @@
 /**
  * @file Utilitário para adicionar mensagens a um array de log.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.1.0
  */
 
 /**
@@ -68,4 +66,4 @@ function pushLogMessage(logObj, message, more_info) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = pushLogMessage;
+export default pushLogMessage;

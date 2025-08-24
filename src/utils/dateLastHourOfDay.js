@@ -1,11 +1,9 @@
-const isInstanceOf = require("../helpers/isInstanceOf.js");
+import isInstanceOf from "../helpers/isInstanceOf.js";
 
 // ------------------------------------------------------------------------------------------------
 
 /**
  * @file Utilitário para obter o final de um dia a partir de um objeto Date.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -52,4 +50,4 @@ function dateLastHourOfDay(date) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = dateLastHourOfDay;
+export default dateLastHourOfDay;

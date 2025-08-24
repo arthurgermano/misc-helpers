@@ -1,7 +1,5 @@
 /**
  * @file Utilitário para converter um buffer (ou sua representação em string) para uma string de texto.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.1.0
  */
 
 /**
@@ -64,4 +62,4 @@ function uint8ArrayToString(uint8Array, splitChar) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = uint8ArrayToString;
+export default uint8ArrayToString;

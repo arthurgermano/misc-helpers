@@ -1,13 +1,11 @@
-const { DATE_BR_FORMAT_D } = require("../constants.js");
-const { format } = require("date-fns/format");
-const isInstanceOf = require("../helpers/isInstanceOf.js");
+import { DATE_BR_FORMAT_D } from "../constants.js";
+import { format } from "date-fns/format";
+import isInstanceOf from "../helpers/isInstanceOf.js";
 
 // ------------------------------------------------------------------------------------------------
 
 /**
  * @file Utilitário para formatar objetos Date em strings usando date-fns.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.1.0
  */
 
 /**
@@ -46,4 +44,4 @@ function dateToFormat(date, stringFormat = DATE_BR_FORMAT_D) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = dateToFormat;
+export default dateToFormat;

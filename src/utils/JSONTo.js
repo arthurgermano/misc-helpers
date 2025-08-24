@@ -1,7 +1,5 @@
 /**
  * @file Utilitário seguro para converter valores JavaScript em strings JSON.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -61,4 +59,4 @@ function JSONTo(object = {}, throwsError = true) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = JSONTo;
+export default JSONTo;

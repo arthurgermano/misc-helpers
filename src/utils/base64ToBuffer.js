@@ -1,7 +1,5 @@
 /**
  * @file Utilitário para decodificar Base64 para um ArrayBuffer.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.1.0
  */
 
 /**
@@ -71,4 +69,4 @@ function base64ToBuffer(base64String = "") {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = base64ToBuffer;
+export default base64ToBuffer;

@@ -1,7 +1,5 @@
 /**
  * @file Utilitário para converter uma string para um buffer de bytes.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -52,4 +50,4 @@ function bufferFromString(txtString, encoding = "utf-8") {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = bufferFromString;
+export default bufferFromString;

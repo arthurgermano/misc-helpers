@@ -1,6 +1,6 @@
-const { DATE_ISO_FORMAT } = require("../constants.js");
-const { parse } = require("date-fns/parse");
-const isInstanceOf = require("../helpers/isInstanceOf");
+import { DATE_ISO_FORMAT } from "../constants.js";
+import { parse } from "date-fns/parse";
+import isInstanceOf from "../helpers/isInstanceOf";
 
 // ------------------------------------------------------------------------------------------------
 
@@ -66,4 +66,4 @@ function stringToDate(
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = stringToDate;
+export default stringToDate;

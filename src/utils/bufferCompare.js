@@ -1,7 +1,5 @@
 /**
  * @file Utilitário para comparação binária de ArrayBuffers.
- * @author Seu Nome <seu.email@example.com>
- * @version 2.0.0
  */
 
 /**
@@ -76,4 +74,4 @@ function bufferCompare(buffer1, buffer2) {
 
 // ------------------------------------------------------------------------------------------------
 
-module.exports = bufferCompare;
+export default bufferCompare;

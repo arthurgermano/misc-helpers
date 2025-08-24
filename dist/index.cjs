@@ -1,14 +1,121 @@
 var __defProp = Object.defineProperty;
-var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
-  get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
-}) : x)(function(x) {
-  if (typeof require !== "undefined") return require.apply(this, arguments);
-  throw Error('Dynamic require of "' + x + '" is not supported');
-});
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
 };
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// src/index.js
+var index_exports = {};
+__export(index_exports, {
+  JSONFrom: () => JSONFrom_default,
+  JSONTo: () => JSONTo_default,
+  assign: () => assign_default,
+  auth: () => auth,
+  base64From: () => base64From_default,
+  base64FromBase64URLSafe: () => base64FromBase64URLSafe_default,
+  base64FromBuffer: () => base64FromBuffer_default,
+  base64To: () => base64To_default,
+  base64ToBuffer: () => base64ToBuffer_default,
+  base64URLEncode: () => base64URLEncode_default,
+  bufferCompare: () => bufferCompare_default,
+  bufferConcatenate: () => bufferConcatenate_default,
+  bufferFromString: () => bufferFromString_default,
+  bufferToString: () => bufferToString_default,
+  bulkProcessor: () => bulkProcessor_default,
+  calculateSecondsInTime: () => calculateSecondsInTime_default,
+  constants: () => constants,
+  convertECDSAASN1Signature: () => convertECDSAASN1Signature_default,
+  crypto: () => crypto2,
+  currencyBRToFloat: () => currencyBRToFloat_default,
+  custom: () => custom,
+  dateCompareAsc: () => dateCompareAsc_default,
+  dateCompareDesc: () => dateCompareDesc_default,
+  dateFirstHourOfDay: () => dateFirstHourOfDay_default,
+  dateLastHourOfDay: () => dateLastHourOfDay_default,
+  dateToFormat: () => dateToFormat_default,
+  debouncer: () => debouncer_default,
+  decrypt: () => decrypt_default,
+  default: () => index_default,
+  defaultNumeric: () => defaultNumeric_default,
+  defaultValue: () => defaultValue_default,
+  deleteKeys: () => deleteKeys_default,
+  digest: () => digest_default,
+  encrypt: () => encrypt_default,
+  generateRandomString: () => generateRandomString_default,
+  generateSimpleId: () => generateSimpleId_default,
+  getAuthenticationAuthData: () => getAuthenticationAuthData_default,
+  getCrypto: () => getCrypto_default,
+  getExecutionTime: () => getExecutionTime_default,
+  getRegistrationAuthData: () => getRegistrationAuthData_default,
+  getWebAuthnAuthenticationAssertion: () => getWebAuthnAuthenticationAssertion_default,
+  getWebAuthnRegistrationCredential: () => getWebAuthnRegistrationCredential_default,
+  helpers: () => helpers,
+  importCryptoKey: () => importCryptoKey_default,
+  isInstanceOf: () => isInstanceOf_default,
+  isNumber: () => isNumber_default,
+  isObject: () => isObject_default,
+  messageDecryptFromChunks: () => messageDecryptFromChunks_default,
+  messageEncryptToChunks: () => messageEncryptToChunks_default,
+  normalize: () => normalize_default,
+  pickKeys: () => pickKeys_default,
+  pushLogMessage: () => pushLogMessage_default,
+  regexDigitsOnly: () => regexDigitsOnly_default,
+  regexLettersOnly: () => regexLettersOnly_default,
+  regexReplaceTrim: () => regexReplaceTrim_default,
+  removeDuplicatedStrings: () => removeDuplicatedStrings_default,
+  setConditionBetweenDates: () => setConditionsBetweenDates_default,
+  setConditionBetweenValues: () => setConditionsBetweenValues_default,
+  setConditionStringLike: () => setConditionStringLike_default,
+  sleep: () => sleep_default,
+  split: () => split_default,
+  stringCompress: () => stringCompress_default,
+  stringDecompress: () => stringDecompress_default,
+  stringToDate: () => stringToDate_default,
+  stringToDateToFormat: () => stringToDateToFormat_default,
+  stringToFormat: () => stringToFormat_default,
+  stringZLibCompress: () => stringZLibCompress_default,
+  stringZLibDecompress: () => stringZLibDecompress_default,
+  throttle: () => throttle_default,
+  timestamp: () => timestamp_default,
+  toString: () => toString_default,
+  uint8ArrayFromString: () => uint8ArrayFromString_default,
+  uint8ArrayToString: () => uint8ArrayToString_default,
+  utils: () => utils,
+  validateAuthentication: () => validateAuthentication_default,
+  validateCADICMSPR: () => validateCADICMSPR_default,
+  validateCEP: () => validateCEP_default,
+  validateCNH: () => validateCNH_default,
+  validateCNPJ: () => validateCNPJ_default,
+  validateCPF: () => validateCPF_default,
+  validateChavePix: () => validateChavePix_default,
+  validateEmail: () => validateEmail_default,
+  validatePISPASEPNIT: () => validatePISPASEPNIT_default,
+  validateRG: () => validateRG_default,
+  validateRPID: () => validateRPID_default,
+  validateRegistration: () => validateRegistration_default,
+  validateRenavam: () => validateRenavam_default,
+  validateTituloEleitor: () => validateTituloEleitor_default,
+  validators: () => validators,
+  verifySignature: () => verifySignature_default,
+  waitPlugin: () => waitPlugin_default
+});
+module.exports = __toCommonJS(index_exports);
+
+// node_modules/tsup/assets/cjs_shims.js
+var getImportMetaUrl = () => typeof document === "undefined" ? new URL(`file:${__filename}`).href : document.currentScript && document.currentScript.src || new URL("main.js", document.baseURI).href;
+var importMetaUrl = /* @__PURE__ */ getImportMetaUrl();
 
 // src/helpers/index.js
 var helpers_exports = {};
@@ -654,12 +761,12 @@ var constants_default = {
 };
 
 // src/utils/dateToFormat.js
-import { format } from "date-fns/format";
+var import_format = require("date-fns/format");
 function dateToFormat(date, stringFormat = DATE_BR_FORMAT_D) {
   if (!isInstanceOf_default(date, Date) || isNaN(date.getTime())) {
     return false;
   }
-  return format(date, stringFormat);
+  return (0, import_format.format)(date, stringFormat);
 }
 var dateToFormat_default = dateToFormat;
 
@@ -839,11 +946,11 @@ function getCrypto() {
     return window.crypto;
   }
   try {
-    if (typeof __require !== "undefined") {
-      return __require("crypto");
+    if (typeof require !== "undefined") {
+      return require("crypto");
     }
     if (typeof module !== "undefined" && module.createRequire) {
-      const require2 = module.createRequire(import.meta.url);
+      const require2 = module.createRequire(importMetaUrl);
       return require2("crypto");
     }
     throw new Error("No method available to load crypto module in current environment");
@@ -1077,7 +1184,7 @@ function split(text, char = " ") {
 var split_default = split;
 
 // src/utils/stringCompress.js
-import { compressSync, strToU8 } from "fflate";
+var import_fflate = require("fflate");
 function stringCompress(text, options = {}) {
   const finalOptions = {
     outputType: "base64",
@@ -1088,8 +1195,8 @@ function stringCompress(text, options = {}) {
   if (typeof text !== "string" || text.length === 0) {
     return finalOptions.outputType === "buffer" ? new Uint8Array() : "";
   }
-  const inputBuffer = strToU8(text);
-  const compressedBuffer = compressSync(inputBuffer, {
+  const inputBuffer = (0, import_fflate.strToU8)(text);
+  const compressedBuffer = (0, import_fflate.compressSync)(inputBuffer, {
     level: finalOptions.level,
     mem: finalOptions.mem
   });
@@ -1110,7 +1217,7 @@ function stringCompress(text, options = {}) {
 var stringCompress_default = stringCompress;
 
 // src/utils/stringDecompress.js
-import { decompressSync, strFromU8 } from "fflate";
+var import_fflate2 = require("fflate");
 function stringDecompress(compressedData, options = {}) {
   const finalOptions = {
     inputType: "base64",
@@ -1142,8 +1249,8 @@ function stringDecompress(compressedData, options = {}) {
     if (!inputBuffer || inputBuffer.byteLength === 0) {
       return "";
     }
-    const decompressedBuffer = decompressSync(inputBuffer);
-    return strFromU8(decompressedBuffer);
+    const decompressedBuffer = (0, import_fflate2.decompressSync)(inputBuffer);
+    return (0, import_fflate2.strFromU8)(decompressedBuffer);
   } catch (error) {
     return "";
   }
@@ -1151,11 +1258,11 @@ function stringDecompress(compressedData, options = {}) {
 var stringDecompress_default = stringDecompress;
 
 // src/utils/stringToDate.js
-import { parse } from "date-fns/parse";
+var import_parse = require("date-fns/parse");
 function stringToDate(stringDate, stringFormat = DATE_ISO_FORMAT, defaultDate = /* @__PURE__ */ new Date()) {
   let dateToProcess;
   if (typeof stringDate === "string") {
-    const parsedDate = parse(stringDate, stringFormat, /* @__PURE__ */ new Date());
+    const parsedDate = (0, import_parse.parse)(stringDate, stringFormat, /* @__PURE__ */ new Date());
     if (isInstanceOf_default(parsedDate, Date) && !isNaN(parsedDate.getTime())) {
       dateToProcess = parsedDate;
     } else {
@@ -1212,7 +1319,7 @@ function stringToFormat(text, pattern = STRING_FORMAT_CNPJ, options = {}) {
 var stringToFormat_default = stringToFormat;
 
 // src/utils/stringZLibCompress.js
-import { zlibSync, strToU8 as strToU82 } from "fflate";
+var import_fflate3 = require("fflate");
 function stringZLibCompress(text, options = {}) {
   const finalOptions = {
     outputType: "base64",
@@ -1223,8 +1330,8 @@ function stringZLibCompress(text, options = {}) {
   if (typeof text !== "string" || text.length === 0) {
     return finalOptions.outputType === "buffer" ? new Uint8Array() : "";
   }
-  const inputBuffer = strToU82(text);
-  const compressedBuffer = zlibSync(inputBuffer, {
+  const inputBuffer = (0, import_fflate3.strToU8)(text);
+  const compressedBuffer = (0, import_fflate3.zlibSync)(inputBuffer, {
     level: finalOptions.level,
     mem: finalOptions.mem
   });
@@ -1245,7 +1352,7 @@ function stringZLibCompress(text, options = {}) {
 var stringZLibCompress_default = stringZLibCompress;
 
 // src/utils/stringZLibDecompress.js
-import { unzlibSync, strFromU8 as strFromU82 } from "fflate";
+var import_fflate4 = require("fflate");
 function stringZLibDecompress(compressedData, options = {}) {
   const finalOptions = {
     inputType: "base64",
@@ -1277,8 +1384,8 @@ function stringZLibDecompress(compressedData, options = {}) {
     if (!inputBuffer || inputBuffer.byteLength === 0) {
       return "";
     }
-    const decompressedBuffer = unzlibSync(inputBuffer);
-    return strFromU82(decompressedBuffer);
+    const decompressedBuffer = (0, import_fflate4.unzlibSync)(inputBuffer);
+    return (0, import_fflate4.strFromU8)(decompressedBuffer);
   } catch (error) {
     return "";
   }
@@ -1951,9 +2058,9 @@ function parseExtensionData(flags, authData, pointer) {
 var getAuthenticationAuthData_default = getAuthenticationAuthData;
 
 // src/auth/webauthn/getRegistrationAuthData.js
-import { decode } from "cbor-x";
+var import_cbor_x = require("cbor-x");
 function parseAuthenticatorData(attestationObjectBuffer) {
-  const attestationObject = decode(new Uint8Array(attestationObjectBuffer));
+  const attestationObject = (0, import_cbor_x.decode)(new Uint8Array(attestationObjectBuffer));
   const { authData } = attestationObject;
   const RP_ID_HASH_OFFSET = 0;
   const RP_ID_HASH_LENGTH = 32;
@@ -2260,7 +2367,7 @@ async function validateAuthentication(credential, assertion, expectedProps = {},
 var validateAuthentication_default = validateAuthentication;
 
 // src/auth/webauthn/validateRegistration.js
-import { decode as decode2 } from "cbor-x";
+var import_cbor_x2 = require("cbor-x");
 function validateRegistration(credential, expectedProps = {}) {
   if (!credential) {
     throw new Error("Missing credential");
@@ -2295,7 +2402,7 @@ function validateRegistration(credential, expectedProps = {}) {
   const attestationObjectBuffer = base64ToBuffer_default(
     credential.response.attestationObject
   );
-  const attestationObject = decode2(new Uint8Array(attestationObjectBuffer));
+  const attestationObject = (0, import_cbor_x2.decode)(new Uint8Array(attestationObjectBuffer));
   if (!attestationObject.fmt) {
     throw new Error("Missing attestation object format");
   }
@@ -2863,97 +2970,97 @@ var miscHelpers = {
   validators: validators_exports
 };
 var index_default = miscHelpers;
-export {
-  JSONFrom_default as JSONFrom,
-  JSONTo_default as JSONTo,
-  assign_default as assign,
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  JSONFrom,
+  JSONTo,
+  assign,
   auth,
-  base64From_default as base64From,
-  base64FromBase64URLSafe_default as base64FromBase64URLSafe,
-  base64FromBuffer_default as base64FromBuffer,
-  base64To_default as base64To,
-  base64ToBuffer_default as base64ToBuffer,
-  base64URLEncode_default as base64URLEncode,
-  bufferCompare_default as bufferCompare,
-  bufferConcatenate_default as bufferConcatenate,
-  bufferFromString_default as bufferFromString,
-  bufferToString_default as bufferToString,
-  bulkProcessor_default as bulkProcessor,
-  calculateSecondsInTime_default as calculateSecondsInTime,
+  base64From,
+  base64FromBase64URLSafe,
+  base64FromBuffer,
+  base64To,
+  base64ToBuffer,
+  base64URLEncode,
+  bufferCompare,
+  bufferConcatenate,
+  bufferFromString,
+  bufferToString,
+  bulkProcessor,
+  calculateSecondsInTime,
   constants,
-  convertECDSAASN1Signature_default as convertECDSAASN1Signature,
-  crypto2 as crypto,
-  currencyBRToFloat_default as currencyBRToFloat,
+  convertECDSAASN1Signature,
+  crypto,
+  currencyBRToFloat,
   custom,
-  dateCompareAsc_default as dateCompareAsc,
-  dateCompareDesc_default as dateCompareDesc,
-  dateFirstHourOfDay_default as dateFirstHourOfDay,
-  dateLastHourOfDay_default as dateLastHourOfDay,
-  dateToFormat_default as dateToFormat,
-  debouncer_default as debouncer,
-  decrypt_default as decrypt,
-  index_default as default,
-  defaultNumeric_default as defaultNumeric,
-  defaultValue_default as defaultValue,
-  deleteKeys_default as deleteKeys,
-  digest_default as digest,
-  encrypt_default as encrypt,
-  generateRandomString_default as generateRandomString,
-  generateSimpleId_default as generateSimpleId,
-  getAuthenticationAuthData_default as getAuthenticationAuthData,
-  getCrypto_default as getCrypto,
-  getExecutionTime_default as getExecutionTime,
-  getRegistrationAuthData_default as getRegistrationAuthData,
-  getWebAuthnAuthenticationAssertion_default as getWebAuthnAuthenticationAssertion,
-  getWebAuthnRegistrationCredential_default as getWebAuthnRegistrationCredential,
+  dateCompareAsc,
+  dateCompareDesc,
+  dateFirstHourOfDay,
+  dateLastHourOfDay,
+  dateToFormat,
+  debouncer,
+  decrypt,
+  defaultNumeric,
+  defaultValue,
+  deleteKeys,
+  digest,
+  encrypt,
+  generateRandomString,
+  generateSimpleId,
+  getAuthenticationAuthData,
+  getCrypto,
+  getExecutionTime,
+  getRegistrationAuthData,
+  getWebAuthnAuthenticationAssertion,
+  getWebAuthnRegistrationCredential,
   helpers,
-  importCryptoKey_default as importCryptoKey,
-  isInstanceOf_default as isInstanceOf,
-  isNumber_default as isNumber,
-  isObject_default as isObject,
-  messageDecryptFromChunks_default as messageDecryptFromChunks,
-  messageEncryptToChunks_default as messageEncryptToChunks,
-  normalize_default as normalize,
-  pickKeys_default as pickKeys,
-  pushLogMessage_default as pushLogMessage,
-  regexDigitsOnly_default as regexDigitsOnly,
-  regexLettersOnly_default as regexLettersOnly,
-  regexReplaceTrim_default as regexReplaceTrim,
-  removeDuplicatedStrings_default as removeDuplicatedStrings,
-  setConditionsBetweenDates_default as setConditionBetweenDates,
-  setConditionsBetweenValues_default as setConditionBetweenValues,
-  setConditionStringLike_default as setConditionStringLike,
-  sleep_default as sleep,
-  split_default as split,
-  stringCompress_default as stringCompress,
-  stringDecompress_default as stringDecompress,
-  stringToDate_default as stringToDate,
-  stringToDateToFormat_default as stringToDateToFormat,
-  stringToFormat_default as stringToFormat,
-  stringZLibCompress_default as stringZLibCompress,
-  stringZLibDecompress_default as stringZLibDecompress,
-  throttle_default as throttle,
-  timestamp_default as timestamp,
-  toString_default as toString,
-  uint8ArrayFromString_default as uint8ArrayFromString,
-  uint8ArrayToString_default as uint8ArrayToString,
+  importCryptoKey,
+  isInstanceOf,
+  isNumber,
+  isObject,
+  messageDecryptFromChunks,
+  messageEncryptToChunks,
+  normalize,
+  pickKeys,
+  pushLogMessage,
+  regexDigitsOnly,
+  regexLettersOnly,
+  regexReplaceTrim,
+  removeDuplicatedStrings,
+  setConditionBetweenDates,
+  setConditionBetweenValues,
+  setConditionStringLike,
+  sleep,
+  split,
+  stringCompress,
+  stringDecompress,
+  stringToDate,
+  stringToDateToFormat,
+  stringToFormat,
+  stringZLibCompress,
+  stringZLibDecompress,
+  throttle,
+  timestamp,
+  toString,
+  uint8ArrayFromString,
+  uint8ArrayToString,
   utils,
-  validateAuthentication_default as validateAuthentication,
-  validateCADICMSPR_default as validateCADICMSPR,
-  validateCEP_default as validateCEP,
-  validateCNH_default as validateCNH,
-  validateCNPJ_default as validateCNPJ,
-  validateCPF_default as validateCPF,
-  validateChavePix_default as validateChavePix,
-  validateEmail_default as validateEmail,
-  validatePISPASEPNIT_default as validatePISPASEPNIT,
-  validateRG_default as validateRG,
-  validateRPID_default as validateRPID,
-  validateRegistration_default as validateRegistration,
-  validateRenavam_default as validateRenavam,
-  validateTituloEleitor_default as validateTituloEleitor,
+  validateAuthentication,
+  validateCADICMSPR,
+  validateCEP,
+  validateCNH,
+  validateCNPJ,
+  validateCPF,
+  validateChavePix,
+  validateEmail,
+  validatePISPASEPNIT,
+  validateRG,
+  validateRPID,
+  validateRegistration,
+  validateRenavam,
+  validateTituloEleitor,
   validators,
-  verifySignature_default as verifySignature,
-  waitPlugin_default as waitPlugin
-};
-//# sourceMappingURL=index.js.map
+  verifySignature,
+  waitPlugin
+});
+//# sourceMappingURL=index.cjs.map

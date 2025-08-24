@@ -1,4 +1,5 @@
-module.exports = {
+// 1. Define a estrutura aninhada principal, que será a exportação padrão.
+const miscHelpers = {
   auth: {
     webAuthn: require("./auth/webauthn/index.js"),
   },
@@ -18,12 +19,16 @@ module.exports = {
   helpers: require("./helpers/index.js"),
   utils: require("./utils/index.js"),
   validators: require("./validators/index.js"),
-  ...require("./custom/db/sequelize"),
-  ...require("./helpers"),
-  ...require("./utils"),
-  ...require("./validators"),
-  ...require("./auth/webauthn"),
-  ...require("./crypto"),
-  waitPlugin: require("./custom/waitPlugin"),
-  bulkProcessor: require("./custom/bulkProcessor"),
 };
+
+// 2. Anexa as funções de nível superior ao objeto principal para acesso direto.
+Object.assign(miscHelpers, miscHelpers.helpers);
+Object.assign(miscHelpers, miscHelpers.utils);
+Object.assign(miscHelpers, miscHelpers.validators);
+Object.assign(miscHelpers, miscHelpers.crypto);
+miscHelpers.bulkProcessor = miscHelpers.custom.bulkProcessor;
+miscHelpers.waitPlugin = miscHelpers.custom.waitPlugin;
+
+// Isso copia todas as propriedades de `miscHelpers` para `module.exports`,
+// criando tanto as exportações nomeadas quanto a padrão.
+Object.assign(module.exports, miscHelpers);

@@ -10,6 +10,7 @@ import bufferConcatenate from "./bufferConcatenate.js";
 import bufferFromString from "./bufferFromString.js";
 import bufferToString from "./bufferToString.js";
 import calculateSecondsInTime from "./calculateSecondsInTime.js";
+import cleanObject from "./cleanObject.js";
 import currencyBRToFloat from "./currencyBRToFloat.js";
 import dateToFormat from "./dateToFormat.js";
 import dateFirstHourOfDay from "./dateFirstHourOfDay.js";
@@ -59,6 +60,7 @@ export {
   bufferFromString,
   bufferToString,
   calculateSecondsInTime,
+  cleanObject,
   currencyBRToFloat,
   dateToFormat,
   dateFirstHourOfDay,
@@ -109,6 +111,7 @@ export default {
   bufferFromString,
   bufferToString,
   calculateSecondsInTime,
+  cleanObject,
   currencyBRToFloat,
   dateToFormat,
   dateFirstHourOfDay,

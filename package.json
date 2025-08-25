@@ -29,6 +29,7 @@
     "testWebAuthn2": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/webauthn2.test.js",
     "testWebAuthn3": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/webauthn3.test.js",
     "testBulkProcessor": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/bulkProcessor.test.js",
+    "testCrypto": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/crypto.test.js",
     "build": "tsup",
     "build:debug": "tsup --minify false --sourcemap",
     "dev": "tsup --watch",

@@ -132,17 +132,25 @@ async function encrypt(publicKey, message, props = {}) {
   );
   const binaryPublicKey = base64ToBuffer(cleanedPublicKey);
 
+  const {
+    format = "spki",
+    algorithm = { name: "RSA-OAEP", hash: { name: "SHA-256" } },
+    extractable = true,
+    keyUsages = ["encrypt"],
+    padding = "RSA-OAEP",
+  } = props || {};
+
   // Import the public key into Web Crypto API format
   // Use provided parameters or sensible defaults for RSA-OAEP encryption
   const importedKey = await importCryptoKey(
-    props.format || "spki",
+    format || "spki",
     binaryPublicKey,
-    props.algorithm || {
+    algorithm || {
       name: "RSA-OAEP",
       hash: { name: "SHA-256" },
     },
-    props.extractable !== undefined ? props.extractable : true,
-    props.keyUsages || ["encrypt"]
+    extractable !== undefined ? extractable : true,
+    keyUsages || ["encrypt"]
   );
 
   // Convert message string to binary format for encryption
@@ -151,7 +159,7 @@ async function encrypt(publicKey, message, props = {}) {
   // Perform the actual encryption operation using the imported key
   // The padding parameter determines the encryption scheme used
   const encryptedBuffer = await crypto.subtle.encrypt(
-    { name: props.padding || "RSA-OAEP" },
+    { name: padding || "RSA-OAEP" },
     importedKey,
     messageBuffer
   );

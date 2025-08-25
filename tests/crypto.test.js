@@ -7,6 +7,7 @@ import { credential, assertion } from "./webauthnTestContent.js";
 
 const PUBLIC_KEY = fs.readFileSync("./keys/public_key.pem", "utf8");
 const PRIVATE_KEY = fs.readFileSync("./keys/private_key.pem", "utf8");
+const PRIVATE_KEY2 = fs.readFileSync("./keys/private_key2.pem", "utf8");
 
 // ------------------------------------------------------------------------------------------------
 
@@ -252,3 +253,199 @@ describe("CRYPTO - verifySignature", function () {
 });
 
 // ------------------------------------------------------------------------------------------------
+
+describe("CRYPTO - Full Encryption/Decryption Buffer Cycle", () => {
+  const originalMessage = "Essa mensagem secreta deve ser preservada!";
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should encrypt and decrypt a message, restoring the original data perfectly", async () => {
+    // 1. Preparação: Converte a mensagem original para um buffer
+    const originalBuffer = utils.bufferFromString(originalMessage);
+
+    // 2. Criptografia: Usa a chave pública para criptografar o buffer
+    const encryptedBase64 = await crypto.encryptBuffer(
+      PUBLIC_KEY,
+      originalBuffer
+    );
+
+    expect(encryptedBase64).toBeTruthy(); // Verifica se não é nulo ou vazio
+    expect(encryptedBase64).not.toBe(originalMessage); // Garante que a mensagem foi alterada
+
+    // 3. Decriptografia: Usa a chave privada correspondente para decriptografar
+    const decryptedBuffer = await crypto.decryptBuffer(
+      PRIVATE_KEY,
+      encryptedBase64
+    );
+
+    // 4. Verificação:
+
+    // A verificação mais confiável usando seu utilitário de comparação de buffers
+    expect(utils.bufferCompare(originalBuffer, decryptedBuffer)).toBe(true);
+
+    // Verificação secundária de legibilidade
+    const finalMessage = utils.bufferToString(decryptedBuffer);
+    expect(finalMessage).toBe(originalMessage);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should handle empty strings correctly through the cycle", async () => {
+    const emptyBuffer = utils.bufferFromString("");
+
+    const encrypted = await crypto.encryptBuffer(PUBLIC_KEY, emptyBuffer);
+    expect(encrypted).toBe("");
+
+    const decrypted = await crypto.decryptBuffer(PRIVATE_KEY, encrypted);
+    expect(utils.bufferCompare(emptyBuffer, decrypted)).toBe(true);
+  });
+
+  it("should correctly handle messages with special UTF-8 characters", async () => {
+    const message = "Olá, mundo da criptografia! 👋✅";
+    const originalBuffer = utils.bufferFromString(message);
+
+    const encrypted = await crypto.encryptBuffer(PUBLIC_KEY, originalBuffer);
+    const decrypted = await crypto.decryptBuffer(PRIVATE_KEY, encrypted);
+
+    expect(utils.bufferCompare(originalBuffer, decrypted)).toBe(true);
+    expect(utils.bufferToString(decrypted)).toBe(message);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should correctly handle serialized JSON objects as messages", async () => {
+    const jsonPayload = {
+      id: 123,
+      user: "gema",
+      data: [1, "teste", true],
+      timestamp: "2025-08-25T16:13:21.000Z",
+    };
+    const message = JSON.stringify(jsonPayload);
+    const originalBuffer = utils.bufferFromString(message);
+
+    const encrypted = await crypto.encryptBuffer(PUBLIC_KEY, originalBuffer);
+    const decrypted = await crypto.decryptBuffer(PRIVATE_KEY, encrypted);
+
+    const finalMessage = utils.bufferToString(decrypted);
+    expect(JSON.parse(finalMessage)).toEqual(jsonPayload);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should handle keys with extra whitespace and line breaks", async () => {
+    // Simula uma chave que foi copiada/colada com espaçamento incorreto.
+    const keyWithExtraSpaces = `
+
+    -----BEGIN PUBLIC KEY-----
+    ${PUBLIC_KEY.replace(/-----(BEGIN|END) PUBLIC KEY-----/g, "").replace(
+      /\s/g,
+      ""
+    )}
+
+    -----END PUBLIC KEY-----
+
+  `;
+    const message = "robustez da chave";
+    const originalBuffer = utils.bufferFromString(message);
+
+    // O teste passa se a criptografia não lançar um erro.
+    const encrypted = await crypto.encryptBuffer(
+      keyWithExtraSpaces,
+      originalBuffer
+    );
+    expect(encrypted).toBeTruthy();
+
+    // Verifica o ciclo completo para garantir.
+    const decrypted = await crypto.decryptBuffer(PRIVATE_KEY, encrypted);
+    expect(utils.bufferToString(decrypted)).toBe(message);
+  });
+  // ----------------------------------------------------------------------------------------------
+
+  it("should perform the cycle correctly with custom algorithm options (SHA-512)", async () => {
+    const message = "ciclo com opções customizadas";
+    const originalBuffer = utils.bufferFromString(message);
+    const customOptions = {
+      algorithm: { name: "RSA-OAEP", hash: { name: "SHA-512" } },
+    };
+
+    const encrypted = await crypto.encryptBuffer(
+      PUBLIC_KEY,
+      originalBuffer,
+      customOptions
+    );
+    const decrypted = await crypto.decryptBuffer(
+      PRIVATE_KEY,
+      encrypted,
+      customOptions
+    );
+
+    expect(utils.bufferCompare(originalBuffer, decrypted)).toBe(true);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  it("should fail to decrypt if algorithm options do not match between encryption and decryption", async () => {
+    const message = "falha de opções";
+    const originalBuffer = utils.bufferFromString(message);
+    const encryptionOptions = {
+      algorithm: { name: "RSA-OAEP", hash: { name: "SHA-512" } },
+    };
+    // Opções de decriptografia diferentes (o padrão é SHA-256)
+    const decryptionOptions = {
+      algorithm: { name: "RSA-OAEP", hash: { name: "SHA-256" } },
+    };
+
+    const encrypted = await crypto.encryptBuffer(
+      PUBLIC_KEY,
+      originalBuffer,
+      encryptionOptions
+    );
+
+    // A decriptografia deve falhar porque os hashes não coincidem.
+    await expect(
+      crypto.decryptBuffer(PRIVATE_KEY, encrypted, decryptionOptions)
+    ).rejects.toBeInstanceOf(Error);
+  });
+
+  // ----------------------------------------------------------------------------------------------
+
+  describe("Error Handling", () => {
+    it("should throw an error if trying to decrypt with the wrong private key", async () => {
+      const originalBuffer = utils.bufferFromString("teste de chave");
+      const encryptedBase64 = await crypto.encryptBuffer(
+        PUBLIC_KEY,
+        originalBuffer
+      );
+
+      // A sintaxe `expect().rejects` é a forma idiomática do Vitest para testar Promises que falham
+      await expect(
+        crypto.decryptBuffer(PRIVATE_KEY2, encryptedBase64)
+      ).rejects.toBeInstanceOf(Error);
+    });
+
+    it("should throw an error if the encrypted data is corrupted", async () => {
+      const originalBuffer = utils.bufferFromString("teste de corrupção");
+      const encryptedBase64 = await crypto.encryptBuffer(
+        PUBLIC_KEY,
+        originalBuffer
+      );
+
+      // Corrompe a mensagem (troca um caractere no meio)
+      const corruptedData =
+        encryptedBase64.slice(0, 10) + "X" + encryptedBase64.slice(11);
+
+      await expect(
+        crypto.decryptBuffer(PRIVATE_KEY, corruptedData)
+      ).rejects.toBeInstanceOf(Error);
+    });
+
+    it("should throw an error when encrypting a message that is too large", async () => {
+      const longMessage = "A".repeat(500);
+      const largeBuffer = utils.bufferFromString(longMessage);
+
+      await expect(
+        crypto.encryptBuffer(PUBLIC_KEY, largeBuffer)
+      ).rejects.toBeInstanceOf(Error);
+    });
+  });
+});

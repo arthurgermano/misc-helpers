@@ -28,7 +28,7 @@ function bufferConcatenate(buffer1, buffer2) {
   // 1. Validação explícita para `null` ou `undefined`.
   // A verificação `== null` é uma forma concisa de tratar ambos os casos.
   if (buffer1 == null || buffer2 == null) {
-    return null;
+    return buffer1 || buffer2 || null;
   }
 
   try {

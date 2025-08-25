@@ -50,7 +50,7 @@ async function decrypt(privateKey, encryptedMessage, props = {}) {
     extractable = true,
     keyUsages = ["decrypt"],
     padding = "RSA-OAEP"
-  } = props;
+  } = props || {};
 
   // Get crypto implementation (Node.js or browser)
   const crypto = getCrypto();

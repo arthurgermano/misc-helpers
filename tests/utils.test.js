@@ -588,20 +588,20 @@ describe("UTILS - bufferConcatenate", () => {
 
   // -----------------------------------------------------------------------------------------------
 
-  it("bufferConcatenate - should return null if buffer1 is null", () => {
+  it("bufferConcatenate - should return buffer2 if buffer1 is null", () => {
     const buffer1 = null;
     const buffer2 = new Uint8Array([4, 5, 6]).buffer;
     const concatenated = bufferConcatenate(buffer1, buffer2);
-    expect(concatenated).toBeNull();
+    expect(concatenated).toEqual(new Uint8Array([4, 5, 6]).buffer);
   });
 
   // -----------------------------------------------------------------------------------------------
 
-  it("bufferConcatenate - should return null if buffer2 is null", () => {
+  it("bufferConcatenate - should return buffer1 if buffer2 is null", () => {
     const buffer1 = new Uint8Array([1, 2, 3]).buffer;
     const buffer2 = null;
     const concatenated = bufferConcatenate(buffer1, buffer2);
-    expect(concatenated).toBeNull();
+    expect(concatenated).toEqual(new Uint8Array([1, 2, 3]).buffer);
   });
 
   // -----------------------------------------------------------------------------------------------
@@ -1085,6 +1085,506 @@ describe("UTILS - deleteKeys", () => {
 
 // ------------------------------------------------------------------------------------------------
 
+describe("UTILS - cleanObject - Comprehensive Test Suite", () => {
+  const cleanObject = utils.cleanObject;
+
+  // Basic functionality tests - default behavior
+  it("should remove undefined values by default", () => {
+    const input = { a: 1, b: undefined, c: 3 };
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({ a: 1, c: 3 });
+    expect(result).not.toHaveProperty('b');
+  });
+
+  it("should remove null values by default", () => {
+    const input = { a: 1, b: null, c: 3 };
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({ a: 1, c: 3 });
+    expect(result).not.toHaveProperty('b');
+  });
+
+  it("should remove empty strings by default", () => {
+    const input = { a: 1, b: '', c: 'test' };
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({ a: 1, c: 'test' });
+    expect(result).not.toHaveProperty('b');
+  });
+
+  it("should remove empty arrays by default", () => {
+    const input = { a: 1, b: [], c: [1, 2, 3] };
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({ a: 1, c: [1, 2, 3] });
+    expect(result).not.toHaveProperty('b');
+  });
+
+  it("should remove empty objects by default", () => {
+    const input = { a: 1, b: {}, c: { test: 'value' } };
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({ a: 1, c: { test: 'value' } });
+    expect(result).not.toHaveProperty('b');
+  });
+
+  it("should keep false values by default", () => {
+    const input = { a: 1, b: false, c: true };
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({ a: 1, b: false, c: true });
+  });
+
+  it("should keep zero values", () => {
+    const input = { a: 1, b: 0, c: -1 };
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({ a: 1, b: 0, c: -1 });
+  });
+
+  // Non-object inputs
+  it("should return null unchanged", () => {
+    const result = cleanObject(null);
+    expect(result).toBe(null);
+  });
+
+  it("should return arrays unchanged", () => {
+    const input = [1, 2, null, '', undefined];
+    const result = cleanObject(input);
+    expect(result).toBe(input);
+    expect(result).toEqual([1, 2, null, '', undefined]);
+  });
+
+  it("should return primitives unchanged", () => {
+    expect(cleanObject(42)).toBe(42);
+    expect(cleanObject('string')).toBe('string');
+    expect(cleanObject(true)).toBe(true);
+    expect(cleanObject(false)).toBe(false);
+    expect(cleanObject(undefined)).toBe(undefined);
+  });
+
+  // Empty object tests
+  it("should return empty object for empty input", () => {
+    const result = cleanObject({});
+    expect(result).toEqual({});
+  });
+
+  it("should return empty object when all values are removed", () => {
+    const input = { a: null, b: undefined, c: '', d: [], e: {} };
+    const result = cleanObject(input);
+    expect(result).toEqual({});
+  });
+
+  // Recursive functionality tests
+  it("should clean nested objects recursively by default", () => {
+    const input = {
+      a: 1,
+      b: {
+        c: 2,
+        d: null,
+        e: '',
+        f: {
+          g: 3,
+          h: undefined
+        }
+      }
+    };
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({
+      a: 1,
+      b: {
+        c: 2,
+        f: {
+          g: 3
+        }
+      }
+    });
+  });
+
+  it("should remove nested objects that become empty after cleaning", () => {
+    const input = {
+      a: 1,
+      b: {
+        c: null,
+        d: undefined,
+        e: ''
+      }
+    };
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({ a: 1 });
+    expect(result).not.toHaveProperty('b');
+  });
+
+  it("should handle deeply nested objects", () => {
+    const input = {
+      level1: {
+        level2: {
+          level3: {
+            level4: {
+              value: 'deep',
+              empty: null
+            },
+            emptyObj: {}
+          }
+        },
+        emptyAfterCleaning: {
+          removed: undefined
+        }
+      }
+    };
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({
+      level1: {
+        level2: {
+          level3: {
+            level4: {
+              value: 'deep'
+            }
+          }
+        }
+      }
+    });
+  });
+
+  // Options tests - recursive
+  it("should not clean nested objects when recursive=false", () => {
+    const input = {
+      a: 1,
+      b: {
+        c: 2,
+        d: null,
+        e: ''
+      }
+    };
+    const result = cleanObject(input, { recursive: false });
+    
+    expect(result).toEqual({
+      a: 1,
+      b: {
+        c: 2,
+        d: null,
+        e: ''
+      }
+    });
+  });
+
+  // Options tests - considerNullValue
+  it("should keep null values when considerNullValue=true", () => {
+    const input = { a: 1, b: null, c: 3 };
+    const result = cleanObject(input, { considerNullValue: true });
+    
+    expect(result).toEqual({ a: 1, b: null, c: 3 });
+  });
+
+  it("should keep null in nested objects when considerNullValue=true", () => {
+    const input = {
+      a: 1,
+      b: {
+        c: null,
+        d: 'test'
+      }
+    };
+    const result = cleanObject(input, { considerNullValue: true });
+    
+    expect(result).toEqual({
+      a: 1,
+      b: {
+        c: null,
+        d: 'test'
+      }
+    });
+  });
+
+  // Options tests - considerFalseValue
+  it("should remove false values when considerFalseValue=false", () => {
+    const input = { a: 1, b: false, c: true };
+    const result = cleanObject(input, { considerFalseValue: false });
+    
+    expect(result).toEqual({ a: 1, c: true });
+    expect(result).not.toHaveProperty('b');
+  });
+
+  it("should remove false in nested objects when considerFalseValue=false", () => {
+    const input = {
+      a: 1,
+      b: {
+        c: false,
+        d: 'test'
+      }
+    };
+    const result = cleanObject(input, { considerFalseValue: false });
+    
+    expect(result).toEqual({
+      a: 1,
+      b: {
+        d: 'test'
+      }
+    });
+  });
+
+  // Combined options tests
+  it("should handle multiple options correctly", () => {
+    const input = {
+      a: 1,
+      b: null,
+      c: false,
+      d: '',
+      e: undefined,
+      f: {
+        g: null,
+        h: false,
+        i: 'valid'
+      }
+    };
+    const result = cleanObject(input, {
+      considerNullValue: true,
+      considerFalseValue: false
+    });
+    
+    expect(result).toEqual({
+      a: 1,
+      b: null,
+      f: {
+        g: null,
+        i: 'valid'
+      }
+    });
+  });
+
+  it("should handle all options combined with recursive=false", () => {
+    const input = {
+      a: 1,
+      b: null,
+      c: false,
+      d: {
+        e: null,
+        f: false,
+        g: undefined
+      }
+    };
+    const result = cleanObject(input, {
+      recursive: false,
+      considerNullValue: true,
+      considerFalseValue: false
+    });
+    
+    expect(result).toEqual({
+      a: 1,
+      b: null,
+      d: {
+        e: null,
+        f: false,
+        g: undefined
+      }
+    });
+  });
+
+  // Edge cases with options
+  it("should handle undefined options", () => {
+    const input = { a: 1, b: null, c: false };
+    const result = cleanObject(input, undefined);
+    
+    expect(result).toEqual({ a: 1, c: false });
+  });
+
+  it("should handle null options", () => {
+    const input = { a: 1, b: null, c: false };
+    const result = cleanObject(input, null);
+    
+    expect(result).toEqual({ a: 1, c: false });
+  });
+
+  it("should handle empty options object", () => {
+    const input = { a: 1, b: null, c: false };
+    const result = cleanObject(input, {});
+    
+    expect(result).toEqual({ a: 1, c: false });
+  });
+
+  it("should handle options with extra properties", () => {
+    const input = { a: 1, b: null, c: false };
+    const result = cleanObject(input, {
+      considerNullValue: true,
+      extraProp: 'ignored'
+    });
+    
+    expect(result).toEqual({ a: 1, b: null, c: false });
+  });
+
+  // Complex data types
+  it("should handle Date objects correctly", () => {
+    const date = new Date();
+    const input = { a: 1, b: date, c: null };
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({ a: 1, b: date });
+  });
+
+  it("should handle RegExp objects correctly", () => {
+    const regex = /test/g;
+    const input = { a: 1, b: regex, c: null };
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({ a: 1, b: regex });
+  });
+
+  it("should handle functions correctly", () => {
+    const func = () => 'test';
+    const input = { a: 1, b: func, c: null };
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({ a: 1, b: func });
+  });
+
+  it("should handle arrays with mixed content", () => {
+    const array = [1, null, '', undefined, { test: 'value' }];
+    const input = { a: 1, b: array, c: null };
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({ a: 1, b: array });
+  });
+
+  // Special string cases
+  it("should keep whitespace-only strings", () => {
+    const input = { a: '   ', b: '\n\t', c: '' };
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({ a: '   ', b: '\n\t' });
+    expect(result).not.toHaveProperty('c');
+  });
+
+  it("should handle string with only zeros", () => {
+    const input = { a: '0', b: '00', c: '' };
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({ a: '0', b: '00' });
+    expect(result).not.toHaveProperty('c');
+  });
+
+  // Special number cases
+  it("should keep NaN values", () => {
+    const input = { a: 1, b: NaN, c: null };
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({ a: 1, b: NaN });
+  });
+
+  it("should keep Infinity values", () => {
+    const input = { a: 1, b: Infinity, c: -Infinity, d: null };
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({ a: 1, b: Infinity, c: -Infinity });
+  });
+
+  // Object mutation tests
+  it("should not mutate the original object", () => {
+    const input = { a: 1, b: null, c: 3 };
+    const original = { ...input };
+    const result = cleanObject(input);
+    
+    expect(input).toEqual(original);
+    expect(result).not.toBe(input);
+  });
+
+  it("should not mutate nested objects", () => {
+    const nested = { b: null, c: 'test' };
+    const input = { a: 1, nested: nested };
+    const originalNested = { ...nested };
+    
+    const result = cleanObject(input);
+    
+    expect(nested).toEqual(originalNested);
+    expect(result.nested).not.toBe(nested);
+  });
+
+  // Performance and memory tests
+  it("should handle large objects efficiently", () => {
+    const largeObject = {};
+    for (let i = 0; i < 1000; i++) {
+      largeObject[`key${i}`] = i % 5 === 0 ? null : `value${i}`;
+    }
+    
+    const result = cleanObject(largeObject);
+    const expectedSize = Object.keys(largeObject).filter(key => 
+      largeObject[key] !== null
+    ).length;
+    
+    expect(Object.keys(result).length).toBe(expectedSize);
+  });
+
+  it("should handle deep nesting without stack overflow", () => {
+    let deepObject = { value: 'deep' };
+    for (let i = 0; i < 100; i++) {
+      deepObject = { level: deepObject, empty: null };
+    }
+    
+    const result = cleanObject(deepObject);
+    
+    // Should successfully clean without throwing
+    expect(result).toBeTruthy();
+    expect(result).not.toHaveProperty('empty');
+  });
+
+  // Arrays in objects
+  it("should not recursively clean arrays", () => {
+    const input = {
+      a: 1,
+      b: [
+        { c: null, d: 'test' },
+        { e: undefined, f: 'value' }
+      ]
+    };
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({
+      a: 1,
+      b: [
+        { c: null, d: 'test' },
+        { e: undefined, f: 'value' }
+      ]
+    });
+  });
+
+  // Symbol keys (if supported)
+  it("should handle objects with Symbol keys", () => {
+    const sym = Symbol('test');
+    const input = { a: 1, [sym]: 'symbol', b: null };
+    const result = cleanObject(input);
+    
+    expect(result.a).toBe(1);
+    expect(result[sym]).toBe('symbol');
+    expect(result).not.toHaveProperty('b');
+  });
+
+  // Prototype chain
+  it("should only clean own properties", () => {
+    const proto = { inherited: 'value' };
+    const input = Object.create(proto);
+    input.own = 'test';
+    input.empty = null;
+    
+    const result = cleanObject(input);
+    
+    expect(result).toEqual({ own: 'test' });
+    expect(result.inherited).toBeUndefined();
+  });
+
+  // Circular references (should not cause infinite recursion)
+  it("should handle circular references gracefully", () => {
+    const input = { a: 1, b: null };
+    input.circular = input;
+    
+    // This should not throw or cause infinite recursion
+    expect(() => cleanObject(input)).not.toThrow();
+  });
+});
+
+// ------------------------------------------------------------------------------------------------
+
 describe("UTILS - generateRandomString", () => {
   // ----------------------------------------------------------------------------------------------
 
@@ -1454,7 +1954,10 @@ describe("UTILS - messageEncryptToChunks", () => {
 
   it("messageEncryptToChunks - Encrypts a short message with default chunk size", async () => {
     const message = "Hello, world!";
-    const encryptedChunks = await messageEncryptToChunks(PUBLIC_KEY, message);
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      message
+    );
     expect(encryptedChunks).toBeTruthy();
   });
 
@@ -1494,7 +1997,7 @@ describe("UTILS - messageEncryptToChunks", () => {
       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`;
-    const encryptedChunks = await messageEncryptToChunks(
+    const encryptedChunks = await utils.messageEncryptToChunks(
       PUBLIC_KEY,
       longMessage,
       { chunkSize: 190 }
@@ -1509,7 +2012,7 @@ describe("UTILS - messageEncryptToChunks", () => {
     const publicKey = "INVALID_PUBLIC_KEY";
 
     try {
-      await messageEncryptToChunks(publicKey, message);
+      await utils.messageEncryptToChunks(publicKey, message);
     } catch (error) {
       expect(error.message).toBe("Invalid keyData");
     }
@@ -1517,9 +2020,9 @@ describe("UTILS - messageEncryptToChunks", () => {
 
   // ----------------------------------------------------------------------------------------------
 
-  it("messageEncryptToChunks - Returns empty string for empty message", async () => {
-    const encryptedChunks = await messageEncryptToChunks(PUBLIC_KEY, "");
-    expect(encryptedChunks).to.be.an("array").that.is.empty;
+  it("messageEncryptToChunks - Returns empty array for undefined message", async () => {
+    const encryptedChunks = await utils.messageEncryptToChunks(PUBLIC_KEY);
+    expect(encryptedChunks).toEqual([]);
   });
 
   // ----------------------------------------------------------------------------------------------
@@ -1532,13 +2035,11 @@ describe("UTILS - messageDecryptFromChunks", () => {
 
   const PUBLIC_KEY = fs.readFileSync("./keys/public_key.pem", "utf8");
   const PRIVATE_KEY = fs.readFileSync("./keys/private_key.pem", "utf8");
-  const messageDecryptFromChunks = utils.messageDecryptFromChunks;
-  const messageEncryptToChunks = utils.messageEncryptToChunks;
 
   // ----------------------------------------------------------------------------------------------
 
   it("messageDecryptFromChunks - Returns empty string for empty messageChunks", async () => {
-    const result = await messageDecryptFromChunks(PRIVATE_KEY, []);
+    const result = await utils.messageDecryptFromChunks(PRIVATE_KEY, []);
     expect(result).toBe("");
   });
 
@@ -1546,7 +2047,7 @@ describe("UTILS - messageDecryptFromChunks", () => {
 
   it("messageDecryptFromChunks - Throws error for invalid private key format", async () => {
     try {
-      await messageDecryptFromChunks("invalid_private_key", [
+      await utils.messageDecryptFromChunks("invalid_private_key", [
         "chunk1",
         "chunk2",
       ]);
@@ -1559,8 +2060,11 @@ describe("UTILS - messageDecryptFromChunks", () => {
 
   it("messageDecryptFromChunks - Decrypt the message correctly", async () => {
     const message = "Hello, world! à ã ü ñ ° ª";
-    const encryptedChunks = await messageEncryptToChunks(PUBLIC_KEY, message);
-    const decrypted = await messageDecryptFromChunks(
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      message
+    );
+    const decrypted = await utils.messageDecryptFromChunks(
       PRIVATE_KEY,
       encryptedChunks
     );
@@ -1574,11 +2078,11 @@ describe("UTILS - messageDecryptFromChunks", () => {
     const PUBLIC_KEY2 = fs.readFileSync("./keys/public_key2.pem", "utf8");
     const message = "Hello, world!";
     try {
-      const encryptedChunks = await messageEncryptToChunks(
+      const encryptedChunks = await utils.messageEncryptToChunks(
         PUBLIC_KEY2,
         message
       );
-      await messageDecryptFromChunks(PRIVATE_KEY, encryptedChunks);
+      await utils.messageDecryptFromChunks(PRIVATE_KEY, encryptedChunks);
     } catch (error) {
       expect(error.message).toBe(
         "The operation failed for an operation-specific reason"
@@ -1590,12 +2094,12 @@ describe("UTILS - messageDecryptFromChunks", () => {
 
   it("messageDecryptFromChunks - Encrypt a long message with chunk size greater than allowed", async () => {
     try {
-      const encryptedChunks = await messageEncryptToChunks(
+      const encryptedChunks = await utils.messageEncryptToChunks(
         PUBLIC_KEY,
         jsonTest,
         { chunkSize: 300 }
       );
-      await messageDecryptFromChunks(PRIVATE_KEY, encryptedChunks);
+      await utils.messageDecryptFromChunks(PRIVATE_KEY, encryptedChunks);
     } catch (error) {
       expect(error.message).toBe(
         "The operation failed for an operation-specific reason"
@@ -1606,9 +2110,12 @@ describe("UTILS - messageDecryptFromChunks", () => {
   // ----------------------------------------------------------------------------------------------
 
   it("messageDecryptFromChunks - Encrypt a long message with chunk size equal to allowed", async () => {
-    const encryptedChunks = await messageEncryptToChunks(PUBLIC_KEY, jsonTest);
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      jsonTest
+    );
 
-    const decrypted = await messageDecryptFromChunks(
+    const decrypted = await utils.messageDecryptFromChunks(
       PRIVATE_KEY,
       encryptedChunks
     );
@@ -1626,12 +2133,12 @@ describe("UTILS - messageDecryptFromChunks", () => {
         "Operação com acentuação e caracteres especiais para teste: ç, ã, é.",
       data: "a".repeat(500), // para garantir que seja uma mensagem longa
     });
-    const encryptedChunks = await messageEncryptToChunks(
+    const encryptedChunks = await utils.messageEncryptToChunks(
       PUBLIC_KEY,
       jsonTestComAcentos
     );
 
-    const decrypted = await messageDecryptFromChunks(
+    const decrypted = await utils.messageDecryptFromChunks(
       PRIVATE_KEY,
       encryptedChunks
     );
@@ -3037,4 +3544,615 @@ describe("UTILS - pickKeys", () => {
       expect(result).toEqual({});
     }
   );
+});
+
+describe("UTILS - messageEncryptToChunks - Comprehensive Test Suite", () => {
+  const PUBLIC_KEY = fs.readFileSync("./keys/public_key.pem", "utf8");
+  const PRIVATE_KEY = fs.readFileSync("./keys/private_key.pem", "utf8");
+
+  it("should encrypt null message", async () => {
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      null
+    );
+    expect(encryptedChunks).toEqual([]);
+  });
+
+  it("should encrypt single character", async () => {
+    const encryptedChunks = await utils.messageEncryptToChunks(PUBLIC_KEY, "a");
+    expect(encryptedChunks).toBeTruthy();
+    expect(encryptedChunks.length).toBeGreaterThan(0);
+  });
+
+  it("should encrypt whitespace-only message", async () => {
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      "   \n\t  "
+    );
+    expect(encryptedChunks).toBeTruthy();
+    expect(encryptedChunks.length).toBeGreaterThan(0);
+  });
+
+  // // Edge cases for chunk sizes
+  it("should handle chunk size of 1", async () => {
+    const message = "Hello World";
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      message,
+      {
+        chunkSize: 1,
+      }
+    );
+    expect(encryptedChunks).toBeTruthy();
+    expect(encryptedChunks.length).toBeGreaterThanOrEqual(message.length);
+  });
+
+  it("should handle chunk size equal to message length", async () => {
+    const message = "Hello World";
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      message,
+      {
+        chunkSize: message.length,
+      }
+    );
+    expect(encryptedChunks).toBeTruthy();
+    expect(encryptedChunks.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("should handle chunk size larger than message", async () => {
+    const message = "Hello";
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      message,
+      {
+        chunkSize: 1000,
+      }
+    );
+    expect(encryptedChunks).toBeTruthy();
+    expect(encryptedChunks.length).toBe(1);
+  });
+
+  it("should default to 190 chunk size when informed as 0", async () => {
+    const message = "Hello World";
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      message,
+      { chunkSize: 0 }
+    );
+
+    expect(encryptedChunks).toBeTruthy();
+  });
+
+  it("should efault to 190 chunk size for negative chunk size", async () => {
+    const message = "Hello World";
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      message,
+      { chunkSize: -1 }
+    );
+
+    expect(encryptedChunks).toBeTruthy();
+  });
+
+  // Unicode and special character tests
+  it("should encrypt message with emojis", async () => {
+    const message = "Hello 👋 World 🌍 Test 🚀";
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      message
+    );
+    expect(encryptedChunks).toBeTruthy();
+  });
+
+  it("should encrypt message with complex unicode", async () => {
+    const message = "𝕳𝖊𝖑𝖑𝖔 𝖂𝖔𝖗𝖑𝖉 🔥 测试 العربية עברית";
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      message
+    );
+    expect(encryptedChunks).toBeTruthy();
+  });
+
+  it("should encrypt message with zero-width characters", async () => {
+    const message = "Hello\u200B\u200C\u200D\uFEFFWorld";
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      message
+    );
+    expect(encryptedChunks).toBeTruthy();
+  });
+
+  it("should encrypt message with control characters", async () => {
+    const message = "Hello\x00\x01\x02\x03World";
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      message
+    );
+    expect(encryptedChunks).toBeTruthy();
+  });
+
+  // Binary data tests
+  it("should encrypt binary data as string", async () => {
+    const binaryData = String.fromCharCode(
+      ...Array.from({ length: 256 }, (_, i) => i)
+    );
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      binaryData
+    );
+    expect(encryptedChunks).toBeTruthy();
+  });
+
+  // // Large data tests
+  it("should encrypt extremely large message", async () => {
+    const largeMessage = "a".repeat(100000); // 100KB
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      largeMessage
+    );
+    expect(encryptedChunks).toBeTruthy();
+    expect(encryptedChunks.length).toBeGreaterThan(1);
+  });
+
+  it("should encrypt message with maximum safe integer length", async () => {
+    const message = "a".repeat(10000);
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      message,
+      {
+        chunkSize: 100,
+      }
+    );
+    expect(encryptedChunks).toBeTruthy();
+    expect(encryptedChunks.length).toBeGreaterThanOrEqual(100);
+  });
+
+  // Invalid key format tests
+  it("should throw error for malformed PEM key", async () => {
+    const malformedKey =
+      "-----BEGIN PUBLIC KEY-----\nINVALID_BASE64\n-----END PUBLIC KEY-----";
+    await expect(
+      utils.messageEncryptToChunks(malformedKey, "test")
+    ).rejects.toThrow();
+  });
+
+  it("should throw error for private key instead of public", async () => {
+    const privateKey = fs.readFileSync("./keys/private_key.pem", "utf8");
+    await expect(
+      utils.messageEncryptToChunks(privateKey, "test")
+    ).rejects.toThrow();
+  });
+
+  it("should throw error for empty key string", async () => {
+    await expect(utils.messageEncryptToChunks("", "test")).rejects.toThrow();
+  });
+
+  it("should throw error for key without headers", async () => {
+    const keyWithoutHeaders = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...";
+    await expect(
+      utils.messageEncryptToChunks(keyWithoutHeaders, "test")
+    ).rejects.toThrow();
+  });
+
+  // Options parameter tests
+  it("should handle undefined options", async () => {
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      "test",
+      undefined
+    );
+    expect(encryptedChunks).toBeTruthy();
+  });
+
+  it("should handle null options", async () => {
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      "test",
+      null
+    );
+    expect(encryptedChunks).toBeTruthy();
+  });
+
+  it("should handle empty options object", async () => {
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      "test",
+      {}
+    );
+    expect(encryptedChunks).toBeTruthy();
+  });
+
+  it("should handle options with extra properties", async () => {
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      "test",
+      {
+        chunkSize: 100,
+        extraProp: "ignored",
+      }
+    );
+    expect(encryptedChunks).toBeTruthy();
+  });
+
+  // Return value validation tests
+  it("should return array of strings", async () => {
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      "test"
+    );
+    expect(Array.isArray(encryptedChunks)).toBe(true);
+    encryptedChunks.forEach((chunk) => {
+      expect(typeof chunk).toBe("string");
+    });
+  });
+
+  it("should return base64-encoded chunks", async () => {
+    const encryptedChunks = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      "test"
+    );
+    const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+    encryptedChunks.forEach((chunk) => {
+      expect(base64Regex.test(chunk)).toBe(true);
+    });
+  });
+
+  // Concurrent encryption tests
+  it("should handle concurrent encryption calls", async () => {
+    const promises = Array.from({ length: 10 }, (_, i) =>
+      utils.messageEncryptToChunks(PUBLIC_KEY, `Message ${i}`)
+    );
+    const results = await Promise.all(promises);
+
+    results.forEach((result, index) => {
+      expect(result).toBeTruthy();
+      expect(result.length).toBeGreaterThan(0);
+    });
+  });
+
+  // // Memory and performance tests
+  // it("should not leak memory with repeated calls", async () => {
+  //   for (let i = 0; i < 100; i++) {
+  //     const encryptedChunks = await utils.messageEncryptToChunks(
+  //       PUBLIC_KEY,
+  //       `Test ${i}`
+  //     );
+  //     expect(encryptedChunks).toBeTruthy();
+  //   }
+  // });
+});
+
+// // ================================================================================================
+
+describe("UTILS - messageDecryptFromChunks - Comprehensive Test Suite", () => {
+  const PUBLIC_KEY = fs.readFileSync("./keys/public_key.pem", "utf8");
+  const PRIVATE_KEY = fs.readFileSync("./keys/private_key.pem", "utf8");
+  const PUBLIC_KEY2 = fs.readFileSync("./keys/public_key2.pem", "utf8");
+  const PRIVATE_KEY2 = fs.readFileSync("./keys/private_key2.pem", "utf8");
+
+  // Basic functionality tests
+  it("should decrypt to empty string for empty array", async () => {
+    const result = await utils.messageDecryptFromChunks(PRIVATE_KEY, []);
+    expect(result).toBe("");
+  });
+
+  it("should handle null chunks array", async () => {
+    await expect(
+      await utils.messageDecryptFromChunks(PRIVATE_KEY, null)
+    ).toEqual("");
+  });
+
+  it("should handle undefined chunks array", async () => {
+    await expect(
+      await utils.messageDecryptFromChunks(PRIVATE_KEY, undefined)
+    ).toEqual("");
+  });
+
+  // Round-trip encryption/decryption tests
+  it("should decrypt single character correctly", async () => {
+    const message = "a";
+    const encrypted = await utils.messageEncryptToChunks(PUBLIC_KEY, message);
+    const decrypted = await utils.messageDecryptFromChunks(
+      PRIVATE_KEY,
+      encrypted
+    );
+    expect(decrypted).toBe(message);
+  });
+
+  it("should decrypt whitespace-only message correctly", async () => {
+    const message = "   \n\t  ";
+    const encrypted = await utils.messageEncryptToChunks(PUBLIC_KEY, message);
+    const decrypted = await utils.messageDecryptFromChunks(
+      PRIVATE_KEY,
+      encrypted
+    );
+    expect(decrypted).toBe(message);
+  });
+
+  it("should decrypt message with all ASCII characters", async () => {
+    const message = String.fromCharCode(
+      ...Array.from({ length: 128 }, (_, i) => i + 32)
+    );
+    const encrypted = await utils.messageEncryptToChunks(PUBLIC_KEY, message);
+    const decrypted = await utils.messageDecryptFromChunks(
+      PRIVATE_KEY,
+      encrypted
+    );
+    expect(decrypted).toBe(message);
+  });
+
+  it("should decrypt extremely large message", async () => {
+    const largeMessage = "Test message ".repeat(10000);
+    const encrypted = await utils.messageEncryptToChunks(
+      PUBLIC_KEY,
+      largeMessage
+    );
+    const decrypted = await utils.messageDecryptFromChunks(
+      PRIVATE_KEY,
+      encrypted
+    );
+    expect(decrypted).toBe(largeMessage);
+  });
+
+  it("should decrypt message with various chunk sizes", async () => {
+    const message = "Hello World Test Message";
+    const chunkSizes = [1, 5, 10, 50, 100, 200];
+
+    for (const chunkSize of chunkSizes) {
+      const encrypted = await utils.messageEncryptToChunks(
+        PUBLIC_KEY,
+        message,
+        {
+          chunkSize,
+        }
+      );
+      const decrypted = await utils.messageDecryptFromChunks(
+        PRIVATE_KEY,
+        encrypted
+      );
+      expect(decrypted).toBe(message);
+    }
+  });
+
+  // Unicode and encoding tests
+  it("should decrypt emojis correctly", async () => {
+    const message = "🎉🚀🌟💎🔥⭐🎯🎪🎨🎭";
+    const encrypted = await utils.messageEncryptToChunks(PUBLIC_KEY, message);
+    const decrypted = await utils.messageDecryptFromChunks(
+      PRIVATE_KEY,
+      encrypted
+    );
+    expect(decrypted).toBe(message);
+  });
+
+  it("should decrypt complex unicode correctly", async () => {
+    const message = "𝕳𝖊𝖑𝖑𝖔 𝖂𝖔𝖗𝖑𝖉 测试 العربية עברית हिन्दी русский";
+    const encrypted = await utils.messageEncryptToChunks(PUBLIC_KEY, message);
+    const decrypted = await utils.messageDecryptFromChunks(
+      PRIVATE_KEY,
+      encrypted
+    );
+    expect(decrypted).toBe(message);
+  });
+
+  it("should decrypt zero-width characters correctly", async () => {
+    const message = "Hello\u200B\u200C\u200D\uFEFFWorld";
+    const encrypted = await utils.messageEncryptToChunks(PUBLIC_KEY, message);
+    const decrypted = await utils.messageDecryptFromChunks(
+      PRIVATE_KEY,
+      encrypted
+    );
+    expect(decrypted).toBe(message);
+  });
+
+  it("should decrypt control characters correctly", async () => {
+    const message = "Hello\x00\x01\x02\x03\x04\x05World";
+    const encrypted = await utils.messageEncryptToChunks(PUBLIC_KEY, message);
+    const decrypted = await utils.messageDecryptFromChunks(
+      PRIVATE_KEY,
+      encrypted
+    );
+    expect(decrypted).toBe(message);
+  });
+
+  // Invalid private key tests
+  it("should throw error for malformed PEM private key", async () => {
+    const malformedKey =
+      "-----BEGIN PRIVATE KEY-----\nINVALID_BASE64\n-----END PRIVATE KEY-----";
+    await expect(
+      utils.messageDecryptFromChunks(malformedKey, ["chunk"])
+    ).rejects.toThrow();
+  });
+
+  it("should throw error for public key instead of private", async () => {
+    await expect(
+      utils.messageDecryptFromChunks(PUBLIC_KEY, ["chunk"])
+    ).rejects.toThrow();
+  });
+
+  it("should throw error for empty private key", async () => {
+    await expect(
+      utils.messageDecryptFromChunks("", ["chunk"])
+    ).rejects.toThrow();
+  });
+
+  it("should throw error for null private key", async () => {
+    await expect(
+      utils.messageDecryptFromChunks(null, ["chunk"])
+    ).rejects.toThrow();
+  });
+
+  // Key mismatch tests
+  it("should throw error for mismatched key pairs", async () => {
+    const message = "Test message";
+    const encrypted = await utils.messageEncryptToChunks(PUBLIC_KEY, message);
+
+    await expect(
+      utils.messageDecryptFromChunks(PRIVATE_KEY2, encrypted)
+    ).rejects.toThrow();
+  });
+
+  it("should decrypt correctly with matching key pairs", async () => {
+    const message = "Test with second key pair";
+    const encrypted = await utils.messageEncryptToChunks(PUBLIC_KEY2, message);
+    const decrypted = await utils.messageDecryptFromChunks(
+      PRIVATE_KEY2,
+      encrypted
+    );
+    expect(decrypted).toBe(message);
+  });
+
+  // Corrupted chunk tests
+  it("should throw error for corrupted base64 chunks", async () => {
+    const corruptedChunks = ["invalid_base64!", "@#$%^&*()"];
+    await expect(
+      utils.messageDecryptFromChunks(PRIVATE_KEY, corruptedChunks)
+    ).rejects.toThrow();
+  });
+
+  it("should throw error for chunks with wrong length", async () => {
+    const message = "Test";
+    const encrypted = await utils.messageEncryptToChunks(PUBLIC_KEY, message);
+    const corruptedChunks = encrypted.map((chunk) => chunk.slice(0, -10)); // Remove last 10 chars
+
+    await expect(
+      utils.messageDecryptFromChunks(PRIVATE_KEY, corruptedChunks)
+    ).rejects.toThrow();
+  });
+
+  it("should throw error for mixed valid and invalid chunks", async () => {
+    const message = "Test";
+    const encrypted = await utils.messageEncryptToChunks(PUBLIC_KEY, message);
+    const mixedChunks = [...encrypted, "invalid_chunk"];
+
+    await expect(
+      utils.messageDecryptFromChunks(PRIVATE_KEY, mixedChunks)
+    ).rejects.toThrow();
+  });
+
+  it("should throw error for empty string chunks", async () => {
+    const chunksWithEmpty = ["", "validbase64chunk"];
+    await expect(
+      utils.messageDecryptFromChunks(PRIVATE_KEY, chunksWithEmpty)
+    ).rejects.toThrow();
+  });
+
+  // Chunk order tests
+  it("should maintain message integrity regardless of chunk processing order", async () => {
+    const message =
+      "This is a test message that will be split into multiple chunks";
+    const encrypted = await utils.messageEncryptToChunks(PUBLIC_KEY, message, {
+      chunkSize: 10,
+    });
+    const decrypted = await utils.messageDecryptFromChunks(
+      PRIVATE_KEY,
+      encrypted
+    );
+    expect(decrypted).toBe(message);
+  });
+
+  // JSON data tests
+  it("should decrypt complex JSON correctly", async () => {
+    const jsonData = JSON.stringify({
+      name: "José da Silva",
+      email: "jose@test.com",
+      address: {
+        street: "Rua das Flores, 123",
+        city: "São Paulo",
+        country: "Brasil",
+      },
+      tags: ["cliente", "vip", "ação"],
+      metadata: {
+        created: new Date().toISOString(),
+        special: "àáâãäåæçèéêëìíîïñòóôõöùúûüý",
+      },
+    });
+
+    const encrypted = await utils.messageEncryptToChunks(PUBLIC_KEY, jsonData);
+    const decrypted = await utils.messageDecryptFromChunks(
+      PRIVATE_KEY,
+      encrypted
+    );
+    expect(decrypted).toBe(jsonData);
+    expect(JSON.parse(decrypted)).toEqual(JSON.parse(jsonData));
+  });
+
+  // Performance and memory tests
+  it("should handle concurrent decryption calls", async () => {
+    const messages = Array.from(
+      { length: 10 },
+      (_, i) => `Message ${i} with special chars ção`
+    );
+
+    const encryptionPromises = messages.map((msg) =>
+      utils.messageEncryptToChunks(PUBLIC_KEY, msg)
+    );
+    const encrypted = await Promise.all(encryptionPromises);
+
+    const decryptionPromises = encrypted.map((chunks) =>
+      utils.messageDecryptFromChunks(PRIVATE_KEY, chunks)
+    );
+    const decrypted = await Promise.all(decryptionPromises);
+
+    decrypted.forEach((result, index) => {
+      expect(result).toBe(messages[index]);
+    });
+  });
+
+  it("should not leak memory with repeated decrypt calls", async () => {
+    const message = "Test message for memory leak check";
+    const encrypted = await utils.messageEncryptToChunks(PUBLIC_KEY, message);
+
+    for (let i = 0; i < 100; i++) {
+      const decrypted = await utils.messageDecryptFromChunks(
+        PRIVATE_KEY,
+        encrypted
+      );
+      expect(decrypted).toBe(message);
+    }
+  });
+
+  // Edge cases for chunk arrays
+  it("should handle single chunk array", async () => {
+    const message = "Short";
+    const encrypted = await utils.messageEncryptToChunks(PUBLIC_KEY, message, {
+      chunkSize: 1000,
+    });
+    expect(encrypted.length).toBe(1);
+
+    const decrypted = await utils.messageDecryptFromChunks(
+      PRIVATE_KEY,
+      encrypted
+    );
+    expect(decrypted).toBe(message);
+  });
+
+  it("should handle large number of small chunks", async () => {
+    const message = "a".repeat(1000);
+    const encrypted = await utils.messageEncryptToChunks(PUBLIC_KEY, message, {
+      chunkSize: 1,
+    });
+    expect(encrypted.length).toBeGreaterThanOrEqual(1000);
+
+    const decrypted = await utils.messageDecryptFromChunks(
+      PRIVATE_KEY,
+      encrypted
+    );
+    expect(decrypted).toBe(message);
+  });
+
+  // Type validation tests
+  it("should throw error for non-array chunks parameter", async () => {
+    await expect(
+      utils.messageDecryptFromChunks(PRIVATE_KEY, "not_an_array")
+    ).rejects.toThrow();
+  });
+
+  it("should throw error for array with non-string elements", async () => {
+    const invalidChunks = ["valid_chunk", 123, null, undefined];
+    await expect(
+      utils.messageDecryptFromChunks(PRIVATE_KEY, invalidChunks)
+    ).rejects.toThrow();
+  });
 });

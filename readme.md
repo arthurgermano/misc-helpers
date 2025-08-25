@@ -50,8 +50,10 @@ const { defaultNumeric, validateCPF } = require('misc-helpers');
       - [`getAuthenticationAuthData`](#getauthenticationauthdata)
   - [Crypto](#crypto)
     - [`decrypt`](#decrypt)
+  - [`decryptBuffer`](#decryptbuffer)
     - [`digest`](#digest)
     - [`encrypt`](#encrypt)
+  - [`encryptBuffer`](#encryptbuffer)
     - [`getCrypto`](#getcrypto)
     - [`importCryptoKey`](#importcryptokey)
     - [`verifySignature`](#verifysignature)
@@ -83,6 +85,7 @@ const { defaultNumeric, validateCPF } = require('misc-helpers');
     - [`bufferFromString`](#bufferfromstring)
     - [`bufferToString`](#buffertostring)
     - [`calculateSecondsInTime`](#calculatesecondsintime)
+  - [`cleanObject`](#cleanobject)
     - [`currencyBRToFloat`](#currencybrtofloat)
     - [`dateFirstHourOfDay`](#datefirsthourofday)
     - [`dateLastHourOfDay`](#datelasthourofday)
@@ -348,6 +351,29 @@ decrypt(privateKeyPEM, encryptedMessageBase64)
 
 ---
 
+## `decryptBuffer`
+Descriptografa uma mensagem em Base64 para um `Buffer` ou `Uint8Array`. Ideal para quando o resultado final precisa ser binário.
+
+**Assinatura:** `decryptBuffer(privateKey, encryptedMessage, props?)`
+
+**Exemplo:**
+```javascript
+const { decryptBuffer, bufferToString } = require('misc-helpers');
+
+const privateKeyPEM = `-----BEGIN PRIVATE KEY-----...`;
+const encryptedMessageBase64 = '...'; // Mensagem criptografada pela encryptBuffer
+
+decryptBuffer(privateKeyPEM, encryptedMessageBase64)
+  .then(decryptedBuffer => {
+    // O resultado é um buffer. Use um utilitário para visualizá-lo como string.
+    console.log('Buffer Descriptografado:', decryptedBuffer);
+    console.log('Mensagem Original:', bufferToString(decryptedBuffer)); // "Dados secretos em um buffer"
+  })
+  .catch(console.error);
+```
+
+---
+
 ### `digest`
 Calcula o hash criptográfico (digest) de uma string ou `Uint8Array`.
 
@@ -384,6 +410,30 @@ const publicKeyPEM = `-----BEGIN PUBLIC KEY-----...`;
 const message = 'Hello, World!';
 
 encrypt(publicKeyPEM, message)
+  .then(encryptedMessage => {
+    console.log('Mensagem Criptografada (Base64):', encryptedMessage);
+  })
+  .catch(console.error);
+```
+
+---
+
+## `encryptBuffer`
+Criptografa um `Buffer` ou `Uint8Array` usando uma chave pública RSA-OAEP e retorna o resultado em Base64.
+
+**Assinatura:** `encryptBuffer(publicKey, messageBuffer, props?)`
+
+**Exemplo:**
+```javascript
+const { encryptBuffer, bufferFromString } = require('misc-helpers');
+
+const publicKeyPEM = `-----BEGIN PUBLIC KEY-----...`;
+const message = 'Dados secretos em um buffer';
+
+// Primeiro, converta a mensagem para um buffer
+const messageBuffer = bufferFromString(message);
+
+encryptBuffer(publicKeyPEM, messageBuffer)
   .then(encryptedMessage => {
     console.log('Mensagem Criptografada (Base64):', encryptedMessage);
   })
@@ -990,6 +1040,103 @@ const timeOneMinuteAgo = calculateSecondsInTime(60, false);
 console.log(new Date(timeOneMinuteAgo));
 ```
 
+---
+
+## `cleanObject`
+Cria uma cópia 'limpa' de um objeto, removendo recursivamente chaves com valores vazios, nulos ou indesejados, com segurança contra referências circulares.
+
+**Assinatura:** `cleanObject(sourceObject, options?)`
+
+**Parâmetros:**
+* `sourceObject` (`any`): O objeto ou valor a ser limpo. Se a entrada não for um objeto simples (plain object), ela será retornada sem modificações.
+* `options` (`object`, opcional): Um objeto para customizar o comportamento da limpeza.
+    * `options.recursive` (`boolean`, padrão: `true`): Se `true`, a função é aplicada recursivamente a objetos aninhados.
+    * `options.considerNullValue` (`boolean`, padrão: `false`): Se `false`, chaves com valor `null` são removidas. Se `true`, são mantidas.
+    * `options.considerFalseValue` (`boolean`, padrão: `true`): Se `true`, chaves com valor `false` são mantidas. Se `false`, são removidas.
+
+**Retorna:** (`object | any`) - Um novo objeto 'limpo', `{}` se o objeto original se tornar vazio, ou o valor original se a entrada não for um objeto simples.
+
+**Exemplo 1: Uso Básico**
+```javascript
+const { cleanObject } = require('misc-helpers');
+
+const dirtyObject = {
+  name: 'Produto A',
+  price: 100,
+  description: '',
+  stock: 0,
+  metadata: {},
+  category: null,
+  available: false,
+  notes: undefined,
+  attributes: []
+};
+
+const cleaned = cleanObject(dirtyObject);
+// Retorna: { name: 'Produto A', price: 100, stock: 0, available: false }
+console.log(cleaned);
+```
+
+**Exemplo 2: Recursividade e Tipos Especiais**
+```javascript
+const sym = Symbol('id');
+
+const nestedDirty = {
+  [sym]: 'xyz-123',
+  user: {
+    name: 'Jane Doe',
+    email: null,
+    registeredAt: new Date(),
+  },
+  validator: /^[a-z]+$/,
+  order: null
+};
+
+const cleanedNested = cleanObject(nestedDirty);
+/*
+Retorna:
+{
+  [sym]: 'xyz-123',
+  user: {
+    name: 'Jane Doe',
+    registeredAt: [Date Object]
+  },
+  validator: /^[a-z]+$/
+}
+*/
+console.log(cleanedNested);
+```
+
+**Exemplo 3: Usando Opções**
+```javascript
+const data = {
+  isActive: false,
+  user: null,
+  id: 123
+};
+
+const cleanedWithOptions = cleanObject(data, {
+  considerNullValue: true,  // Manter o `null`
+  considerFalseValue: false // Remover o `false`
+});
+
+// Retorna: { user: null, id: 123 }
+console.log(cleanedWithOptions);
+```
+
+**Exemplo 4: Segurança contra Referência Circular**
+```javascript
+const objA = { name: 'A' };
+const objB = { name: 'B', parent: objA };
+objA.child = objB; // Cria o ciclo: A -> B -> A
+
+const cleanedCycle = cleanObject(objA);
+
+// A função não trava e quebra o ciclo.
+// Retorna: { name: 'A', child: { name: 'B' } }
+// A propriedade 'parent' que criaria o ciclo é removida.
+console.log(JSON.stringify(cleanedCycle, null, 2));
+```
 ---
 
 ### `currencyBRToFloat`

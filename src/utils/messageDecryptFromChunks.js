@@ -1,5 +1,5 @@
-import decrypt from "../crypto/decrypt";
-import base64From from "../utils/base64From";
+import decryptBuffer from "../crypto/decryptBuffer";
+import bufferToString from "../utils/bufferToString";
 
 // ------------------------------------------------------------------------------------------------
 
@@ -8,29 +8,48 @@ import base64From from "../utils/base64From";
  *
  * @description
  * Esta função assíncrona recebe um array de pedaços encriptados, decripta cada um
- * deles em paralelo para máxima performance, e então une os resultados (que são pedaços
- * de uma string Base64) para reconstruir e decodificar a mensagem de texto original.
+ * deles em paralelo para máxima performance, e então concatena os buffers resultantes
+ * para reconstruir a mensagem original.
  *
- * @param {CryptoKey} privateKey - A chave privada RSA (formato `CryptoKey`) a ser usada.
+ * @param {string} privateKey - A chave privada RSA (formato string PEM) a ser usada.
  * @param {string[]} messageChunks - Um array de strings, onde cada uma é um pedaço encriptado.
  * @param {object} [props={}] - Propriedades adicionais para a decriptação.
  *
- * @returns {Promise<string>} Uma Promise que resolve para a mensagem original decriptada.
+ * @returns {Promise<any>} Uma Promise que resolve para o payload original decriptado.
  */
 async function messageDecryptFromChunks(privateKey, messageChunks, props = {}) {
-  // 1. Cria um array de Promises, onde cada uma representa a decriptação de um pedaço.
+  if (!messageChunks || messageChunks.length === 0) {
+    return "";
+  }
+
   const decryptionPromises = messageChunks.map(chunk =>
-    decrypt(privateKey, chunk, props)
+    decryptBuffer(privateKey, chunk, props)
   );
+  const decryptedBuffers = await Promise.all(decryptionPromises);
 
-  // 2. Executa todas as decriptações em paralelo. O resultado é um array de pedaços de string Base64.
-  const decryptedChunks = await Promise.all(decryptionPromises);
+  
+  // Lógica de concatenação de alta performance.
+  // Etapa A: Calcula o tamanho total necessário para o buffer final.
+  let totalLength = 0;
+  for (const buffer of decryptedBuffers) {
+    totalLength += buffer.byteLength;
+  }
 
-  // 3. Junta os pedaços de Base64 em uma única string.
-  const finalBase64 = decryptedChunks.join("");
+  // Etapa B: Aloca um único buffer grande (Uint8Array) de uma só vez.
+  const finalBuffer = new Uint8Array(totalLength);
 
-  // 4. Decodifica a string Base64 final de volta para o texto original.
-  return base64From(finalBase64);
+  // Etapa C: Copia cada buffer decriptado para a sua posição correta no buffer final.
+  let offset = 0;
+  for (const buffer of decryptedBuffers) {
+    finalBuffer.set(new Uint8Array(buffer), offset);
+    offset += buffer.byteLength;
+  }
+
+  const jsonString = bufferToString(finalBuffer);
+  
+  const payload = JSON.parse(jsonString);
+
+  return payload.data;
 }
 
 // ------------------------------------------------------------------------------------------------

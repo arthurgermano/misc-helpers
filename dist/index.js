@@ -179,6 +179,7 @@ __export(utils_exports, {
   bufferFromString: () => bufferFromString_default,
   bufferToString: () => bufferToString_default,
   calculateSecondsInTime: () => calculateSecondsInTime_default,
+  cleanObject: () => cleanObject_default,
   currencyBRToFloat: () => currencyBRToFloat_default,
   dateFirstHourOfDay: () => dateFirstHourOfDay_default,
   dateLastHourOfDay: () => dateLastHourOfDay_default,
@@ -374,31 +375,13 @@ var base64URLEncode_default = base64URLEncode;
 
 // src/utils/bufferCompare.js
 function bufferCompare(buffer1, buffer2) {
-  if (!(buffer1 instanceof ArrayBuffer) || !(buffer2 instanceof ArrayBuffer)) {
+  if (!buffer1 || !buffer2 || buffer1.byteLength !== buffer2.byteLength) {
     return false;
   }
-  if (buffer1.byteLength !== buffer2.byteLength) {
-    return false;
-  }
-  if (typeof window === "undefined") {
-    const buf1 = Buffer.from(buffer1);
-    const buf2 = Buffer.from(buffer2);
-    return buf1.equals(buf2);
-  }
-  const view1_32 = new Uint32Array(buffer1);
-  const view2_32 = new Uint32Array(buffer2);
-  for (let i = 0; i < view1_32.length; i++) {
-    if (view1_32[i] !== view2_32[i]) {
-      return false;
-    }
-  }
-  const remainingOffset = view1_32.length * 4;
-  const view1_8 = new Uint8Array(buffer1);
-  const view2_8 = new Uint8Array(buffer2);
-  for (let i = remainingOffset; i < view1_8.length; i++) {
-    if (view1_8[i] !== view2_8[i]) {
-      return false;
-    }
+  const view1 = new Uint8Array(buffer1);
+  const view2 = new Uint8Array(buffer2);
+  for (let i = 0; i < view1.length; i++) {
+    if (view1[i] !== view2[i]) return false;
   }
   return true;
 }
@@ -407,7 +390,7 @@ var bufferCompare_default = bufferCompare;
 // src/utils/bufferConcatenate.js
 function bufferConcatenate(buffer1, buffer2) {
   if (buffer1 == null || buffer2 == null) {
-    return null;
+    return buffer1 || buffer2 || null;
   }
   try {
     const view1 = new Uint8Array(buffer1);
@@ -463,6 +446,48 @@ function calculateSecondsInTime(seconds, add = true) {
   return Date.now() - offsetInMilliseconds;
 }
 var calculateSecondsInTime_default = calculateSecondsInTime;
+
+// src/utils/cleanObject.js
+function cleanObject(sourceObject, options = {}) {
+  const cache = /* @__PURE__ */ new WeakMap();
+  function _clean(currentObject) {
+    if (currentObject === null || typeof currentObject !== "object" || currentObject.constructor !== Object) {
+      return currentObject;
+    }
+    if (cache.has(currentObject)) {
+      return void 0;
+    }
+    const {
+      recursive = true,
+      considerNullValue = false,
+      considerFalseValue = true
+    } = options || {};
+    const newObj = {};
+    cache.set(currentObject, newObj);
+    for (const key of Reflect.ownKeys(currentObject)) {
+      let value = currentObject[key];
+      if (recursive) {
+        value = _clean(value);
+      }
+      const isUndefined = value === void 0;
+      const isNullAndIgnored = value === null && !considerNullValue;
+      const isFalseAndIgnored = value === false && !considerFalseValue;
+      const isEmptyString = value === "";
+      const isEmptyArray = Array.isArray(value) && value.length === 0;
+      const isEmptyObjectAfterCleaning = value !== null && typeof value === "object" && value.constructor === Object && Reflect.ownKeys(value).length === 0;
+      if (!isUndefined && !isNullAndIgnored && !isFalseAndIgnored && !isEmptyString && !isEmptyArray && !isEmptyObjectAfterCleaning) {
+        newObj[key] = value;
+      }
+    }
+    return Reflect.ownKeys(newObj).length > 0 ? newObj : void 0;
+  }
+  const result = _clean(sourceObject);
+  if (result === void 0 && sourceObject?.constructor === Object) {
+    return {};
+  }
+  return result;
+}
+var cleanObject_default = cleanObject;
 
 // src/utils/currencyBRToFloat.js
 function currencyBRToFloat(moneyValue) {
@@ -851,54 +876,67 @@ async function importCryptoKey(format2, keyData, algorithm, extractable, keyUsag
 }
 var importCryptoKey_default = importCryptoKey;
 
-// src/crypto/encrypt.js
-async function encrypt(publicKey, message, props = {}) {
-  if (!message) return "";
+// src/crypto/encryptBuffer.js
+async function encryptBuffer(publicKey, messageBuffer, props = {}) {
+  if (!messageBuffer || messageBuffer.length === 0) return "";
   const crypto3 = getCrypto_default();
   const cleanedPublicKey = publicKey.replace(
     /(-----(BEGIN|END) (RSA )?(PRIVATE|PUBLIC) KEY-----|\s)/g,
     ""
   );
   const binaryPublicKey = base64ToBuffer_default(cleanedPublicKey);
+  const {
+    format: format2 = "spki",
+    algorithm = { name: "RSA-OAEP", hash: { name: "SHA-256" } },
+    extractable = true,
+    keyUsages = ["encrypt"],
+    padding = "RSA-OAEP"
+  } = props || {};
   const importedKey = await importCryptoKey_default(
-    props.format || "spki",
+    format2 || "spki",
     binaryPublicKey,
-    props.algorithm || {
+    algorithm || {
       name: "RSA-OAEP",
       hash: { name: "SHA-256" }
     },
-    props.extractable !== void 0 ? props.extractable : true,
-    props.keyUsages || ["encrypt"]
+    extractable !== void 0 ? extractable : true,
+    keyUsages || ["encrypt"]
   );
-  const messageBuffer = bufferFromString_default(message);
   const encryptedBuffer = await crypto3.subtle.encrypt(
-    { name: props.padding || "RSA-OAEP" },
+    { name: padding || "RSA-OAEP" },
     importedKey,
     messageBuffer
   );
   return base64FromBuffer_default(encryptedBuffer);
 }
-var encrypt_default = encrypt;
+var encryptBuffer_default = encryptBuffer;
 
 // src/utils/messageEncryptToChunks.js
-async function messageEncryptToChunks(publicKey, message, props = {}) {
-  const message64 = base64To_default(message);
-  const chunkSize = props.chunkSize || 190;
-  const chunks = [];
-  for (let i = 0; i < message64.length; i += chunkSize) {
-    chunks.push(message64.substring(i, i + chunkSize));
+async function messageEncryptToChunks(publicKey, payload, props = {}) {
+  if (payload === void 0 || payload === null) {
+    return [];
   }
-  const encryptionPromises = chunks.map(
-    (chunk) => encrypt_default(publicKey, chunk, props)
-  );
+  let { chunkSize } = props || {};
+  if (!isFinite(chunkSize) || chunkSize <= 0) {
+    chunkSize = 190;
+  }
+  const jsonPayload = JSON.stringify({ data: payload });
+  const bufferPayload = bufferFromString_default(jsonPayload);
+  const chunks = [];
+  for (let i = 0; i < bufferPayload.length; i += chunkSize) {
+    chunks.push(bufferPayload.slice(i, i + chunkSize));
+  }
+  const encryptionPromises = chunks.map((chunk) => {
+    return encryptBuffer_default(publicKey, chunk, props);
+  });
   return Promise.all(encryptionPromises);
 }
 var messageEncryptToChunks_default = messageEncryptToChunks;
 
-// src/crypto/decrypt.js
-async function decrypt(privateKey, encryptedMessage, props = {}) {
+// src/crypto/decryptBuffer.js
+async function decryptBuffer(privateKey, encryptedMessage, props = {}) {
   if (!encryptedMessage) {
-    return "";
+    return getCrypto_default().subtle ? new Uint8Array(0) : Buffer.alloc(0);
   }
   const {
     format: format2 = "pkcs8",
@@ -906,7 +944,7 @@ async function decrypt(privateKey, encryptedMessage, props = {}) {
     extractable = true,
     keyUsages = ["decrypt"],
     padding = "RSA-OAEP"
-  } = props;
+  } = props || {};
   const crypto3 = getCrypto_default();
   const cleanedPrivateKey = privateKey.replace(
     /-----(BEGIN|END) (?:RSA )?(?:PRIVATE|PUBLIC) KEY-----|\s/g,
@@ -926,18 +964,32 @@ async function decrypt(privateKey, encryptedMessage, props = {}) {
     importedKey,
     encryptedData
   );
-  return bufferToString_default(decryptedBuffer);
+  return decryptedBuffer;
 }
-var decrypt_default = decrypt;
+var decryptBuffer_default = decryptBuffer;
 
 // src/utils/messageDecryptFromChunks.js
 async function messageDecryptFromChunks(privateKey, messageChunks, props = {}) {
+  if (!messageChunks || messageChunks.length === 0) {
+    return "";
+  }
   const decryptionPromises = messageChunks.map(
-    (chunk) => decrypt_default(privateKey, chunk, props)
+    (chunk) => decryptBuffer_default(privateKey, chunk, props)
   );
-  const decryptedChunks = await Promise.all(decryptionPromises);
-  const finalBase64 = decryptedChunks.join("");
-  return base64From_default(finalBase64);
+  const decryptedBuffers = await Promise.all(decryptionPromises);
+  let totalLength = 0;
+  for (const buffer of decryptedBuffers) {
+    totalLength += buffer.byteLength;
+  }
+  const finalBuffer = new Uint8Array(totalLength);
+  let offset = 0;
+  for (const buffer of decryptedBuffers) {
+    finalBuffer.set(new Uint8Array(buffer), offset);
+    offset += buffer.byteLength;
+  }
+  const jsonString = bufferToString_default(finalBuffer);
+  const payload = JSON.parse(jsonString);
+  return payload.data;
 }
 var messageDecryptFromChunks_default = messageDecryptFromChunks;
 
@@ -1369,6 +1421,7 @@ var utils_default = {
   bufferFromString: bufferFromString_default,
   bufferToString: bufferToString_default,
   calculateSecondsInTime: calculateSecondsInTime_default,
+  cleanObject: cleanObject_default,
   currencyBRToFloat: currencyBRToFloat_default,
   dateToFormat: dateToFormat_default,
   dateFirstHourOfDay: dateFirstHourOfDay_default,
@@ -1735,13 +1788,86 @@ var validators_default = {
 var crypto_exports = {};
 __export(crypto_exports, {
   decrypt: () => decrypt_default,
+  decryptBuffer: () => decryptBuffer_default,
   default: () => crypto_default,
   digest: () => digest_default,
   encrypt: () => encrypt_default,
+  encryptBuffer: () => encryptBuffer_default,
   getCrypto: () => getCrypto_default,
   importCryptoKey: () => importCryptoKey_default,
   verifySignature: () => verifySignature_default
 });
+
+// src/crypto/decrypt.js
+async function decrypt(privateKey, encryptedMessage, props = {}) {
+  if (!encryptedMessage) {
+    return "";
+  }
+  const {
+    format: format2 = "pkcs8",
+    algorithm = { name: "RSA-OAEP", hash: { name: "SHA-256" } },
+    extractable = true,
+    keyUsages = ["decrypt"],
+    padding = "RSA-OAEP"
+  } = props || {};
+  const crypto3 = getCrypto_default();
+  const cleanedPrivateKey = privateKey.replace(
+    /-----(BEGIN|END) (?:RSA )?(?:PRIVATE|PUBLIC) KEY-----|\s/g,
+    ""
+  );
+  const binaryPrivateKey = base64ToBuffer_default(cleanedPrivateKey);
+  const importedKey = await importCryptoKey_default(
+    format2,
+    binaryPrivateKey,
+    algorithm,
+    extractable,
+    keyUsages
+  );
+  const encryptedData = base64ToBuffer_default(encryptedMessage);
+  const decryptedBuffer = await crypto3.subtle.decrypt(
+    { name: padding },
+    importedKey,
+    encryptedData
+  );
+  return bufferToString_default(decryptedBuffer);
+}
+var decrypt_default = decrypt;
+
+// src/crypto/encrypt.js
+async function encrypt(publicKey, message, props = {}) {
+  if (!message) return "";
+  const crypto3 = getCrypto_default();
+  const cleanedPublicKey = publicKey.replace(
+    /(-----(BEGIN|END) (RSA )?(PRIVATE|PUBLIC) KEY-----|\s)/g,
+    ""
+  );
+  const binaryPublicKey = base64ToBuffer_default(cleanedPublicKey);
+  const {
+    format: format2 = "spki",
+    algorithm = { name: "RSA-OAEP", hash: { name: "SHA-256" } },
+    extractable = true,
+    keyUsages = ["encrypt"],
+    padding = "RSA-OAEP"
+  } = props || {};
+  const importedKey = await importCryptoKey_default(
+    format2 || "spki",
+    binaryPublicKey,
+    algorithm || {
+      name: "RSA-OAEP",
+      hash: { name: "SHA-256" }
+    },
+    extractable !== void 0 ? extractable : true,
+    keyUsages || ["encrypt"]
+  );
+  const messageBuffer = bufferFromString_default(message);
+  const encryptedBuffer = await crypto3.subtle.encrypt(
+    { name: padding || "RSA-OAEP" },
+    importedKey,
+    messageBuffer
+  );
+  return base64FromBuffer_default(encryptedBuffer);
+}
+var encrypt_default = encrypt;
 
 // src/crypto/digest.js
 async function digest(algorithm, data) {
@@ -1769,6 +1895,8 @@ var crypto_default = {
   getCrypto: getCrypto_default,
   decrypt: decrypt_default,
   encrypt: encrypt_default,
+  decryptBuffer: decryptBuffer_default,
+  encryptBuffer: encryptBuffer_default,
   digest: digest_default,
   importCryptoKey: importCryptoKey_default,
   verifySignature: verifySignature_default
@@ -2865,6 +2993,7 @@ export {
   bufferToString_default as bufferToString,
   bulkProcessor_default as bulkProcessor,
   calculateSecondsInTime_default as calculateSecondsInTime,
+  cleanObject_default as cleanObject,
   constants,
   convertECDSAASN1Signature_default as convertECDSAASN1Signature,
   crypto2 as crypto,
@@ -2877,12 +3006,14 @@ export {
   dateToFormat_default as dateToFormat,
   debouncer_default as debouncer,
   decrypt_default as decrypt,
+  decryptBuffer_default as decryptBuffer,
   index_default as default,
   defaultNumeric_default as defaultNumeric,
   defaultValue_default as defaultValue,
   deleteKeys_default as deleteKeys,
   digest_default as digest,
   encrypt_default as encrypt,
+  encryptBuffer_default as encryptBuffer,
   generateRandomString_default as generateRandomString,
   generateSimpleId_default as generateSimpleId,
   getAuthenticationAuthData_default as getAuthenticationAuthData,

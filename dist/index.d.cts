@@ -865,51 +865,15 @@ function base64URLEncode(text = "", fromFormat = "utf8") {
  * console.log(bufferCompare(buf1, buf3)); // false
  */
 function bufferCompare(buffer1, buffer2) {
-  // 1. Validação de tipo: garante que ambos os argumentos são instâncias de ArrayBuffer.
-  if (!(buffer1 instanceof ArrayBuffer) || !(buffer2 instanceof ArrayBuffer)) {
+  if (!buffer1 || !buffer2 || buffer1.byteLength !== buffer2.byteLength) {
     return false;
   }
 
-  // 2. Verificação de tamanho: a forma mais rápida de identificar buffers diferentes.
-  // Se os tamanhos não batem, é impossível que sejam iguais.
-  if (buffer1.byteLength !== buffer2.byteLength) {
-    return false;
+  const view1 = new Uint8Array(buffer1);
+  const view2 = new Uint8Array(buffer2);
+  for (let i = 0; i < view1.length; i++) {
+    if (view1[i] !== view2[i]) return false;
   }
-
-  // **Otimização para ambiente Node.js:**
-  if (typeof window === 'undefined') {
-    // Converte os ArrayBuffers para Buffers do Node.js e usa o método `equals`,
-    // que é uma implementação nativa e extremamente performática.
-    const buf1 = Buffer.from(buffer1);
-    const buf2 = Buffer.from(buffer2);
-    return buf1.equals(buf2);
-  }
-
-  // **Otimização para ambiente do Navegador:**
-  // Em vez de comparar byte a byte, compara em blocos maiores (4 bytes ou 32 bits por vez).
-  const view1_32 = new Uint32Array(buffer1);
-  const view2_32 = new Uint32Array(buffer2);
-
-  // Compara a maior parte do buffer em blocos de 32 bits.
-  for (let i = 0; i < view1_32.length; i++) {
-    if (view1_32[i] !== view2_32[i]) {
-      return false;
-    }
-  }
-
-  // Calcula onde a comparação de 32 bits parou para checar os bytes restantes.
-  const remainingOffset = view1_32.length * 4;
-
-  // Compara os bytes restantes (caso o tamanho do buffer não seja múltiplo de 4).
-  const view1_8 = new Uint8Array(buffer1);
-  const view2_8 = new Uint8Array(buffer2);
-  for (let i = remainingOffset; i < view1_8.length; i++) {
-    if (view1_8[i] !== view2_8[i]) {
-      return false;
-    }
-  }
-
-  // Se todas as comparações passaram, os buffers são idênticos.
   return true;
 }
 
@@ -943,7 +907,7 @@ function bufferConcatenate(buffer1, buffer2) {
   // 1. Validação explícita para `null` ou `undefined`.
   // A verificação `== null` é uma forma concisa de tratar ambos os casos.
   if (buffer1 == null || buffer2 == null) {
-    return null;
+    return buffer1 || buffer2 || null;
   }
 
   try {
@@ -1123,6 +1087,130 @@ function calculateSecondsInTime(seconds, add = true) {
 
   return Date.now() - offsetInMilliseconds;
 }
+
+/**
+ * @fileoverview Fornece uma função para "limpar" um objeto, removendo chaves
+ * com valores considerados vazios, nulos ou indesejados.
+ */
+
+/**
+ * @summary Cria uma cópia "limpa" de um objeto, removendo chaves com valores vazios de forma segura e performática.
+ *
+ * @description
+ * Itera sobre as chaves de um objeto (incluindo `Symbol`s) e retorna uma nova cópia contendo apenas as
+ * chaves com valores considerados "válidos". Por padrão, `undefined`, `null`, strings vazias, arrays
+ * vazios e objetos que se tornam vazios após a limpeza são removidos.
+ * Tipos complexos como `Date` e `RegExp` são preservados como valores válidos.
+ *
+ * A função é segura contra referências circulares; estruturas cíclicas são interrompidas
+ * e as propriedades que causam o ciclo são removidas do resultado final.
+ *
+ * @param {any} sourceObject - O objeto a ser limpo. Se não for um objeto "simples" (plain object), será retornado diretamente.
+ * @param {object} [options={}] - Opções para customizar o comportamento da limpeza.
+ * @property {boolean} [options.recursive=true] - Se `true`, a função será aplicada recursivamente a
+ * objetos aninhados. Se `false`, objetos aninhados são mantidos como estão.
+ * @property {boolean} [options.considerNullValue=false] - Se `false` (padrão), chaves com valor `null`
+ * são removidas. Se `true`, são mantidas.
+ * @property {boolean} [options.considerFalseValue=true] - Se `true` (padrão), chaves com valor `false`
+ * são mantidas. Se `false`, são removidas.
+ *
+ * @returns {object|any} Um novo objeto "limpo" ou o valor original se a entrada não for um objeto.
+ *
+ * @example
+ * // Exemplo com Symbol e RegExp
+ * const sym = Symbol('id');
+ * const complexObj = {
+ * [sym]: 'valor-do-symbol',
+ * regex: /abc/g,
+ * a: 1,
+ * b: null
+ * };
+ * const cleanedComplex = cleanObject(complexObj);
+ * // Retorna: { [sym]: 'valor-do-symbol', regex: /abc/g, a: 1 }
+ * console.log(cleanedComplex);
+ */
+function cleanObject(sourceObject, options = {}) {
+  // O WeakMap rastreia os objetos já visitados para evitar ciclos infinitos.
+  const cache = new WeakMap();
+
+  // Função interna recursiva que faz o trabalho principal.
+  function _clean(currentObject) {
+    // Valores que não são "plain objects" (como Date, RegExp, arrays, primitivos)
+    // são tratados como valores finais e não devem ser iterados.
+    if (
+      currentObject === null ||
+      typeof currentObject !== 'object' ||
+      currentObject.constructor !== Object
+    ) {
+      return currentObject;
+    }
+    
+    // Se o objeto já foi visitado nesta chamada, é uma referência circular.
+    // Retorna 'undefined' para que a chave que aponta para ele seja removida.
+    if (cache.has(currentObject)) {
+      return undefined;
+    }
+
+    const {
+      recursive = true,
+      considerNullValue = false,
+      considerFalseValue = true,
+    } = options || {};
+
+    const newObj = {};
+    // Adiciona o objeto ao cache antes de iterar para detectar ciclos que apontem para ele mesmo.
+    cache.set(currentObject, newObj);
+
+    // Usa-se Reflect.ownKeys para garantir que chaves do tipo Symbol sejam incluídas,
+    // ao contrário de Object.keys ou for...in.
+    for (const key of Reflect.ownKeys(currentObject)) {
+      let value = currentObject[key];
+
+      if (recursive) {
+        value = _clean(value);
+      }
+
+      const isUndefined = value === undefined;
+      const isNullAndIgnored = value === null && !considerNullValue;
+      const isFalseAndIgnored = value === false && !considerFalseValue;
+      const isEmptyString = value === '';
+      const isEmptyArray = Array.isArray(value) && value.length === 0;
+      
+      // Um objeto que se tornou vazio após a limpeza recursiva também deve ser removido.
+      const isEmptyObjectAfterCleaning = 
+        value !== null &&
+        typeof value === 'object' &&
+        value.constructor === Object &&
+        Reflect.ownKeys(value).length === 0;
+
+      if (
+        !isUndefined &&
+        !isNullAndIgnored &&
+        !isFalseAndIgnored &&
+        !isEmptyString &&
+        !isEmptyArray &&
+        !isEmptyObjectAfterCleaning
+      ) {
+        newObj[key] = value;
+      }
+    }
+    
+    // Se o objeto resultante não tiver chaves, ele é considerado vazio.
+    // Retorna `undefined` para que a chave que aponta para ele seja removida no nível pai.
+    return Reflect.ownKeys(newObj).length > 0 ? newObj : undefined;
+  }
+
+  const result = _clean(sourceObject);
+
+  // CORREÇÃO: Se o resultado final da limpeza do objeto de nível superior for `undefined`
+  // (ou seja, ele ficou vazio), retorna `{}`, conforme esperado pelos testes.
+  if (result === undefined && sourceObject?.constructor === Object) {
+    return {};
+  }
+
+  return result;
+}
+// ------------------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------------------
 
@@ -2293,151 +2381,100 @@ async function importCryptoKey(format, keyData, algorithm, extractable, keyUsage
 // ------------------------------------------------------------------------------------------------
 
 /**
- * Encrypts a message using asymmetric cryptography with public key encryption.
+ * Criptografa dados binários (Buffer/Uint8Array) usando uma chave pública RSA.
  *
- * This function provides a complete encryption workflow that handles PEM-formatted
- * public keys, performs key importation, and encrypts plaintext messages using
- * industry-standard cryptographic algorithms. It supports various RSA encryption
- * schemes and is designed for secure data transmission scenarios where the sender
- * has access to the recipient's public key.
- *
- * The function automatically handles key format conversion from PEM to binary,
- * imports the key into the Web Crypto API, performs the encryption operation,
- * and returns the result as a base64-encoded string for easy transmission.
+ * Esta função gerencia o fluxo de criptografia completo: processa uma chave pública
+ * em formato PEM, importa-a para a Web Crypto API e criptografa os dados usando
+ * o algoritmo RSA-OAEP, que é o padrão da indústria para preenchimento (padding).
  *
  * @async
- * @param {string} publicKey - The public key in PEM format for encryption:
- *                            - Must be a valid PEM-encoded public key string
- *                            - Supports standard PEM headers (BEGIN/END PUBLIC KEY)
- *                            - Can include RSA-specific headers (BEGIN/END RSA PUBLIC KEY)
- *                            - Whitespace and line breaks are automatically handled
- *                            - Key should be compatible with the specified algorithm
+ * @function encryptBuffer
  *
- * @param {string} message - The plaintext message to encrypt:
- *                          - UTF-8 encoded string that will be converted to binary
- *                          - Empty strings are handled gracefully (returns empty result)
- *                          - Message length is limited by the key size and padding:
- *                            - RSA-OAEP with 2048-bit key: ~190 bytes max
- *                            - RSA-OAEP with 4096-bit key: ~446 bytes max
- *                          - For larger messages, consider hybrid encryption approaches
+ * @param {string} publicKey A chave pública em formato PEM. Deve ser uma string
+ * válida, incluindo os cabeçalhos `-----BEGIN PUBLIC KEY-----` e `-----END PUBLIC KEY-----`.
  *
- * @param {Object} [props={}] - Configuration options for encryption parameters:
- * @param {string} [props.format='spki'] - Public key import format:
- *                            - 'spki': SubjectPublicKeyInfo format (most common for public keys)
- *                            - 'raw': Raw key data (not typical for RSA keys)
- *                            - 'jwk': JSON Web Key format
+ * @param {Buffer|Uint8Array} messageBuffer Os dados binários a serem criptografados.
+ * - Em Node.js, pode ser um `Buffer`.
+ * - No navegador, pode ser um `Uint8Array`.
+ * - O tamanho máximo dos dados é limitado pelo tamanho da chave e pelo esquema de
+ * padding. Por exemplo:
+ * - Chave de 2048 bits (RSA-OAEP): ~190 bytes.
+ * - Chave de 4096 bits (RSA-OAEP): ~446 bytes.
  *
- * @param {Object} [props.algorithm] - Cryptographic algorithm specification:
- *                            Default: { name: 'RSA-OAEP', hash: { name: 'SHA-256' } }
- *                            Supported algorithms:
- *                            - RSA-OAEP: Optimal Asymmetric Encryption Padding
- *                            - RSA-PKCS1-v1_5: PKCS#1 v1.5 padding (legacy, less secure)
- *                            Hash options: SHA-1, SHA-256, SHA-384, SHA-512
+ * @param {object} [options={}] Opções para personalizar a importação da chave e a criptografia.
+ * @property {string} [options.format='spki'] O formato da chave a ser importada.
+ * Valores comuns são 'spki' (padrão) ou 'jwk'.
+ * @property {RsaHashedImportParams} [options.algorithm={name: 'RSA-OAEP', hash: 'SHA-256'}]
+ * O algoritmo a ser usado para a importação da chave.
+ * @property {boolean} [options.extractable=true] Se a chave importada pode ser exportada.
+ * @property {string[]} [options.keyUsages=['encrypt']] As operações permitidas para a chave.
+ * Deve incluir 'encrypt'.
+ * @property {string} [options.padding='RSA-OAEP'] O esquema de preenchimento (padding) a ser
+ * usado na criptografia.
  *
- * @param {boolean} [props.extractable=true] - Key extractability setting:
- *                            - true: Key can be exported after import (default)
- *                            - false: Key cannot be extracted (more secure)
- *                            - Generally safe to leave as true for public keys
+ * @returns {Promise<string>} Uma Promise que resolve para uma string codificada em base64
+ * contendo os dados criptografados. Retorna uma string vazia se `messageBuffer` for vazio.
  *
- * @param {string[]} [props.keyUsages=['encrypt']] - Permitted key operations:
- *                            - ['encrypt']: Only encryption operations (default)
- *                            - ['encrypt', 'wrapKey']: Encryption and key wrapping
- *                            - Must include 'encrypt' for this function to work
- *
- * @param {string} [props.padding='RSA-OAEP'] - Encryption padding scheme:
- *                            - 'RSA-OAEP': Optimal Asymmetric Encryption Padding (recommended)
- *                            - 'RSA-PKCS1-v1_5': PKCS#1 v1.5 padding (legacy)
- *                            - Should match the algorithm.name parameter
- *
- * @returns {Promise<string>} Promise resolving to encrypted data:
- *                           - Base64-encoded string representation of encrypted bytes
- *                           - Ready for transmission over text-based protocols
- *                           - Can be stored safely in JSON, XML, or database text fields
- *                           - Returns empty string if input message is empty
- *
- * @throws {Error} Throws an error when:
- *                 - Public key is malformed or invalid PEM format
- *                 - Key is incompatible with the specified algorithm
- *                 - Message exceeds maximum size for the key/padding combination
- *                 - Cryptographic operation fails due to invalid parameters
- *                 - Required crypto modules are unavailable in the environment
+ * @throws {Error} Lança um erro se a chave for inválida, a mensagem exceder o
+ * limite de tamanho para a chave, ou se a operação criptográfica falhar.
  *
  * @example
- * // Basic RSA-OAEP encryption with default parameters
+ * // Exemplo de uso para criptografar uma mensagem
  * const publicKeyPem = `-----BEGIN PUBLIC KEY-----
  * MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
  * -----END PUBLIC KEY-----`;
  *
- * const encrypted = await encrypt(publicKeyPem, 'Hello, World!');
- * console.log('Encrypted message:', encrypted);
+ * // No Node.js:
+ * // const buffer = Buffer.from('Hello, World!');
  *
- * @example
- * // Advanced encryption with custom algorithm parameters
- * const customEncrypted = await encrypt(
- *   publicKeyPem,
- *   'Sensitive data',
- *   {
- *     algorithm: {
- *       name: 'RSA-OAEP',
- *       hash: { name: 'SHA-512' }
- *     },
- *     extractable: false,
- *     keyUsages: ['encrypt'],
- *     padding: 'RSA-OAEP'
- *   }
- * );
+ * // No navegador:
+ * // const buffer = new TextEncoder().encode('Hello, World!');
  *
- * @example
- * // Handle encryption errors gracefully
  * try {
- *   const result = await encrypt(publicKey, message);
- *   // Transmit or store the encrypted result
- *   await sendSecureMessage(result);
+ * const encrypted = await encryptBuffer(publicKeyPem, buffer);
+ * console.log('Dados criptografados (base64):', encrypted);
  * } catch (error) {
- *   console.error('Encryption failed:', error.message);
- *   // Implement fallback or error reporting
+ * console.error('Falha na criptografia:', error);
  * }
- *
- * @example
- * // Empty message handling
- * const emptyResult = await encrypt(publicKey, '');
- * console.log(emptyResult === ''); // true
  */
-async function encrypt(publicKey, message, props = {}) {
-  // Handle empty message case early for performance
-  if (!message) return "";
+async function encryptBuffer(publicKey, messageBuffer, props = {}) {
+  // Handle empty buffer case early for performance
+  if (!messageBuffer || messageBuffer.length === 0) return "";
 
   // Extract crypto module for the current environment
   const crypto = getCrypto();
 
   // Clean and convert PEM-formatted public key to binary format
-  // Remove PEM headers, footers, and whitespace to get pure base64 content
   const cleanedPublicKey = publicKey.replace(
     /(-----(BEGIN|END) (RSA )?(PRIVATE|PUBLIC) KEY-----|\s)/g,
     ""
   );
   const binaryPublicKey = base64ToBuffer(cleanedPublicKey);
 
+  // Destructure configuration with defaults
+  const {
+    format = "spki",
+    algorithm = { name: "RSA-OAEP", hash: { name: "SHA-256" } },
+    extractable = true,
+    keyUsages = ["encrypt"],
+    padding = "RSA-OAEP",
+  } = props || {};
+
   // Import the public key into Web Crypto API format
-  // Use provided parameters or sensible defaults for RSA-OAEP encryption
   const importedKey = await importCryptoKey(
-    props.format || "spki",
+    format || "spki",
     binaryPublicKey,
-    props.algorithm || {
+    algorithm || {
       name: "RSA-OAEP",
       hash: { name: "SHA-256" },
     },
-    props.extractable !== undefined ? props.extractable : true,
-    props.keyUsages || ["encrypt"]
+    extractable !== undefined ? extractable : true,
+    keyUsages || ["encrypt"]
   );
 
-  // Convert message string to binary format for encryption
-  const messageBuffer = bufferFromString(message);
-
   // Perform the actual encryption operation using the imported key
-  // The padding parameter determines the encryption scheme used
   const encryptedBuffer = await crypto.subtle.encrypt(
-    { name: props.padding || "RSA-OAEP" },
+    { name: padding || "RSA-OAEP" },
     importedKey,
     messageBuffer
   );
@@ -2452,101 +2489,126 @@ async function encrypt(publicKey, message, props = {}) {
  * @summary Encripta uma mensagem em pedaços (chunks) usando RSA-OAEP.
  *
  * @description
- * Esta função assíncrona primeiro converte a mensagem para uma string Base64 para garantir
- * a consistência dos dados. Em seguida, divide essa string em pedaços e encripta cada
- * um em paralelo para máxima performance. O resultado é um array de strings, onde
- * cada uma representa um pedaço encriptado.
+ * Esta função assíncrona primeiro converte o payload para um buffer de bytes.
+ * Em seguida, divide esse buffer em pedaços (chunks) e encripta cada um deles
+ * em paralelo para máxima performance. O resultado é um array de strings, onde
+ * cada uma representa um pedaço encriptado em base64.
  *
- * @param {CryptoKey} publicKey - A chave pública RSA (formato `CryptoKey`) a ser usada.
- * @param {string} message - A mensagem de texto a ser encriptada.
+ * @param {string} publicKey - A chave pública RSA (formato string PEM) a ser usada.
+ * @param {object} payload - A carga a ser encriptada.
  * @param {object} [props={}] - Propriedades adicionais para a encriptação.
- * @param {number} [props.chunkSize=190] - O tamanho de cada pedaço da string Base64.
+ * @param {number} [props.chunkSize=190] - O tamanho máximo de cada pedaço em bytes.
+ * O padrão 190 é o limite seguro para chaves RSA de 2048 bits com padding OAEP.
  *
  * @returns {Promise<string[]>} Uma Promise que resolve para um array de pedaços encriptados.
  */
-async function messageEncryptToChunks(publicKey, message, props = {}) {
-  // 1. Converte a mensagem para Base64 PRIMEIRO.
-  // Esta etapa é crucial para a consistência do sistema e o tratamento de caracteres especiais.
-  const message64 = base64To(message);
-
-  const chunkSize = props.chunkSize || 190;
-  const chunks = [];
-
-  // 2. Divide a string Base64 em pedaços (chunks).
-  for (let i = 0; i < message64.length; i += chunkSize) {
-    chunks.push(message64.substring(i, i + chunkSize));
+async function messageEncryptToChunks(publicKey, payload, props = {}) {
+  if (payload === undefined || payload === null) {
+    return []; // Retornar um array vazio é mais consistente com o tipo de retorno
+  }
+  let { chunkSize } = props || {};
+  if (!isFinite(chunkSize) || chunkSize <= 0) {
+    chunkSize = 190;
   }
 
-  // 3. Cria um array de Promises para encriptar cada pedaço da string Base64.
-  const encryptionPromises = chunks.map((chunk) =>
-    encrypt(publicKey, chunk, props)
-  );
+  const jsonPayload = JSON.stringify({ data: payload });
+  const bufferPayload = bufferFromString(jsonPayload);
+  const chunks = [];
 
-  // 4. Executa todas as encriptações em paralelo para máxima performance.
+  // 1. Divide o buffer principal em vários buffers menores (chunks).
+  for (let i = 0; i < bufferPayload.length; i += chunkSize) {
+    chunks.push(bufferPayload.slice(i, i + chunkSize));
+  }
+
+  // 2. Mapeia cada chunk de buffer para uma promessa de encriptação.
+  const encryptionPromises = chunks.map((chunk) => {
+    return encryptBuffer(publicKey, chunk, props);
+  });
+
+  // 3. Executa todas as encriptações em paralelo para máxima performance.
   return Promise.all(encryptionPromises);
 }
 
 // ------------------------------------------------------------------------------------------------
 
 /**
- * Asynchronously decrypts an encrypted message using a provided private key.
- * 
- * This function performs RSA-OAEP decryption using the Web Crypto API, supporting both
- * Node.js and browser environments. It handles PEM-formatted private keys and base64-encoded
- * encrypted messages, providing a secure and efficient decryption process.
+ * Decriptografa uma mensagem em base64 usando uma chave privada RSA.
+ *
+ * Esta função gerencia o fluxo de decriptografia completo: processa uma chave privada
+ * em formato PEM, decodifica a mensagem criptografada de base64, importa a chave
+ * para a Web Crypto API e decriptografa os dados usando o algoritmo RSA-OAEP.
  *
  * @async
- * @function decrypt
- * @param {string} privateKey - The PEM-encoded private key used for decryption
- * @param {string} encryptedMessage - The base64-encoded encrypted message to decrypt
- * @param {Object} [props={}] - Configuration options for the decryption process
- * @param {string} [props.format="pkcs8"] - Private key format specification
- * @param {Object} [props.algorithm] - Cryptographic algorithm configuration
- * @param {string} [props.algorithm.name="RSA-OAEP"] - Algorithm name
- * @param {Object} [props.algorithm.hash] - Hash algorithm configuration
- * @param {string} [props.algorithm.hash.name="SHA-256"] - Hash algorithm name
- * @param {boolean} [props.extractable=true] - Whether the imported key can be extracted
- * @param {string[]} [props.keyUsages=["decrypt"]] - Permitted key usage operations
- * @param {string} [props.padding="RSA-OAEP"] - Padding scheme for decryption operation
- * @returns {Promise<string>} The decrypted message as a UTF-8 string
- * @throws {Error} When decryption fails due to invalid key, corrupted data, or crypto errors
- * 
+ * @function decryptBuffer
+ *
+ * @param {string} privateKey A chave privada em formato PEM. Deve ser uma string
+ * válida, incluindo os cabeçalhos `-----BEGIN PRIVATE KEY-----` e `-----END PRIVATE KEY-----`.
+ *
+ * @param {string} encryptedMessage A mensagem criptografada e codificada em base64
+ * que será decriptografada.
+ *
+ * @param {object} [options={}] Opções para personalizar a importação da chave e a decriptografia.
+ * @property {string} [options.format='pkcs8'] O formato da chave privada a ser importada.
+ * O padrão 'pkcs8' é o formato mais comum.
+ * @property {RsaHashedImportParams} [options.algorithm={name: 'RSA-OAEP', hash: 'SHA-256'}]
+ * O algoritmo a ser usado para a importação da chave.
+ * @property {boolean} [options.extractable=true] Se a chave importada pode ser exportada.
+ * @property {string[]} [options.keyUsages=['decrypt']] As operações permitidas para a chave.
+ * Deve incluir 'decrypt'.
+ * @property {string} [options.padding='RSA-OAEP'] O esquema de preenchimento (padding)
+ * usado na decriptografia. Deve ser o mesmo usado na criptografia.
+ *
+ * @returns {Promise<Buffer|Uint8Array>} Uma Promise que resolve para os dados
+ * decriptografados como um `Buffer` (em Node.js) ou `Uint8Array` (no navegador).
+ * Retorna uma string vazia se `encryptedMessage` for vazio.
+ *
+ * @throws {Error} Lança um erro se a chave for inválida, a mensagem estiver
+ * corrompida, ou se a operação criptográfica falhar (ex: padding incorreto).
+ *
  * @example
- * const decryptedText = await decrypt(pemPrivateKey, base64EncryptedMessage);
- * 
- * @example
- * const decryptedText = await decrypt(pemPrivateKey, base64EncryptedMessage, {
- *   algorithm: { name: "RSA-OAEP", hash: { name: "SHA-1" } },
- *   extractable: false
- * });
+ * // Supondo que `encryptedBase64` foi gerado pela função `encryptBuffer`
+ * // e `privateKeyPem` é a chave privada correspondente.
+ *
+ * try {
+ * const decryptedBuffer = await decryptBuffer(privateKeyPem, encryptedBase64);
+ *
+ * // Para visualizar o resultado como texto:
+ * // No Node.js:
+ * // console.log('Mensagem decriptografada:', decryptedBuffer.toString('utf8'));
+ *
+ * // No navegador:
+ * // console.log('Mensagem decriptografada:', new TextDecoder().decode(decryptedBuffer));
+ * } catch (error) {
+ * console.error('Falha na decriptografia:', error);
+ * }
  */
-async function decrypt(privateKey, encryptedMessage, props = {}) {
-  // Early return for empty encrypted messages to avoid unnecessary processing
+async function decryptBuffer(privateKey, encryptedMessage, props = {}) {
+  // Early return for empty encrypted messages
   if (!encryptedMessage) {
-    return "";
+    // Retorna um Uint8Array vazio no navegador ou Buffer vazio no Node
+    return getCrypto().subtle ? new Uint8Array(0) : Buffer.alloc(0);
   }
 
-  // Destructure configuration with optimized defaults
+  // Destructure configuration with defaults
   const {
     format = "pkcs8",
     algorithm = { name: "RSA-OAEP", hash: { name: "SHA-256" } },
     extractable = true,
     keyUsages = ["decrypt"],
     padding = "RSA-OAEP"
-  } = props;
+  } = props || {};
 
-  // Get crypto implementation (Node.js or browser)
+  // Get crypto implementation
   const crypto = getCrypto();
 
-  // Clean and convert PEM private key to binary format
-  // Removes PEM headers, footers, and whitespace in a single operation
+  // Clean and convert PEM private key to binary
   const cleanedPrivateKey = privateKey.replace(
     /-----(BEGIN|END) (?:RSA )?(?:PRIVATE|PUBLIC) KEY-----|\s/g,
     ""
   );
   const binaryPrivateKey = base64ToBuffer(cleanedPrivateKey);
 
-  // Import the private key for cryptographic operations
+  // Import the private key
   const importedKey = await importCryptoKey(
     format,
     binaryPrivateKey,
@@ -2555,21 +2617,19 @@ async function decrypt(privateKey, encryptedMessage, props = {}) {
     keyUsages
   );
 
-  // Convert base64 encrypted message to binary data
+  // Convert base64 encrypted message to binary
   const encryptedData = base64ToBuffer(encryptedMessage);
 
-  // Perform decryption using the Web Crypto API
+  // Perform decryption
   const decryptedBuffer = await crypto.subtle.decrypt(
     { name: padding },
     importedKey,
     encryptedData
   );
 
-  // Convert decrypted binary data back to string
-  return bufferToString(decryptedBuffer);
+  // Return the raw decrypted buffer
+  return decryptedBuffer;
 }
-
-// ------------------------------------------------------------------------------------------------
 
 // ------------------------------------------------------------------------------------------------
 
@@ -2578,29 +2638,48 @@ async function decrypt(privateKey, encryptedMessage, props = {}) {
  *
  * @description
  * Esta função assíncrona recebe um array de pedaços encriptados, decripta cada um
- * deles em paralelo para máxima performance, e então une os resultados (que são pedaços
- * de uma string Base64) para reconstruir e decodificar a mensagem de texto original.
+ * deles em paralelo para máxima performance, e então concatena os buffers resultantes
+ * para reconstruir a mensagem original.
  *
- * @param {CryptoKey} privateKey - A chave privada RSA (formato `CryptoKey`) a ser usada.
+ * @param {string} privateKey - A chave privada RSA (formato string PEM) a ser usada.
  * @param {string[]} messageChunks - Um array de strings, onde cada uma é um pedaço encriptado.
  * @param {object} [props={}] - Propriedades adicionais para a decriptação.
  *
- * @returns {Promise<string>} Uma Promise que resolve para a mensagem original decriptada.
+ * @returns {Promise<any>} Uma Promise que resolve para o payload original decriptado.
  */
 async function messageDecryptFromChunks(privateKey, messageChunks, props = {}) {
-  // 1. Cria um array de Promises, onde cada uma representa a decriptação de um pedaço.
+  if (!messageChunks || messageChunks.length === 0) {
+    return "";
+  }
+
   const decryptionPromises = messageChunks.map(chunk =>
-    decrypt(privateKey, chunk, props)
+    decryptBuffer(privateKey, chunk, props)
   );
+  const decryptedBuffers = await Promise.all(decryptionPromises);
 
-  // 2. Executa todas as decriptações em paralelo. O resultado é um array de pedaços de string Base64.
-  const decryptedChunks = await Promise.all(decryptionPromises);
+  
+  // Lógica de concatenação de alta performance.
+  // Etapa A: Calcula o tamanho total necessário para o buffer final.
+  let totalLength = 0;
+  for (const buffer of decryptedBuffers) {
+    totalLength += buffer.byteLength;
+  }
 
-  // 3. Junta os pedaços de Base64 em uma única string.
-  const finalBase64 = decryptedChunks.join("");
+  // Etapa B: Aloca um único buffer grande (Uint8Array) de uma só vez.
+  const finalBuffer = new Uint8Array(totalLength);
 
-  // 4. Decodifica a string Base64 final de volta para o texto original.
-  return base64From(finalBase64);
+  // Etapa C: Copia cada buffer decriptado para a sua posição correta no buffer final.
+  let offset = 0;
+  for (const buffer of decryptedBuffers) {
+    finalBuffer.set(new Uint8Array(buffer), offset);
+    offset += buffer.byteLength;
+  }
+
+  const jsonString = bufferToString(finalBuffer);
+  
+  const payload = JSON.parse(jsonString);
+
+  return payload.data;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -3913,6 +3992,7 @@ var index$5 = {
   bufferFromString,
   bufferToString,
   calculateSecondsInTime,
+  cleanObject,
   currencyBRToFloat,
   dateToFormat,
   dateFirstHourOfDay,
@@ -3963,6 +4043,7 @@ declare const utilsNamespace_bufferConcatenate: typeof bufferConcatenate;
 declare const utilsNamespace_bufferFromString: typeof bufferFromString;
 declare const utilsNamespace_bufferToString: typeof bufferToString;
 declare const utilsNamespace_calculateSecondsInTime: typeof calculateSecondsInTime;
+declare const utilsNamespace_cleanObject: typeof cleanObject;
 declare const utilsNamespace_currencyBRToFloat: typeof currencyBRToFloat;
 declare const utilsNamespace_dateFirstHourOfDay: typeof dateFirstHourOfDay;
 declare const utilsNamespace_dateLastHourOfDay: typeof dateLastHourOfDay;
@@ -3996,7 +4077,7 @@ declare const utilsNamespace_toString: typeof toString;
 declare const utilsNamespace_uint8ArrayFromString: typeof uint8ArrayFromString;
 declare const utilsNamespace_uint8ArrayToString: typeof uint8ArrayToString;
 declare namespace utilsNamespace {
-  export { utilsNamespace_JSONFrom as JSONFrom, utilsNamespace_JSONTo as JSONTo, utilsNamespace_assign as assign, utilsNamespace_base64From as base64From, utilsNamespace_base64FromBase64URLSafe as base64FromBase64URLSafe, utilsNamespace_base64FromBuffer as base64FromBuffer, utilsNamespace_base64To as base64To, utilsNamespace_base64ToBuffer as base64ToBuffer, utilsNamespace_base64URLEncode as base64URLEncode, utilsNamespace_bufferCompare as bufferCompare, utilsNamespace_bufferConcatenate as bufferConcatenate, utilsNamespace_bufferFromString as bufferFromString, utilsNamespace_bufferToString as bufferToString, utilsNamespace_calculateSecondsInTime as calculateSecondsInTime, utilsNamespace_currencyBRToFloat as currencyBRToFloat, utilsNamespace_dateFirstHourOfDay as dateFirstHourOfDay, utilsNamespace_dateLastHourOfDay as dateLastHourOfDay, utilsNamespace_dateToFormat as dateToFormat, utilsNamespace_debouncer as debouncer, index$5 as default, utilsNamespace_deleteKeys as deleteKeys, utilsNamespace_generateRandomString as generateRandomString, utilsNamespace_generateSimpleId as generateSimpleId, utilsNamespace_getExecutionTime as getExecutionTime, utilsNamespace_messageDecryptFromChunks as messageDecryptFromChunks, utilsNamespace_messageEncryptToChunks as messageEncryptToChunks, utilsNamespace_normalize as normalize, utilsNamespace_pickKeys as pickKeys, utilsNamespace_pushLogMessage as pushLogMessage, utilsNamespace_regexDigitsOnly as regexDigitsOnly, utilsNamespace_regexLettersOnly as regexLettersOnly, utilsNamespace_regexReplaceTrim as regexReplaceTrim, utilsNamespace_removeDuplicatedStrings as removeDuplicatedStrings, utilsNamespace_sleep as sleep, utilsNamespace_split as split, utilsNamespace_stringCompress as stringCompress, utilsNamespace_stringDecompress as stringDecompress, utilsNamespace_stringToDate as stringToDate, utilsNamespace_stringToDateToFormat as stringToDateToFormat, utilsNamespace_stringToFormat as stringToFormat, utilsNamespace_stringZLibCompress as stringZLibCompress, utilsNamespace_stringZLibDecompress as stringZLibDecompress, utilsNamespace_throttle as throttle, utilsNamespace_timestamp as timestamp, utilsNamespace_toString as toString, utilsNamespace_uint8ArrayFromString as uint8ArrayFromString, utilsNamespace_uint8ArrayToString as uint8ArrayToString };
+  export { utilsNamespace_JSONFrom as JSONFrom, utilsNamespace_JSONTo as JSONTo, utilsNamespace_assign as assign, utilsNamespace_base64From as base64From, utilsNamespace_base64FromBase64URLSafe as base64FromBase64URLSafe, utilsNamespace_base64FromBuffer as base64FromBuffer, utilsNamespace_base64To as base64To, utilsNamespace_base64ToBuffer as base64ToBuffer, utilsNamespace_base64URLEncode as base64URLEncode, utilsNamespace_bufferCompare as bufferCompare, utilsNamespace_bufferConcatenate as bufferConcatenate, utilsNamespace_bufferFromString as bufferFromString, utilsNamespace_bufferToString as bufferToString, utilsNamespace_calculateSecondsInTime as calculateSecondsInTime, utilsNamespace_cleanObject as cleanObject, utilsNamespace_currencyBRToFloat as currencyBRToFloat, utilsNamespace_dateFirstHourOfDay as dateFirstHourOfDay, utilsNamespace_dateLastHourOfDay as dateLastHourOfDay, utilsNamespace_dateToFormat as dateToFormat, utilsNamespace_debouncer as debouncer, index$5 as default, utilsNamespace_deleteKeys as deleteKeys, utilsNamespace_generateRandomString as generateRandomString, utilsNamespace_generateSimpleId as generateSimpleId, utilsNamespace_getExecutionTime as getExecutionTime, utilsNamespace_messageDecryptFromChunks as messageDecryptFromChunks, utilsNamespace_messageEncryptToChunks as messageEncryptToChunks, utilsNamespace_normalize as normalize, utilsNamespace_pickKeys as pickKeys, utilsNamespace_pushLogMessage as pushLogMessage, utilsNamespace_regexDigitsOnly as regexDigitsOnly, utilsNamespace_regexLettersOnly as regexLettersOnly, utilsNamespace_regexReplaceTrim as regexReplaceTrim, utilsNamespace_removeDuplicatedStrings as removeDuplicatedStrings, utilsNamespace_sleep as sleep, utilsNamespace_split as split, utilsNamespace_stringCompress as stringCompress, utilsNamespace_stringDecompress as stringDecompress, utilsNamespace_stringToDate as stringToDate, utilsNamespace_stringToDateToFormat as stringToDateToFormat, utilsNamespace_stringToFormat as stringToFormat, utilsNamespace_stringZLibCompress as stringZLibCompress, utilsNamespace_stringZLibDecompress as stringZLibDecompress, utilsNamespace_throttle as throttle, utilsNamespace_timestamp as timestamp, utilsNamespace_toString as toString, utilsNamespace_uint8ArrayFromString as uint8ArrayFromString, utilsNamespace_uint8ArrayToString as uint8ArrayToString };
 }
 
 /**
@@ -4785,6 +4866,255 @@ declare namespace validatorsNamespace {
 // ------------------------------------------------------------------------------------------------
 
 /**
+ * Asynchronously decrypts an encrypted message using a provided private key.
+ * 
+ * This function performs RSA-OAEP decryption using the Web Crypto API, supporting both
+ * Node.js and browser environments. It handles PEM-formatted private keys and base64-encoded
+ * encrypted messages, providing a secure and efficient decryption process.
+ *
+ * @async
+ * @function decrypt
+ * @param {string} privateKey - The PEM-encoded private key used for decryption
+ * @param {string} encryptedMessage - The base64-encoded encrypted message to decrypt
+ * @param {Object} [props={}] - Configuration options for the decryption process
+ * @param {string} [props.format="pkcs8"] - Private key format specification
+ * @param {Object} [props.algorithm] - Cryptographic algorithm configuration
+ * @param {string} [props.algorithm.name="RSA-OAEP"] - Algorithm name
+ * @param {Object} [props.algorithm.hash] - Hash algorithm configuration
+ * @param {string} [props.algorithm.hash.name="SHA-256"] - Hash algorithm name
+ * @param {boolean} [props.extractable=true] - Whether the imported key can be extracted
+ * @param {string[]} [props.keyUsages=["decrypt"]] - Permitted key usage operations
+ * @param {string} [props.padding="RSA-OAEP"] - Padding scheme for decryption operation
+ * @returns {Promise<string>} The decrypted message as a UTF-8 string
+ * @throws {Error} When decryption fails due to invalid key, corrupted data, or crypto errors
+ * 
+ * @example
+ * const decryptedText = await decrypt(pemPrivateKey, base64EncryptedMessage);
+ * 
+ * @example
+ * const decryptedText = await decrypt(pemPrivateKey, base64EncryptedMessage, {
+ *   algorithm: { name: "RSA-OAEP", hash: { name: "SHA-1" } },
+ *   extractable: false
+ * });
+ */
+async function decrypt(privateKey, encryptedMessage, props = {}) {
+  // Early return for empty encrypted messages to avoid unnecessary processing
+  if (!encryptedMessage) {
+    return "";
+  }
+
+  // Destructure configuration with optimized defaults
+  const {
+    format = "pkcs8",
+    algorithm = { name: "RSA-OAEP", hash: { name: "SHA-256" } },
+    extractable = true,
+    keyUsages = ["decrypt"],
+    padding = "RSA-OAEP"
+  } = props || {};
+
+  // Get crypto implementation (Node.js or browser)
+  const crypto = getCrypto();
+
+  // Clean and convert PEM private key to binary format
+  // Removes PEM headers, footers, and whitespace in a single operation
+  const cleanedPrivateKey = privateKey.replace(
+    /-----(BEGIN|END) (?:RSA )?(?:PRIVATE|PUBLIC) KEY-----|\s/g,
+    ""
+  );
+  const binaryPrivateKey = base64ToBuffer(cleanedPrivateKey);
+
+  // Import the private key for cryptographic operations
+  const importedKey = await importCryptoKey(
+    format,
+    binaryPrivateKey,
+    algorithm,
+    extractable,
+    keyUsages
+  );
+
+  // Convert base64 encrypted message to binary data
+  const encryptedData = base64ToBuffer(encryptedMessage);
+
+  // Perform decryption using the Web Crypto API
+  const decryptedBuffer = await crypto.subtle.decrypt(
+    { name: padding },
+    importedKey,
+    encryptedData
+  );
+
+  // Convert decrypted binary data back to string
+  return bufferToString(decryptedBuffer);
+}
+
+// ------------------------------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------------------------
+
+/**
+ * Encrypts a message using asymmetric cryptography with public key encryption.
+ *
+ * This function provides a complete encryption workflow that handles PEM-formatted
+ * public keys, performs key importation, and encrypts plaintext messages using
+ * industry-standard cryptographic algorithms. It supports various RSA encryption
+ * schemes and is designed for secure data transmission scenarios where the sender
+ * has access to the recipient's public key.
+ *
+ * The function automatically handles key format conversion from PEM to binary,
+ * imports the key into the Web Crypto API, performs the encryption operation,
+ * and returns the result as a base64-encoded string for easy transmission.
+ *
+ * @async
+ * @param {string} publicKey - The public key in PEM format for encryption:
+ *                            - Must be a valid PEM-encoded public key string
+ *                            - Supports standard PEM headers (BEGIN/END PUBLIC KEY)
+ *                            - Can include RSA-specific headers (BEGIN/END RSA PUBLIC KEY)
+ *                            - Whitespace and line breaks are automatically handled
+ *                            - Key should be compatible with the specified algorithm
+ *
+ * @param {string} message - The plaintext message to encrypt:
+ *                          - UTF-8 encoded string that will be converted to binary
+ *                          - Empty strings are handled gracefully (returns empty result)
+ *                          - Message length is limited by the key size and padding:
+ *                            - RSA-OAEP with 2048-bit key: ~190 bytes max
+ *                            - RSA-OAEP with 4096-bit key: ~446 bytes max
+ *                          - For larger messages, consider hybrid encryption approaches
+ *
+ * @param {Object} [props={}] - Configuration options for encryption parameters:
+ * @param {string} [props.format='spki'] - Public key import format:
+ *                            - 'spki': SubjectPublicKeyInfo format (most common for public keys)
+ *                            - 'raw': Raw key data (not typical for RSA keys)
+ *                            - 'jwk': JSON Web Key format
+ *
+ * @param {Object} [props.algorithm] - Cryptographic algorithm specification:
+ *                            Default: { name: 'RSA-OAEP', hash: { name: 'SHA-256' } }
+ *                            Supported algorithms:
+ *                            - RSA-OAEP: Optimal Asymmetric Encryption Padding
+ *                            - RSA-PKCS1-v1_5: PKCS#1 v1.5 padding (legacy, less secure)
+ *                            Hash options: SHA-1, SHA-256, SHA-384, SHA-512
+ *
+ * @param {boolean} [props.extractable=true] - Key extractability setting:
+ *                            - true: Key can be exported after import (default)
+ *                            - false: Key cannot be extracted (more secure)
+ *                            - Generally safe to leave as true for public keys
+ *
+ * @param {string[]} [props.keyUsages=['encrypt']] - Permitted key operations:
+ *                            - ['encrypt']: Only encryption operations (default)
+ *                            - ['encrypt', 'wrapKey']: Encryption and key wrapping
+ *                            - Must include 'encrypt' for this function to work
+ *
+ * @param {string} [props.padding='RSA-OAEP'] - Encryption padding scheme:
+ *                            - 'RSA-OAEP': Optimal Asymmetric Encryption Padding (recommended)
+ *                            - 'RSA-PKCS1-v1_5': PKCS#1 v1.5 padding (legacy)
+ *                            - Should match the algorithm.name parameter
+ *
+ * @returns {Promise<string>} Promise resolving to encrypted data:
+ *                           - Base64-encoded string representation of encrypted bytes
+ *                           - Ready for transmission over text-based protocols
+ *                           - Can be stored safely in JSON, XML, or database text fields
+ *                           - Returns empty string if input message is empty
+ *
+ * @throws {Error} Throws an error when:
+ *                 - Public key is malformed or invalid PEM format
+ *                 - Key is incompatible with the specified algorithm
+ *                 - Message exceeds maximum size for the key/padding combination
+ *                 - Cryptographic operation fails due to invalid parameters
+ *                 - Required crypto modules are unavailable in the environment
+ *
+ * @example
+ * // Basic RSA-OAEP encryption with default parameters
+ * const publicKeyPem = `-----BEGIN PUBLIC KEY-----
+ * MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
+ * -----END PUBLIC KEY-----`;
+ *
+ * const encrypted = await encrypt(publicKeyPem, 'Hello, World!');
+ * console.log('Encrypted message:', encrypted);
+ *
+ * @example
+ * // Advanced encryption with custom algorithm parameters
+ * const customEncrypted = await encrypt(
+ *   publicKeyPem,
+ *   'Sensitive data',
+ *   {
+ *     algorithm: {
+ *       name: 'RSA-OAEP',
+ *       hash: { name: 'SHA-512' }
+ *     },
+ *     extractable: false,
+ *     keyUsages: ['encrypt'],
+ *     padding: 'RSA-OAEP'
+ *   }
+ * );
+ *
+ * @example
+ * // Handle encryption errors gracefully
+ * try {
+ *   const result = await encrypt(publicKey, message);
+ *   // Transmit or store the encrypted result
+ *   await sendSecureMessage(result);
+ * } catch (error) {
+ *   console.error('Encryption failed:', error.message);
+ *   // Implement fallback or error reporting
+ * }
+ *
+ * @example
+ * // Empty message handling
+ * const emptyResult = await encrypt(publicKey, '');
+ * console.log(emptyResult === ''); // true
+ */
+async function encrypt(publicKey, message, props = {}) {
+  // Handle empty message case early for performance
+  if (!message) return "";
+
+  // Extract crypto module for the current environment
+  const crypto = getCrypto();
+
+  // Clean and convert PEM-formatted public key to binary format
+  // Remove PEM headers, footers, and whitespace to get pure base64 content
+  const cleanedPublicKey = publicKey.replace(
+    /(-----(BEGIN|END) (RSA )?(PRIVATE|PUBLIC) KEY-----|\s)/g,
+    ""
+  );
+  const binaryPublicKey = base64ToBuffer(cleanedPublicKey);
+
+  const {
+    format = "spki",
+    algorithm = { name: "RSA-OAEP", hash: { name: "SHA-256" } },
+    extractable = true,
+    keyUsages = ["encrypt"],
+    padding = "RSA-OAEP",
+  } = props || {};
+
+  // Import the public key into Web Crypto API format
+  // Use provided parameters or sensible defaults for RSA-OAEP encryption
+  const importedKey = await importCryptoKey(
+    format || "spki",
+    binaryPublicKey,
+    algorithm || {
+      name: "RSA-OAEP",
+      hash: { name: "SHA-256" },
+    },
+    extractable !== undefined ? extractable : true,
+    keyUsages || ["encrypt"]
+  );
+
+  // Convert message string to binary format for encryption
+  const messageBuffer = bufferFromString(message);
+
+  // Perform the actual encryption operation using the imported key
+  // The padding parameter determines the encryption scheme used
+  const encryptedBuffer = await crypto.subtle.encrypt(
+    { name: padding || "RSA-OAEP" },
+    importedKey,
+    messageBuffer
+  );
+
+  // Convert encrypted binary data to base64 for safe text transmission
+  return base64FromBuffer(encryptedBuffer);
+}
+
+// ------------------------------------------------------------------------------------------------
+
+/**
  * Computes a cryptographic hash (digest) of the given data using the specified algorithm.
  * 
  * This function provides a unified interface for cryptographic hashing that works seamlessly
@@ -4964,19 +5294,23 @@ var index$3 = {
   getCrypto,
   decrypt,
   encrypt,
+  decryptBuffer,
+  encryptBuffer,
   digest,
   importCryptoKey,
   verifySignature,
 };
 
 declare const cryptoNamespace_decrypt: typeof decrypt;
+declare const cryptoNamespace_decryptBuffer: typeof decryptBuffer;
 declare const cryptoNamespace_digest: typeof digest;
 declare const cryptoNamespace_encrypt: typeof encrypt;
+declare const cryptoNamespace_encryptBuffer: typeof encryptBuffer;
 declare const cryptoNamespace_getCrypto: typeof getCrypto;
 declare const cryptoNamespace_importCryptoKey: typeof importCryptoKey;
 declare const cryptoNamespace_verifySignature: typeof verifySignature;
 declare namespace cryptoNamespace {
-  export { cryptoNamespace_decrypt as decrypt, index$3 as default, cryptoNamespace_digest as digest, cryptoNamespace_encrypt as encrypt, cryptoNamespace_getCrypto as getCrypto, cryptoNamespace_importCryptoKey as importCryptoKey, cryptoNamespace_verifySignature as verifySignature };
+  export { cryptoNamespace_decrypt as decrypt, cryptoNamespace_decryptBuffer as decryptBuffer, index$3 as default, cryptoNamespace_digest as digest, cryptoNamespace_encrypt as encrypt, cryptoNamespace_encryptBuffer as encryptBuffer, cryptoNamespace_getCrypto as getCrypto, cryptoNamespace_importCryptoKey as importCryptoKey, cryptoNamespace_verifySignature as verifySignature };
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -6900,4 +7234,4 @@ const miscHelpers = {
   validators: validatorsNamespace,
 };
 
-export { JSONFrom, JSONTo, assign, auth, base64From, base64FromBase64URLSafe, base64FromBuffer, base64To, base64ToBuffer, base64URLEncode, bufferCompare, bufferConcatenate, bufferFromString, bufferToString, BulkProcessor as bulkProcessor, calculateSecondsInTime, constants, convertECDSAASN1Signature, crypto$1 as crypto, currencyBRToFloat, custom, dateCompareAsc, dateCompareDesc, dateFirstHourOfDay, dateLastHourOfDay, dateToFormat, debouncer, decrypt, miscHelpers as default, defaultNumeric, defaultValue, deleteKeys, digest, encrypt, generateRandomString, generateSimpleId, getAuthenticationAuthData, getCrypto, getExecutionTime, getRegistrationAuthData, getWebAuthnAuthenticationAssertion, getWebAuthnRegistrationCredential, helpers, importCryptoKey, isInstanceOf, isNumber, isObject, messageDecryptFromChunks, messageEncryptToChunks, normalize, pickKeys, pushLogMessage, regexDigitsOnly, regexLettersOnly, regexReplaceTrim, removeDuplicatedStrings, setConditionBetweenDates, setConditionBetweenValues, setConditionStringLike, sleep, split, stringCompress, stringDecompress, stringToDate, stringToDateToFormat, stringToFormat, stringZLibCompress, stringZLibDecompress, throttle, timestamp, toString, uint8ArrayFromString, uint8ArrayToString, utils, validateAuthentication, validateCADICMSPR, validateCEP, validateCNH, validateCNPJ, validateCPF, validateChavePix, validateEmail, validatePISPASEPNIT, validateRG, validateRPID, validateRegistration, validateRENAVAM as validateRenavam, validateTituloEleitor, validators, verifySignature, WP as waitPlugin };
+export { JSONFrom, JSONTo, assign, auth, base64From, base64FromBase64URLSafe, base64FromBuffer, base64To, base64ToBuffer, base64URLEncode, bufferCompare, bufferConcatenate, bufferFromString, bufferToString, BulkProcessor as bulkProcessor, calculateSecondsInTime, cleanObject, constants, convertECDSAASN1Signature, crypto$1 as crypto, currencyBRToFloat, custom, dateCompareAsc, dateCompareDesc, dateFirstHourOfDay, dateLastHourOfDay, dateToFormat, debouncer, decrypt, decryptBuffer, miscHelpers as default, defaultNumeric, defaultValue, deleteKeys, digest, encrypt, encryptBuffer, generateRandomString, generateSimpleId, getAuthenticationAuthData, getCrypto, getExecutionTime, getRegistrationAuthData, getWebAuthnAuthenticationAssertion, getWebAuthnRegistrationCredential, helpers, importCryptoKey, isInstanceOf, isNumber, isObject, messageDecryptFromChunks, messageEncryptToChunks, normalize, pickKeys, pushLogMessage, regexDigitsOnly, regexLettersOnly, regexReplaceTrim, removeDuplicatedStrings, setConditionBetweenDates, setConditionBetweenValues, setConditionStringLike, sleep, split, stringCompress, stringDecompress, stringToDate, stringToDateToFormat, stringToFormat, stringZLibCompress, stringZLibDecompress, throttle, timestamp, toString, uint8ArrayFromString, uint8ArrayToString, utils, validateAuthentication, validateCADICMSPR, validateCEP, validateCNH, validateCNPJ, validateCPF, validateChavePix, validateEmail, validatePISPASEPNIT, validateRG, validateRPID, validateRegistration, validateRENAVAM as validateRenavam, validateTituloEleitor, validators, verifySignature, WP as waitPlugin };

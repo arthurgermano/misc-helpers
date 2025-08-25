@@ -413,7 +413,7 @@ function bufferFromString(txtString, encoding = "utf-8") {
   if (typeof window === "undefined") {
     return Buffer.from(txtString, encoding);
   }
-  return new TextEncoder().encode(txtString).buffer;
+  return new TextEncoder(encoding).encode(txtString);
 }
 var bufferFromString_default = bufferFromString;
 
@@ -929,7 +929,7 @@ async function messageEncryptToChunks(publicKey, payload, props = {}) {
   const encryptionPromises = chunks.map((chunk) => {
     return encryptBuffer_default(publicKey, chunk, props);
   });
-  return Promise.all(encryptionPromises);
+  return await Promise.all(encryptionPromises);
 }
 var messageEncryptToChunks_default = messageEncryptToChunks;
 

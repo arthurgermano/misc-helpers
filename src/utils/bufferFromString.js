@@ -45,7 +45,7 @@ function bufferFromString(txtString, encoding = "utf-8") {
   // **Ambiente do Navegador:**
   // `TextEncoder` é a API padrão da web para converter strings em bytes.
   // O método `.encode()` retorna diretamente um `Uint8Array`.
-  return new TextEncoder().encode(txtString).buffer;
+  return new TextEncoder(encoding).encode(txtString);
 }
 
 // ------------------------------------------------------------------------------------------------

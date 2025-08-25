@@ -42,9 +42,9 @@ async function messageEncryptToChunks(publicKey, payload, props = {}) {
   const encryptionPromises = chunks.map((chunk) => {
     return encryptBuffer(publicKey, chunk, props);
   });
-
+  
   // 3. Executa todas as encriptações em paralelo para máxima performance.
-  return Promise.all(encryptionPromises);
+  return await Promise.all(encryptionPromises);
 }
 
 // ------------------------------------------------------------------------------------------------

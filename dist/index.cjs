@@ -374,22 +374,13 @@ var assign_default = assign;
 
 // src/utils/base64From.js
 function base64From(text = "") {
-  if (typeof text !== "string" || text.length === 0) {
+  if (typeof text != "string" || !text) {
     return "";
   }
-  try {
-    if (typeof window === "undefined") {
-      return Buffer.from(text, "base64").toString("utf-8");
-    }
-    const binaryString = window.atob(text);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    return new window.TextDecoder().decode(bytes);
-  } catch (error) {
-    return "";
+  if (typeof window === "undefined") {
+    return Buffer.from(text, "base64").toString("utf-8");
   }
+  return atob(text);
 }
 var base64From_default = base64From;
 
@@ -404,24 +395,35 @@ function base64FromBase64URLSafe(urlSafeBase64 = "") {
 }
 var base64FromBase64URLSafe_default = base64FromBase64URLSafe;
 
+// src/utils/toString.js
+function toString(textObj = "", objectToJSON = true) {
+  if (textObj == null) {
+    return "";
+  }
+  const initialString = String(textObj);
+  if (objectToJSON && initialString === "[object Object]" && typeof textObj === "object") {
+    try {
+      return JSON.stringify(textObj);
+    } catch (error) {
+      return initialString;
+    }
+  }
+  return initialString;
+}
+var toString_default = toString;
+
 // src/utils/base64To.js
 function base64To(text = "", fromFormat) {
-  if (text == null) {
-    return "";
-  }
-  try {
-    let base64String;
-    if (typeof window === "undefined") {
-      const input = Buffer.isBuffer(text) ? text : String(text);
-      base64String = Buffer.from(input, fromFormat).toString("base64");
-    } else {
-      const binaryString = unescape(encodeURIComponent(String(text)));
-      base64String = window.btoa(binaryString);
+  let b64;
+  if (typeof window === "undefined") {
+    if (isNumber_default(text)) {
+      text = toString_default(text);
     }
-    return base64String.replace(/=+$/, "");
-  } catch (error) {
-    return "";
+    b64 = Buffer.from(text, fromFormat).toString("base64");
+  } else {
+    b64 = btoa(text);
   }
+  return b64.replaceAll("=", "");
 }
 var base64To_default = base64To;
 
@@ -469,23 +471,6 @@ function base64ToBuffer(base64String = "") {
   }
 }
 var base64ToBuffer_default = base64ToBuffer;
-
-// src/utils/toString.js
-function toString(textObj = "", objectToJSON = true) {
-  if (textObj == null) {
-    return "";
-  }
-  const initialString = String(textObj);
-  if (objectToJSON && initialString === "[object Object]" && typeof textObj === "object") {
-    try {
-      return JSON.stringify(textObj);
-    } catch (error) {
-      return initialString;
-    }
-  }
-  return initialString;
-}
-var toString_default = toString;
 
 // src/utils/base64URLEncode.js
 function base64URLEncode(text = "", fromFormat = "utf8") {
@@ -552,7 +537,7 @@ function bufferFromString(txtString, encoding = "utf-8") {
   if (typeof window === "undefined") {
     return Buffer.from(txtString, encoding);
   }
-  return new TextEncoder().encode(txtString);
+  return new TextEncoder().encode(txtString).buffer;
 }
 var bufferFromString_default = bufferFromString;
 

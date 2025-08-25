@@ -1617,6 +1617,27 @@ describe("UTILS - messageDecryptFromChunks", () => {
   });
 
   // ----------------------------------------------------------------------------------------------
+
+  it("messageDecryptFromChunks - Encrypt a long message WITH ACCENTS", async () => {
+    // Adicione isso no topo do seu describe
+    const jsonTestComAcentos = JSON.stringify({
+      user: "José da Silva",
+      description:
+        "Operação com acentuação e caracteres especiais para teste: ç, ã, é.",
+      data: "a".repeat(500), // para garantir que seja uma mensagem longa
+    });
+    const encryptedChunks = await messageEncryptToChunks(
+      PUBLIC_KEY,
+      jsonTestComAcentos
+    );
+
+    const decrypted = await messageDecryptFromChunks(
+      PRIVATE_KEY,
+      encryptedChunks
+    );
+
+    expect(decrypted).toEqual(jsonTestComAcentos);
+  });
 });
 
 // ------------------------------------------------------------------------------------------------
@@ -2927,9 +2948,11 @@ describe("UTILS - pickKeys", () => {
     email: "john.doe@example.com",
     status: "active",
   };
-  
+
   // Adiciona uma propriedade herdada para testar a segurança contra o prototype chain.
-  const sourceWithPrototype = Object.create({ inherited: "should_not_be_picked" });
+  const sourceWithPrototype = Object.create({
+    inherited: "should_not_be_picked",
+  });
   Object.assign(sourceWithPrototype, sourceObject);
 
   // ----------------------------------------------------------------------------------------------

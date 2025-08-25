@@ -504,67 +504,30 @@ function assign(target = {}, source = {}, throwsError = true) {
 // ------------------------------------------------------------------------------------------------
 
 /**
- * @file Utilitário cross-environment para decodificação de Base64.
- */
-
-/**
- * @summary Decodifica uma string em Base64 para uma string de texto UTF-8.
+ * @summary Decodifica uma string Base64 para texto de forma isomórfica.
  *
  * @description
- * Esta função fornece uma maneira robusta e compatível com múltiplos ambientes (Node.js e navegadores)
- * para decodificar uma string Base64. Ela detecta automaticamente o ambiente de execução e utiliza
- * as APIs nativas mais apropriadas para garantir a máxima performance e corretude.
+ * Esta função detecta o ambiente de execução (Node.js ou Navegador) para decodificar
+ * uma string no formato Base64.
  *
- * A implementação lida corretamente com caracteres multi-byte (UTF-8), como acentos e emojis,
- * que são frequentemente corrompidos pela função `atob()` nativa do navegador.
+ * - **No Node.js:** A função decodifica a string Base64 para uma string de texto no formato UTF-8,
+ * lidando corretamente com acentuação e caracteres especiais.
+ * - **No Navegador:** A função utiliza `atob()`, que decodifica a string Base64 para uma
+ * "string binária". Cada caractere na string de saída representa um byte dos dados originais.
  *
- * @param {string} [text=""] - A string em formato Base64 a ser decodificada.
  *
- * @returns {string} A string decodificada em UTF-8. Retorna uma string vazia se a entrada
- * for inválida, vazia ou se ocorrer um erro durante a decodificação.
- *
- * @example
- * // Decodificando texto ASCII simples
- * const hello = base64From('SGVsbG8gV29ybGQh');
- * console.log(hello); // "Hello World!"
- *
- * // Decodificando texto com caracteres UTF-8 (acentos e símbolos)
- * const complex = base64From('U3VjZXNzbyEg4pyT');
- * console.log(complex); // "Sucesso! ✓"
+ * @param {string} [text=""] - A string no formato Base64 a ser decodificada.
+ * @returns {string} Uma string decodificada. No Node.js, será uma string UTF-8. No navegador,
+ * será uma "string binária". Retorna uma string vazia se a entrada for inválida.
  */
 function base64From(text = "") {
-  // Valida a entrada para garantir que é uma string não vazia.
-  if (typeof text !== "string" || text.length === 0) {
+  if (typeof text != "string" || !text) {
     return "";
   }
-
-  try {
-    // A maneira padrão de verificar se o código está rodando fora de um navegador (ex: Node.js).
-    if (typeof window === "undefined") {
-      // **Ambiente Node.js:**
-      // Utiliza a classe `Buffer`, que é altamente otimizada e a forma canônica
-      // de lidar com dados binários e encodings no Node.js.
-      return Buffer.from(text, "base64").toString("utf-8");
-    }
-    // **Ambiente do Navegador:**
-    // A função `atob()` sozinha não lida bem com caracteres UTF-8.
-    // A abordagem moderna abaixo garante a decodificação correta.
-    const binaryString = window.atob(text);
-
-    // Converte a string binária decodificada em um array de bytes (Uint8Array).
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-
-    // A API `TextDecoder` interpreta corretamente o array de bytes como uma string UTF-8.
-    return new window.TextDecoder().decode(bytes);
-  } catch (error) {
-    // Captura exceções que podem ocorrer se a string `text` não for um Base64 válido.
-    // Retorna uma string vazia para um comportamento consistente e previsível.
-    // console.error("Falha ao decodificar Base64:", error); // Descomente para depuração
-    return "";
+  if (typeof window === "undefined") {
+    return Buffer.from(text, "base64").toString("utf-8");
   }
+  return atob(text);
 }
 
 /**
@@ -616,65 +579,95 @@ function base64FromBase64URLSafe(urlSafeBase64 = "") {
 }
 
 /**
- * @file Utilitário cross-environment para codificação em Base64.
+ * @file Utilitário seguro e robusto para conversão de valores para string.
  */
 
 /**
- * @summary Codifica uma string, Buffer ou número para o formato Base64 (sem preenchimento).
+ * @summary Converte um valor de qualquer tipo para uma string de forma segura.
  *
  * @description
- * Esta função é cross-environment, funcionando de forma otimizada tanto em Node.js quanto
- * em navegadores. Ela converte a entrada fornecida para uma string Base64 e remove
- * os caracteres de preenchimento (`=`) no final, tornando-a mais compacta e segura para URLs.
+ * Esta função é uma versão mais robusta do construtor `String()`. Ela prioriza o método
+ * `.toString()` customizado de um objeto. Apenas se um objeto não tiver um `.toString()`
+ * customizado (resultando no padrão `"[object Object]"`), a função tentará convertê-lo
+ * para uma string JSON.
  *
- * A implementação no navegador é robusta e lida corretamente com caracteres multi-byte (UTF-8),
- * como acentos e emojis.
+ * @param {*} [textObj=""] - O valor a ser convertido para string.
+ * @param {boolean} [objectToJSON=true] - Se `true` e a entrada for um objeto sem `.toString()`
+ * customizado, tenta convertê-lo para uma string JSON.
  *
- * @param {string | Buffer | number} [text=""] - A entrada a ser codificada. Pode ser uma string,
- * Buffer (apenas Node.js) ou número.
- * @param {BufferEncoding} [fromFormat] - **(Apenas Node.js)** A codificação da string de entrada,
- * se não for UTF-8. Exemplos: 'utf-8', 'hex', 'binary'.
- *
- * @returns {string} A representação da string em Base64, sem o preenchimento (`=`).
+ * @returns {string} A representação do valor como string.
  *
  * @example
- * // Uso no Navegador ou Node.js com string UTF-8
- * const encoded = base64To('Sucesso! ✓');
- * console.log(encoded); // "U3VjZXNzbyEg4pyT"
+ * const custom = { toString: () => 'Custom!' };
+ * toString(custom);           // 'Custom!'
+ *
+ * toString({ a: 1 });         // '{"a":1}'
+ * toString({ a: 1 }, false);  // '[object Object]'
+ * toString(123);              // '123'
+ * toString(null);             // ''
+ */
+function toString(textObj = "", objectToJSON = true) {
+  // 1. Lida com `null` e `undefined` primeiro, retornando uma string vazia.
+  if (textObj == null) {
+    return "";
+  }
+
+  // 2. Realiza a conversão inicial para string.
+  // O construtor `String()` invoca corretamente o método `.toString()` do objeto.
+  const initialString = String(textObj);
+
+  // 3. Verifica se a conversão inicial resultou na string genérica de objeto.
+  // O `typeof` previne que a string literal "[object Object]" seja convertida para JSON.
+  if (
+    objectToJSON &&
+    initialString === '[object Object]' &&
+    typeof textObj === 'object'
+  ) {
+    try {
+      // Se for um objeto genérico, tenta uma conversão JSON mais informativa.
+      return JSON.stringify(textObj);
+    } catch (error) {
+      // Se o JSON falhar (ex: referência circular), retorna a string genérica.
+      return initialString;
+    }
+  }
+
+  // 4. Se não for um objeto genérico (ou se for um primitivo, array, ou objeto customizado),
+  // a conversão inicial já é a correta.
+  return initialString;
+}
+
+// ------------------------------------------------------------------------------------------------
+
+/**
+ * @summary Codifica uma string para o formato Base64 sem padding, de forma isomórfica.
+ *
+ * @description
+ * Esta função detecta o ambiente de execução (Node.js ou Navegador) e codifica
+ * o texto de entrada para uma string Base64, removendo os caracteres de padding (`=`) no final.
+ *
+ * - **No Node.js:** A função é mais robusta, utilizando `Buffer.from()`. Ela pode converter
+ * números para strings e aceita um `fromFormat` para especificar a codificação do texto
+ * de entrada (ex: 'utf-8').
+ * - **No Navegador:** A função utiliza `btoa()`, que opera sobre "strings binárias".
+ *
+ *
+ * @param {string|number} [text=""] - O texto a ser codificado. Se for um número, será convertido para string (apenas no Node.js).
+ * @param {string} [fromFormat] - A codificação do texto de entrada (ex: 'utf-8', 'binary').
+ * **Este parâmetro é utilizado apenas no ambiente Node.js.**
+ * @returns {string} A string codificada em Base64, sem os caracteres de padding (`=`).
  */
 function base64To(text = "", fromFormat) {
-  // Garante que a função retorne uma string vazia para entradas nulas ou indefinidas.
-  if (text == null) {
-    return "";
-  }
-
-  try {
-    let base64String;
-
-    // **Ambiente Node.js:**
-    if (typeof window === "undefined") {
-      // Otimização: se a entrada já for um Buffer, usa-o diretamente.
-      // Caso contrário, converte para string para garantir a consistência da entrada.
-      const input = Buffer.isBuffer(text) ? text : String(text);
-      
-      // Utiliza a API nativa Buffer, que lida com diversos formatos de entrada (`fromFormat`).
-      base64String = Buffer.from(input, fromFormat).toString("base64");
-    } else {
-      // **Ambiente do Navegador:**
-      // A função `btoa` do navegador requer uma string onde cada caractere represente um byte (0-255).
-      // Esta linha converte uma string UTF-8 padrão para este formato "binário", garantindo
-      // que caracteres multi-byte (acentos, emojis) sejam codificados corretamente.
-      const binaryString = unescape(encodeURIComponent(String(text)));
-      base64String = window.btoa(binaryString);
+  let b64;
+  if (typeof window === "undefined") {
+    if (isNumber(text)) {
+      text = toString(text);
     }
-
-    // Remove um ou mais caracteres de preenchimento ('=') do final da string Base64
-    // para criar uma saída mais compacta e segura para URLs.
-    return base64String.replace(/=+$/, "");
-  } catch (error) {
-    // Em caso de qualquer erro durante o processo de codificação, retorna uma string vazia.
-    return "";
+    b64 = Buffer.from(text, fromFormat).toString("base64");
+  } else {
+    b64 = btoa(text);
   }
+  return b64.replaceAll("=", "");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -804,65 +797,6 @@ function base64ToBuffer(base64String = "") {
     // Retorna um ArrayBuffer vazio em caso de erro
     return new ArrayBuffer(0);
   }
-}
-
-/**
- * @file Utilitário seguro e robusto para conversão de valores para string.
- */
-
-/**
- * @summary Converte um valor de qualquer tipo para uma string de forma segura.
- *
- * @description
- * Esta função é uma versão mais robusta do construtor `String()`. Ela prioriza o método
- * `.toString()` customizado de um objeto. Apenas se um objeto não tiver um `.toString()`
- * customizado (resultando no padrão `"[object Object]"`), a função tentará convertê-lo
- * para uma string JSON.
- *
- * @param {*} [textObj=""] - O valor a ser convertido para string.
- * @param {boolean} [objectToJSON=true] - Se `true` e a entrada for um objeto sem `.toString()`
- * customizado, tenta convertê-lo para uma string JSON.
- *
- * @returns {string} A representação do valor como string.
- *
- * @example
- * const custom = { toString: () => 'Custom!' };
- * toString(custom);           // 'Custom!'
- *
- * toString({ a: 1 });         // '{"a":1}'
- * toString({ a: 1 }, false);  // '[object Object]'
- * toString(123);              // '123'
- * toString(null);             // ''
- */
-function toString(textObj = "", objectToJSON = true) {
-  // 1. Lida com `null` e `undefined` primeiro, retornando uma string vazia.
-  if (textObj == null) {
-    return "";
-  }
-
-  // 2. Realiza a conversão inicial para string.
-  // O construtor `String()` invoca corretamente o método `.toString()` do objeto.
-  const initialString = String(textObj);
-
-  // 3. Verifica se a conversão inicial resultou na string genérica de objeto.
-  // O `typeof` previne que a string literal "[object Object]" seja convertida para JSON.
-  if (
-    objectToJSON &&
-    initialString === '[object Object]' &&
-    typeof textObj === 'object'
-  ) {
-    try {
-      // Se for um objeto genérico, tenta uma conversão JSON mais informativa.
-      return JSON.stringify(textObj);
-    } catch (error) {
-      // Se o JSON falhar (ex: referência circular), retorna a string genérica.
-      return initialString;
-    }
-  }
-
-  // 4. Se não for um objeto genérico (ou se for um primitivo, array, ou objeto customizado),
-  // a conversão inicial já é a correta.
-  return initialString;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1081,7 +1015,7 @@ function bufferFromString(txtString, encoding = "utf-8") {
   // **Ambiente do Navegador:**
   // `TextEncoder` é a API padrão da web para converter strings em bytes.
   // O método `.encode()` retorna diretamente um `Uint8Array`.
-  return new TextEncoder().encode(txtString);
+  return new TextEncoder().encode(txtString).buffer;
 }
 
 /**

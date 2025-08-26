@@ -6157,7 +6157,7 @@ async function validateAuthentication(
   // Uma exceção é quando um autenticador não suporta contadores e sempre retorna 0.
   // A lógica abaixo acomoda este cenário: a verificação só é imposta se o novo contador for diferente de zero.
   if (counterAssertion !== 0) {
-    if (counterAssertion <= counterCredential) {
+    if (counterCredential <= counterAssertion) {
       throw new Error(
         `Invalid signature counter. The assertion counter (${counterAssertion}) must be strictly greater than the stored credential counter (${counterCredential}).`
       );

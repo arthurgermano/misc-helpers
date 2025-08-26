@@ -2432,7 +2432,7 @@ async function validateAuthentication(credential, assertion, expectedProps = {},
     throw new Error("counterAssertion must be a number >= 0");
   }
   if (counterAssertion !== 0) {
-    if (counterAssertion <= counterCredential) {
+    if (counterCredential <= counterAssertion) {
       throw new Error(
         `Invalid signature counter. The assertion counter (${counterAssertion}) must be strictly greater than the stored credential counter (${counterCredential}).`
       );

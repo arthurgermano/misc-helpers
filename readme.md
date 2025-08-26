@@ -85,7 +85,7 @@ const { defaultNumeric, validateCPF } = require('misc-helpers');
     - [`bufferFromString`](#bufferfromstring)
     - [`bufferToString`](#buffertostring)
     - [`calculateSecondsInTime`](#calculatesecondsintime)
-  - [`cleanObject`](#cleanobject)
+    - [`cleanObject`](#cleanobject)
     - [`currencyBRToFloat`](#currencybrtofloat)
     - [`dateFirstHourOfDay`](#datefirsthourofday)
     - [`dateLastHourOfDay`](#datelasthourofday)
@@ -1042,7 +1042,7 @@ console.log(new Date(timeOneMinuteAgo));
 
 ---
 
-## `cleanObject`
+### `cleanObject`
 Cria uma cópia 'limpa' de um objeto, removendo recursivamente chaves com valores vazios, nulos ou indesejados, com segurança contra referências circulares.
 
 **Assinatura:** `cleanObject(sourceObject, options?)`

@@ -1,6 +1,8 @@
+var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __export = (target, all) => {
   for (var name in all)
@@ -14,6 +16,14 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // src/index.js
@@ -38,6 +48,7 @@ __export(index_exports, {
   cleanObject: () => cleanObject_default,
   constants: () => constants,
   convertECDSAASN1Signature: () => convertECDSAASN1Signature_default,
+  copyObject: () => copyObject_default,
   crypto: () => crypto2,
   currencyBRToFloat: () => currencyBRToFloat_default,
   custom: () => custom,
@@ -290,6 +301,7 @@ __export(utils_exports, {
   bufferToString: () => bufferToString_default,
   calculateSecondsInTime: () => calculateSecondsInTime_default,
   cleanObject: () => cleanObject_default,
+  copyObject: () => copyObject_default,
   currencyBRToFloat: () => currencyBRToFloat_default,
   dateFirstHourOfDay: () => dateFirstHourOfDay_default,
   dateLastHourOfDay: () => dateLastHourOfDay_default,
@@ -326,47 +338,45 @@ __export(utils_exports, {
 });
 
 // src/utils/assign.js
-function deepClone(source, map = /* @__PURE__ */ new WeakMap()) {
-  if (source === null || typeof source !== "object") {
-    return source;
+var import_lodash = __toESM(require("lodash.clonedeep"), 1);
+var import_lodash2 = __toESM(require("lodash.mergewith"), 1);
+var customizer = (objValue, srcValue) => {
+  if (Array.isArray(srcValue) || ArrayBuffer.isView(srcValue)) {
+    return srcValue;
   }
-  if (map.has(source)) {
-    return map.get(source);
-  }
-  if (Array.isArray(source)) {
-    const clone2 = [];
-    map.set(source, clone2);
-    for (let i = 0; i < source.length; i++) {
-      clone2[i] = deepClone(source[i], map);
-    }
-    return clone2;
-  }
-  const clone = {};
-  map.set(source, clone);
-  for (const key in source) {
-    if (Object.prototype.hasOwnProperty.call(source, key)) {
-      clone[key] = deepClone(source[key], map);
-    }
-  }
-  return clone;
-}
-function assign(target = {}, source = {}, throwsError = true) {
-  if (target === null || typeof target !== "object") {
-    if (throwsError) {
-      throw new TypeError("Assign Function: The target provided is not an object");
-    }
+};
+function assign(target = {}, source = {}, options = {}) {
+  let { exclude = [], throwsError = true } = options;
+  if (target === null || typeof target !== "object" || Array.isArray(target)) {
+    if (throwsError)
+      throw new TypeError("assign: O par\xE2metro 'target' deve ser um objeto.");
     return null;
   }
-  if (source === null || typeof source !== "object") {
-    if (throwsError) {
-      throw new TypeError("Assign Function: The source provided is not an object");
-    }
+  if (source === null || typeof source !== "object" || Array.isArray(source)) {
+    if (throwsError)
+      throw new TypeError("assign: O par\xE2metro 'source' deve ser um objeto.");
     return null;
+  }
+  if (!Array.isArray(exclude)) {
+    exclude = [];
   }
   try {
-    const clonedTarget = deepClone(target);
-    const clonedSource = deepClone(source);
-    return Object.assign(clonedTarget, clonedSource);
+    const sourceToMerge = (0, import_lodash.default)(source);
+    const targetToMerge = (0, import_lodash.default)(target);
+    if (exclude.length > 0) {
+      for (const key of exclude) {
+        delete sourceToMerge[key];
+        delete targetToMerge[key];
+      }
+    }
+    const result = (0, import_lodash2.default)(targetToMerge, sourceToMerge, customizer);
+    const sourceSymbols = Object.getOwnPropertySymbols(source);
+    for (const symbolKey of sourceSymbols) {
+      if (!exclude.includes(symbolKey)) {
+        result[symbolKey] = (0, import_lodash.default)(source[symbolKey]);
+      }
+    }
+    return result;
   } catch (error) {
     if (throwsError) {
       throw error;
@@ -598,6 +608,42 @@ function cleanObject(sourceObject, options = {}) {
   return result;
 }
 var cleanObject_default = cleanObject;
+
+// src/utils/copyObject.js
+var import_lodash3 = __toESM(require("lodash.clonedeep"), 1);
+function copyObject(source = {}, options = {}) {
+  const {
+    exclude = [],
+    throwsError = true,
+    cleanObject: shouldClean = false
+  } = options;
+  if (source === null || typeof source !== "object") {
+    if (throwsError) {
+      throw new TypeError(
+        "copyObject: O par\xE2metro 'source' deve ser um objeto."
+      );
+    }
+    return null;
+  }
+  try {
+    let result = (0, import_lodash3.default)(source);
+    if (exclude.length > 0) {
+      for (const key of exclude) {
+        delete result[key];
+      }
+    }
+    if (shouldClean) {
+      result = cleanObject_default(result);
+    }
+    return result;
+  } catch (error) {
+    if (throwsError) {
+      throw error;
+    }
+    return null;
+  }
+}
+var copyObject_default = copyObject;
 
 // src/utils/currencyBRToFloat.js
 function currencyBRToFloat(moneyValue) {
@@ -2432,7 +2478,7 @@ async function validateAuthentication(credential, assertion, expectedProps = {},
     throw new Error("counterAssertion must be a number >= 0");
   }
   if (counterAssertion !== 0) {
-    if (counterCredential <= counterAssertion) {
+    if (counterAssertion <= counterCredential) {
       throw new Error(
         `Invalid signature counter. The assertion counter (${counterAssertion}) must be strictly greater than the stored credential counter (${counterCredential}).`
       );
@@ -3107,6 +3153,7 @@ var index_default = miscHelpers;
   cleanObject,
   constants,
   convertECDSAASN1Signature,
+  copyObject,
   crypto,
   currencyBRToFloat,
   custom,

@@ -1,6 +1,6 @@
 {
   "name": "misc-helpers",
-  "version": "2.0.17",
+  "version": "2.0.18",
   "author": "Arthur José Germano",
   "license": "MIT",
   "description": "Uma coleção robusta de helpers, validadores e classes de alta performance para JavaScript/Node.js, incluindo processamento em lote (bulk), validadores de documentos brasileiros e utilitários de criptografia.",
@@ -71,7 +71,9 @@
   "dependencies": {
     "cbor-x": "^1.6.0",
     "date-fns": "^4.1.0",
-    "fflate": "^0.8.2"
+    "fflate": "^0.8.2",
+    "lodash.clonedeep": "^4.5.0",
+    "lodash.mergewith": "^4.6.2"
   },
   "devDependencies": {
     "tsup": "^8.5.0",

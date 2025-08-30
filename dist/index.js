@@ -180,6 +180,7 @@ __export(utils_exports, {
   bufferToString: () => bufferToString_default,
   calculateSecondsInTime: () => calculateSecondsInTime_default,
   cleanObject: () => cleanObject_default,
+  copyObject: () => copyObject_default,
   currencyBRToFloat: () => currencyBRToFloat_default,
   dateFirstHourOfDay: () => dateFirstHourOfDay_default,
   dateLastHourOfDay: () => dateLastHourOfDay_default,
@@ -216,47 +217,45 @@ __export(utils_exports, {
 });
 
 // src/utils/assign.js
-function deepClone(source, map = /* @__PURE__ */ new WeakMap()) {
-  if (source === null || typeof source !== "object") {
-    return source;
+import cloneDeep from "lodash.clonedeep";
+import mergewith from "lodash.mergewith";
+var customizer = (objValue, srcValue) => {
+  if (Array.isArray(srcValue) || ArrayBuffer.isView(srcValue)) {
+    return srcValue;
   }
-  if (map.has(source)) {
-    return map.get(source);
-  }
-  if (Array.isArray(source)) {
-    const clone2 = [];
-    map.set(source, clone2);
-    for (let i = 0; i < source.length; i++) {
-      clone2[i] = deepClone(source[i], map);
-    }
-    return clone2;
-  }
-  const clone = {};
-  map.set(source, clone);
-  for (const key in source) {
-    if (Object.prototype.hasOwnProperty.call(source, key)) {
-      clone[key] = deepClone(source[key], map);
-    }
-  }
-  return clone;
-}
-function assign(target = {}, source = {}, throwsError = true) {
-  if (target === null || typeof target !== "object") {
-    if (throwsError) {
-      throw new TypeError("Assign Function: The target provided is not an object");
-    }
+};
+function assign(target = {}, source = {}, options = {}) {
+  let { exclude = [], throwsError = true } = options;
+  if (target === null || typeof target !== "object" || Array.isArray(target)) {
+    if (throwsError)
+      throw new TypeError("assign: O par\xE2metro 'target' deve ser um objeto.");
     return null;
   }
-  if (source === null || typeof source !== "object") {
-    if (throwsError) {
-      throw new TypeError("Assign Function: The source provided is not an object");
-    }
+  if (source === null || typeof source !== "object" || Array.isArray(source)) {
+    if (throwsError)
+      throw new TypeError("assign: O par\xE2metro 'source' deve ser um objeto.");
     return null;
+  }
+  if (!Array.isArray(exclude)) {
+    exclude = [];
   }
   try {
-    const clonedTarget = deepClone(target);
-    const clonedSource = deepClone(source);
-    return Object.assign(clonedTarget, clonedSource);
+    const sourceToMerge = cloneDeep(source);
+    const targetToMerge = cloneDeep(target);
+    if (exclude.length > 0) {
+      for (const key of exclude) {
+        delete sourceToMerge[key];
+        delete targetToMerge[key];
+      }
+    }
+    const result = mergewith(targetToMerge, sourceToMerge, customizer);
+    const sourceSymbols = Object.getOwnPropertySymbols(source);
+    for (const symbolKey of sourceSymbols) {
+      if (!exclude.includes(symbolKey)) {
+        result[symbolKey] = cloneDeep(source[symbolKey]);
+      }
+    }
+    return result;
   } catch (error) {
     if (throwsError) {
       throw error;
@@ -488,6 +487,42 @@ function cleanObject(sourceObject, options = {}) {
   return result;
 }
 var cleanObject_default = cleanObject;
+
+// src/utils/copyObject.js
+import cloneDeep2 from "lodash.clonedeep";
+function copyObject(source = {}, options = {}) {
+  const {
+    exclude = [],
+    throwsError = true,
+    cleanObject: shouldClean = false
+  } = options;
+  if (source === null || typeof source !== "object") {
+    if (throwsError) {
+      throw new TypeError(
+        "copyObject: O par\xE2metro 'source' deve ser um objeto."
+      );
+    }
+    return null;
+  }
+  try {
+    let result = cloneDeep2(source);
+    if (exclude.length > 0) {
+      for (const key of exclude) {
+        delete result[key];
+      }
+    }
+    if (shouldClean) {
+      result = cleanObject_default(result);
+    }
+    return result;
+  } catch (error) {
+    if (throwsError) {
+      throw error;
+    }
+    return null;
+  }
+}
+var copyObject_default = copyObject;
 
 // src/utils/currencyBRToFloat.js
 function currencyBRToFloat(moneyValue) {
@@ -2322,7 +2357,7 @@ async function validateAuthentication(credential, assertion, expectedProps = {},
     throw new Error("counterAssertion must be a number >= 0");
   }
   if (counterAssertion !== 0) {
-    if (counterCredential <= counterAssertion) {
+    if (counterAssertion <= counterCredential) {
       throw new Error(
         `Invalid signature counter. The assertion counter (${counterAssertion}) must be strictly greater than the stored credential counter (${counterCredential}).`
       );
@@ -2996,6 +3031,7 @@ export {
   cleanObject_default as cleanObject,
   constants,
   convertECDSAASN1Signature_default as convertECDSAASN1Signature,
+  copyObject_default as copyObject,
   crypto2 as crypto,
   currencyBRToFloat_default as currencyBRToFloat,
   custom,

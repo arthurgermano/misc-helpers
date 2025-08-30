@@ -86,6 +86,7 @@ const { defaultNumeric, validateCPF } = require('misc-helpers');
     - [`bufferToString`](#buffertostring)
     - [`calculateSecondsInTime`](#calculatesecondsintime)
     - [`cleanObject`](#cleanobject)
+    - [`copyObject`](#copyobject)
     - [`currencyBRToFloat`](#currencybrtofloat)
     - [`dateFirstHourOfDay`](#datefirsthourofday)
     - [`dateLastHourOfDay`](#datelasthourofday)
@@ -1136,6 +1137,60 @@ const cleanedCycle = cleanObject(objA);
 // Retorna: { name: 'A', child: { name: 'B' } }
 // A propriedade 'parent' que criaria o ciclo é removida.
 console.log(JSON.stringify(cleanedCycle, null, 2));
+```
+---
+
+### `copyObject`
+Cria uma cópia profunda (deep copy) de um objeto ou valor, com opções avançadas para excluir propriedades e limpar o resultado final de valores vazios ou nulos.
+
+**Assinatura:** `copyObject(sourceObject, options?)`
+
+**Parâmetros:**
+* `sourceObject` (`any`): O objeto, array ou valor a ser copiado.
+* `options` (`object`, opcional): Um objeto para customizar o comportamento da cópia.
+    * `options.exclude` (`(string|symbol)[]`, padrão: `[]`): Um array de chaves que devem ser omitidas da cópia final.
+    * `options.cleanObject` (`boolean`, padrão: `false`): Se `true`, o objeto copiado é passado pela função `cleanObject` para remover propriedades com valores `undefined`, `null` ou vazios.
+    * `options.throwsError` (`boolean`, padrão: `true`): Se `true`, lança exceções em caso de parâmetros inválidos. Se `false`, retorna `null`.
+
+**Retorna:** (`any`) - Uma **nova** e independente cópia profunda do valor de entrada, opcionalmente modificada pelas opções.
+
+**Exemplo 1: Cópia Profunda e Imutabilidade**
+```javascript
+const original = { a: 1, b: { c: 2 } };
+const copia = copyObject(original);
+
+copia.b.c = 99; // Modifica a cópia
+
+console.log(original.b.c); // Retorna: 2 (O original permanece intacto)
+console.log(copia.b.c);    // Retorna: 99
+```
+
+**Exemplo 2: Recursividade e Tipos Especiais**
+```javascript
+const user = { id: 123, name: 'John', password: 'abc', token: 'xyz' };
+const safeUser = copyObject(user, { exclude: ['password', 'token'] });
+
+// Retorna: { id: 123, name: 'John' }
+console.log(safeUser);
+```
+
+**Exemplo 3: Usando Opções**
+```javascript
+// Supondo que `cleanObject` foi importado corretamente.
+const messyObject = { a: 1, b: null, c: undefined, d: 'hello', e: '' };
+const cleanCopy = copyObject(messyObject, { cleanObject: true });
+
+// Retorna: { a: 1, d: 'hello' } (o resultado exato depende da sua função cleanObject)
+console.log(cleanCopy);
+```
+
+**Exemplo 4: Segurança contra Referência Circular**
+```javascript
+const fullObject = { id: 1, data: null, token: 'xyz', user: 'admin' };
+const finalObject = copyObject(fullObject, { exclude: ['token'], cleanObject: true });
+
+// Retorna: { id: 1, user: 'admin' }
+console.log(finalObject);
 ```
 ---
 

@@ -1,3 +1,5 @@
+import cloneDeep from 'lodash.clonedeep';
+import mergewith from 'lodash.mergewith';
 import { format } from 'date-fns/format';
 import { strToU8, compressSync, decompressSync, strFromU8, zlibSync, unzlibSync } from 'fflate';
 import { parse } from 'date-fns/parse';
@@ -373,135 +375,128 @@ declare namespace helpersNamespace {
 }
 
 /**
- * @file Módulo para mesclar objetos de forma imutável.
+ * @file Módulo utilitário para mesclagem profunda e imutável de objetos.
+ * @summary Fornece uma função `assign` robusta, implementada com as utilidades do Lodash para máxima confiabilidade e tratamento de casos extremos.
  */
 
+
 /**
- * Cria uma cópia profunda (deep clone) de um valor.
- * Esta função auxiliar é a base para garantir a imutabilidade.
- * Ela lida com objetos, arrays e referências circulares.
- *
- * @param {*} source - O valor a ser clonado.
- * @param {WeakMap} [map=new WeakMap()] - Usado internamente para rastrear
- * referências e evitar loops infinitos em estruturas circulares.
- * @returns {*} Uma cópia profunda do valor de entrada.
  * @private
+ * @summary Função customizadora para `lodash.mergewith`.
+ * @description Garante que valores do tipo Array ou TypedArray (ex: Uint8Array) do objeto `source`
+ * substituam completamente os valores do `target`, em vez de serem mesclados. Para outros tipos,
+ * retorna `undefined` para que o `mergewith` utilize seu comportamento padrão de mesclagem.
+ * @param {*} objValue - O valor do objeto de destino (não utilizado neste customizer).
+ * @param {*} srcValue - O valor do objeto de origem que está sendo mesclado.
+ * @returns {*|undefined} O valor de origem (`srcValue`) se for um array/TypedArray, ou `undefined`.
  */
-function deepClone(source, map = new WeakMap()) {
-  // Retorna valores primitivos e nulos, que não precisam ser clonados.
-  if (source === null || typeof source !== 'object') {
-    return source;
+const customizer = (objValue, srcValue) => {
+  if (Array.isArray(srcValue) || ArrayBuffer.isView(srcValue)) {
+    return srcValue;
   }
-
-  // Se este objeto já foi clonado (em caso de referência circular),
-  // retorna a referência do clone já existente para evitar recursão infinita.
-  if (map.has(source)) {
-    return map.get(source);
-  }
-
-  // Lida com Arrays.
-  if (Array.isArray(source)) {
-    const clone = [];
-    // Armazena o clone no mapa antes da recursão para lidar com
-    // arrays que contenham referências a si mesmos.
-    map.set(source, clone);
-    for (let i = 0; i < source.length; i++) {
-      clone[i] = deepClone(source[i], map);
-    }
-    return clone;
-  }
-
-  // Lida com Objetos.
-  const clone = {};
-  // Armazena o clone no mapa antes da recursão para lidar com
-  // objetos que contenham referências a si mesmos.
-  map.set(source, clone);
-  for (const key in source) {
-    // Garante que estamos copiando apenas as propriedades do próprio objeto.
-    if (Object.prototype.hasOwnProperty.call(source, key)) {
-      clone[key] = deepClone(source[key], map);
-    }
-  }
-
-  return clone;
-}
-
+};
 
 /**
- * Realiza uma clonagem profunda de dois objetos e, em seguida, mescla as propriedades
- * do objeto `source` no objeto `target`.
+ * @summary Realiza a mesclagem profunda (deep merge) e imutável de dois objetos.
  *
  * @description
- * Esta função garante imutabilidade, pois opera em clones dos objetos de entrada,
- * deixando os originais intactos. A mesclagem em si é superficial (similar ao
- * `Object.assign`), o que significa que se uma propriedade existir em ambos os objetos,
- * a propriedade do `source` substituirá completamente a do `target`.
+ * Combina as propriedades de um objeto `source` em um `target`, retornando um objeto inteiramente novo.
+ * A função é projetada para ser robusta, utilizando `lodash.mergewith` e `lodash.clonedeep`
+ * para garantir performance, imutabilidade e tratamento correto de casos extremos como
+ * dependências circulares.
  *
- * @param {object} [target={}] - O objeto de destino. Suas propriedades serão a base
- * para o novo objeto.
- * @param {object} [source={}] - O objeto de origem. Suas propriedades serão mescladas
- * e irão sobrescrever as propriedades do `target` em caso de conflito.
- * @param {boolean} [throwsError=true] - Se `true`, a função lançará exceções em caso
- * de parâmetros inválidos. Se `false`, retornará `null`.
+ * Principais Comportamentos:
+ * - **Imutabilidade:** Os objetos `target` and `source` originais nunca são modificados.
+ * - **Mesclagem Profunda:** Objetos aninhados são mesclados recursivamente.
+ * - **Tratamento de Arrays:** Arrays e TypedArrays (ex: `Uint8Array`) do `source` substituem os do `target`.
+ * - **Tratamento de Symbols:** Propriedades com chaves do tipo `Symbol` são corretamente copiadas do `source`.
  *
- * @returns {object | null} Um novo objeto resultante da mesclagem ou `null` se
- * `throwsError` for `false` e ocorrer um erro.
+ * @param {object} target - O objeto base sobre o qual a mesclagem será aplicada.
+ * @param {object} source - O objeto cujas propriedades serão mescladas no `target`.
+ * @param {object} [options={}] - Objeto de configuração para a operação de mesclagem.
+ * @param {(string|symbol)[]} [options.exclude=[]] - Um array de chaves que devem ser completamente omitidas.
+ * Note: As chaves listadas aqui serão removidas tanto do `target` quanto do `source` antes da mesclagem.
+ * @param {boolean} [options.throwsError=true] - Se `true`, a função lançará exceções em caso de
+ * parâmetros inválidos. Se `false`, retornará `null` silenciosamente.
  *
- * @throws {TypeError} Lançado se `target` ou `source` não forem objetos.
- * @throws {Error} Lançado se ocorrer um erro durante a operação (ex: stack overflow
- * em objetos excessivamente aninhados).
+ * @returns {object | null} Retorna um **novo** objeto contendo o resultado da mesclagem,
+ * ou `null` se `throwsError` for `false` e ocorrer um erro.
+ *
+ * @throws {TypeError} Lança um erro se `target` ou `source` não forem objetos.
  *
  * @example
- * const defaults = { settings: { theme: 'dark', notifications: true }, user: 'admin' };
- * const userConfig = { settings: { notifications: false, timezone: 'UTC-3' } };
+ * // Mesclagem profunda de configurações
+ * const defaultConfig = { api: { host: 'api.example.com', port: 443 }, user: { theme: 'dark' } };
+ * const userConfig = { api: { port: 8080 }, user: { name: 'Admin', theme: 'light' } };
+ * const finalConfig = assign(defaultConfig, userConfig);
+ * // finalConfig -> { api: { host: 'api.example.com', port: 8080 }, user: { name: 'Admin', theme: 'light' } }
  *
- * const merged = assign(defaults, userConfig);
- * // Resultado:
- * // {
- * //   settings: { notifications: false, timezone: 'UTC-3' },
- * //   user: 'admin'
- * // }
- *
- * console.log(defaults.settings.theme); // 'dark' (original não foi modificado)
+ * @example
+ * // Usando a opção 'exclude' para remover chaves do resultado final
+ * const userData = { id: 123, name: 'John', role: 'user' };
+ * const updatePayload = { name: 'John Doe', role: 'admin' };
+ * const safeUpdate = assign(userData, updatePayload, { exclude: ['role'] });
+ * // safeUpdate -> { id: 123, name: 'John Doe' }
+ * // A chave 'role' foi removida do resultado.
  */
-function assign(target = {}, source = {}, throwsError = true) {
-  // Validação rigorosa dos parâmetros de entrada.
-  // A verificação `param === null` é crucial, pois `typeof null` retorna 'object'.
-  if (target === null || typeof target !== 'object') {
-    if (throwsError) {
-      throw new TypeError("Assign Function: The target provided is not an object");
-    }
+function assign(target = {}, source = {}, options = {}) {
+  let { exclude = [], throwsError = true } = options;
+
+  // Bloco de validação para garantir a integridade dos parâmetros.
+  if (target === null || typeof target !== "object" || Array.isArray(target)) {
+    if (throwsError)
+      throw new TypeError("assign: O parâmetro 'target' deve ser um objeto.");
     return null;
   }
-
-  if (source === null || typeof source !== 'object') {
-    if (throwsError) {
-      throw new TypeError("Assign Function: The source provided is not an object");
-    }
+  if (source === null || typeof source !== "object" || Array.isArray(source)) {
+    if (throwsError)
+      throw new TypeError("assign: O parâmetro 'source' deve ser um objeto.");
     return null;
+  }
+  // Garante que 'exclude' seja sempre um array para evitar erros posteriores.
+  if (!Array.isArray(exclude)) {
+    exclude = [];
   }
 
   try {
-    // Utiliza nossa implementação de clonagem profunda customizada e compatível.
-    // Isso garante que os objetos originais (`target` e `source`) não sejam modificados (imutabilidade).
-    const clonedTarget = deepClone(target);
-    const clonedSource = deepClone(source);
+    // Etapa 1: Clonar ambos os objetos para garantir a imutabilidade dos originais.
+    const sourceToMerge = cloneDeep(source);
+    const targetToMerge = cloneDeep(target);
 
-    // `Object.assign` realiza a mesclagem superficial das propriedades do clone
-    // de `source` para o clone de `target`. Esta é a forma mais eficiente de
-    // combinar as propriedades no nível superior dos objetos.
-    return Object.assign(clonedTarget, clonedSource);
+    // Etapa 2: Aplicar a lógica de exclusão, se aplicável.
+    if (exclude.length > 0) {
+      for (const key of exclude) {
+        // Remove as chaves especificadas de ambas as cópias.
+        // Isso garante que a chave não existirá no resultado final.
+        delete sourceToMerge[key];
+        delete targetToMerge[key];
+      }
+    }
+
+    // Etapa 3: Realizar a mesclagem profunda.
+    // O `mergewith` modifica o primeiro argumento, por isso operamos sobre a cópia `targetToMerge`.
+    const result = mergewith(targetToMerge, sourceToMerge, customizer);
+
+    // Etapa 4: Tratamento explícito para propriedades com chave Symbol.
+    // Esta etapa corrige uma limitação do `lodash.merge` que não copia Symbols do `source`.
+    const sourceSymbols = Object.getOwnPropertySymbols(source);
+    for (const symbolKey of sourceSymbols) {
+      // A chave de Símbolo só é copiada se não estiver na lista de exclusão.
+      if (!exclude.includes(symbolKey)) {
+        // O valor é clonado para manter a consistência da imutabilidade.
+        result[symbolKey] = cloneDeep(source[symbolKey]);
+      }
+    }
+
+    return result;
   } catch (error) {
+    // Captura de erro para respeitar a opção `throwsError`.
     if (throwsError) {
-      // Repassa o erro original para fornecer um contexto de depuração mais rico.
       throw error;
     }
-    // Retorna null se a captura de erros estiver desativada e ocorrer uma falha.
     return null;
   }
 }
-
-// ------------------------------------------------------------------------------------------------
 
 /**
  * @summary Decodifica uma string Base64 para texto de forma isomórfica.
@@ -1211,6 +1206,102 @@ function cleanObject(sourceObject, options = {}) {
   return result;
 }
 // ------------------------------------------------------------------------------------------------
+
+/**
+ * @file Módulo utilitário para cópia profunda e manipulação de objetos.
+ * @summary Fornece uma função `copyObject` para criar cópias profundas de objetos com opções de transformação.
+ */
+
+
+/**
+ * @summary Cria uma cópia profunda (deep copy) de um objeto, com opções para excluir chaves e limpar valores vazios.
+ *
+ * @description
+ * Esta função utiliza `lodash.clonedeep` para criar uma cópia robusta e totalmente independente do objeto de origem,
+ * garantindo a imutabilidade. Após a cópia, ela permite duas transformações opcionais:
+ * 1. **Exclusão de Chaves:** Remove propriedades especificadas na opção `exclude`.
+ * 2. **Limpeza de Objeto:** Se a opção `cleanObject` for `true`, o resultado é passado por uma função de limpeza
+ * para remover chaves com valores `undefined`, `null` ou vazios.
+ *
+ * @param {object} source - O objeto a ser copiado.
+ * @param {object} [options={}] - Objeto de configuração para a operação de cópia.
+ * @param {(string|symbol)[]} [options.exclude=[]] - Um array de chaves (string ou symbol) que devem ser omitidas da cópia final.
+ * @param {boolean} [options.cleanObject=false] - Se `true`, o objeto copiado será passado pela função `cleanObject` para remover propriedades vazias.
+ * @param {boolean} [options.throwsError=true] - Se `true`, a função lançará exceções em caso de parâmetros inválidos. Se `false`, retornará `null`.
+ *
+ * @returns {object | null} Retorna um **novo** objeto, profundamente copiado e opcionalmente modificado,
+ * ou `null` se `throwsError` for `false` e ocorrer um erro.
+ *
+ * @throws {TypeError} Lança um erro se o `source` não for um objeto válido e `throwsError` for `true`.
+ *
+ * @example
+ * // Exemplo 1: Cópia profunda simples
+ * const original = { a: 1, b: { c: 2 } };
+ * const copia = copyObject(original);
+ * copia.b.c = 99;
+ * // original.b.c ainda é 2.
+ *
+ * @example
+ * // Exemplo 2: Cópia com exclusão de chaves
+ * const user = { id: 123, name: 'John', password: 'abc' };
+ * const safeUser = copyObject(user, { exclude: ['password'] });
+ * // safeUser -> { id: 123, name: 'John' }
+ *
+ * @example
+ * // Exemplo 3: Cópia com limpeza de objeto
+ * const messyObject = { a: 1, b: null, c: undefined, d: 'hello', e: '' };
+ * const clean = copyObject(messyObject, { cleanObject: true });
+ * // clean -> { a: 1, d: 'hello' } (dependendo da implementação de cleanObject)
+ *
+ * @example
+ * // Exemplo 4: Usando todas as opções
+ * const fullObject = { id: 1, data: null, token: 'xyz', user: 'admin' };
+ * const finalObject = copyObject(fullObject, { exclude: ['token'], cleanObject: true });
+ * // finalObject -> { id: 1, user: 'admin' }
+ */
+function copyObject(source = {}, options = {}) {
+  const {
+    exclude = [],
+    throwsError = true,
+    cleanObject: shouldClean = false,
+  } = options;
+
+  // Validação do parâmetro de entrada principal.
+  if (source === null || typeof source !== "object") {
+    if (throwsError) {
+      throw new TypeError(
+        "copyObject: O parâmetro 'source' deve ser um objeto."
+      );
+    }
+    return null;
+  }
+
+  try {
+    // Etapa 1: A base da operação é uma cópia profunda e segura.
+    let result = cloneDeep(source);
+
+    // Etapa 2: Aplicar a lógica de exclusão, se aplicável.
+    if (exclude.length > 0) {
+      for (const key of exclude) {
+        // A remoção é feita na cópia, não no objeto original.
+        delete result[key];
+      }
+    }
+
+    // Etapa 3: Aplicar a limpeza, se solicitado.
+    if (shouldClean) {
+      result = cleanObject(result);
+    }
+
+    return result;
+  } catch (error) {
+    // Captura de erro para respeitar a opção 'throwsError'.
+    if (throwsError) {
+      throw error;
+    }
+    return null;
+  }
+}
 
 // ------------------------------------------------------------------------------------------------
 
@@ -4044,6 +4135,7 @@ declare const utilsNamespace_bufferFromString: typeof bufferFromString;
 declare const utilsNamespace_bufferToString: typeof bufferToString;
 declare const utilsNamespace_calculateSecondsInTime: typeof calculateSecondsInTime;
 declare const utilsNamespace_cleanObject: typeof cleanObject;
+declare const utilsNamespace_copyObject: typeof copyObject;
 declare const utilsNamespace_currencyBRToFloat: typeof currencyBRToFloat;
 declare const utilsNamespace_dateFirstHourOfDay: typeof dateFirstHourOfDay;
 declare const utilsNamespace_dateLastHourOfDay: typeof dateLastHourOfDay;
@@ -4077,7 +4169,7 @@ declare const utilsNamespace_toString: typeof toString;
 declare const utilsNamespace_uint8ArrayFromString: typeof uint8ArrayFromString;
 declare const utilsNamespace_uint8ArrayToString: typeof uint8ArrayToString;
 declare namespace utilsNamespace {
-  export { utilsNamespace_JSONFrom as JSONFrom, utilsNamespace_JSONTo as JSONTo, utilsNamespace_assign as assign, utilsNamespace_base64From as base64From, utilsNamespace_base64FromBase64URLSafe as base64FromBase64URLSafe, utilsNamespace_base64FromBuffer as base64FromBuffer, utilsNamespace_base64To as base64To, utilsNamespace_base64ToBuffer as base64ToBuffer, utilsNamespace_base64URLEncode as base64URLEncode, utilsNamespace_bufferCompare as bufferCompare, utilsNamespace_bufferConcatenate as bufferConcatenate, utilsNamespace_bufferFromString as bufferFromString, utilsNamespace_bufferToString as bufferToString, utilsNamespace_calculateSecondsInTime as calculateSecondsInTime, utilsNamespace_cleanObject as cleanObject, utilsNamespace_currencyBRToFloat as currencyBRToFloat, utilsNamespace_dateFirstHourOfDay as dateFirstHourOfDay, utilsNamespace_dateLastHourOfDay as dateLastHourOfDay, utilsNamespace_dateToFormat as dateToFormat, utilsNamespace_debouncer as debouncer, index$5 as default, utilsNamespace_deleteKeys as deleteKeys, utilsNamespace_generateRandomString as generateRandomString, utilsNamespace_generateSimpleId as generateSimpleId, utilsNamespace_getExecutionTime as getExecutionTime, utilsNamespace_messageDecryptFromChunks as messageDecryptFromChunks, utilsNamespace_messageEncryptToChunks as messageEncryptToChunks, utilsNamespace_normalize as normalize, utilsNamespace_pickKeys as pickKeys, utilsNamespace_pushLogMessage as pushLogMessage, utilsNamespace_regexDigitsOnly as regexDigitsOnly, utilsNamespace_regexLettersOnly as regexLettersOnly, utilsNamespace_regexReplaceTrim as regexReplaceTrim, utilsNamespace_removeDuplicatedStrings as removeDuplicatedStrings, utilsNamespace_sleep as sleep, utilsNamespace_split as split, utilsNamespace_stringCompress as stringCompress, utilsNamespace_stringDecompress as stringDecompress, utilsNamespace_stringToDate as stringToDate, utilsNamespace_stringToDateToFormat as stringToDateToFormat, utilsNamespace_stringToFormat as stringToFormat, utilsNamespace_stringZLibCompress as stringZLibCompress, utilsNamespace_stringZLibDecompress as stringZLibDecompress, utilsNamespace_throttle as throttle, utilsNamespace_timestamp as timestamp, utilsNamespace_toString as toString, utilsNamespace_uint8ArrayFromString as uint8ArrayFromString, utilsNamespace_uint8ArrayToString as uint8ArrayToString };
+  export { utilsNamespace_JSONFrom as JSONFrom, utilsNamespace_JSONTo as JSONTo, utilsNamespace_assign as assign, utilsNamespace_base64From as base64From, utilsNamespace_base64FromBase64URLSafe as base64FromBase64URLSafe, utilsNamespace_base64FromBuffer as base64FromBuffer, utilsNamespace_base64To as base64To, utilsNamespace_base64ToBuffer as base64ToBuffer, utilsNamespace_base64URLEncode as base64URLEncode, utilsNamespace_bufferCompare as bufferCompare, utilsNamespace_bufferConcatenate as bufferConcatenate, utilsNamespace_bufferFromString as bufferFromString, utilsNamespace_bufferToString as bufferToString, utilsNamespace_calculateSecondsInTime as calculateSecondsInTime, utilsNamespace_cleanObject as cleanObject, utilsNamespace_copyObject as copyObject, utilsNamespace_currencyBRToFloat as currencyBRToFloat, utilsNamespace_dateFirstHourOfDay as dateFirstHourOfDay, utilsNamespace_dateLastHourOfDay as dateLastHourOfDay, utilsNamespace_dateToFormat as dateToFormat, utilsNamespace_debouncer as debouncer, index$5 as default, utilsNamespace_deleteKeys as deleteKeys, utilsNamespace_generateRandomString as generateRandomString, utilsNamespace_generateSimpleId as generateSimpleId, utilsNamespace_getExecutionTime as getExecutionTime, utilsNamespace_messageDecryptFromChunks as messageDecryptFromChunks, utilsNamespace_messageEncryptToChunks as messageEncryptToChunks, utilsNamespace_normalize as normalize, utilsNamespace_pickKeys as pickKeys, utilsNamespace_pushLogMessage as pushLogMessage, utilsNamespace_regexDigitsOnly as regexDigitsOnly, utilsNamespace_regexLettersOnly as regexLettersOnly, utilsNamespace_regexReplaceTrim as regexReplaceTrim, utilsNamespace_removeDuplicatedStrings as removeDuplicatedStrings, utilsNamespace_sleep as sleep, utilsNamespace_split as split, utilsNamespace_stringCompress as stringCompress, utilsNamespace_stringDecompress as stringDecompress, utilsNamespace_stringToDate as stringToDate, utilsNamespace_stringToDateToFormat as stringToDateToFormat, utilsNamespace_stringToFormat as stringToFormat, utilsNamespace_stringZLibCompress as stringZLibCompress, utilsNamespace_stringZLibDecompress as stringZLibDecompress, utilsNamespace_throttle as throttle, utilsNamespace_timestamp as timestamp, utilsNamespace_toString as toString, utilsNamespace_uint8ArrayFromString as uint8ArrayFromString, utilsNamespace_uint8ArrayToString as uint8ArrayToString };
 }
 
 /**
@@ -6157,7 +6249,7 @@ async function validateAuthentication(
   // Uma exceção é quando um autenticador não suporta contadores e sempre retorna 0.
   // A lógica abaixo acomoda este cenário: a verificação só é imposta se o novo contador for diferente de zero.
   if (counterAssertion !== 0) {
-    if (counterCredential <= counterAssertion) {
+    if (counterAssertion <= counterCredential) {
       throw new Error(
         `Invalid signature counter. The assertion counter (${counterAssertion}) must be strictly greater than the stored credential counter (${counterCredential}).`
       );
@@ -7234,4 +7326,4 @@ const miscHelpers = {
   validators: validatorsNamespace,
 };
 
-export { JSONFrom, JSONTo, assign, auth, base64From, base64FromBase64URLSafe, base64FromBuffer, base64To, base64ToBuffer, base64URLEncode, bufferCompare, bufferConcatenate, bufferFromString, bufferToString, BulkProcessor as bulkProcessor, calculateSecondsInTime, cleanObject, constants, convertECDSAASN1Signature, crypto$1 as crypto, currencyBRToFloat, custom, dateCompareAsc, dateCompareDesc, dateFirstHourOfDay, dateLastHourOfDay, dateToFormat, debouncer, decrypt, decryptBuffer, miscHelpers as default, defaultNumeric, defaultValue, deleteKeys, digest, encrypt, encryptBuffer, generateRandomString, generateSimpleId, getAuthenticationAuthData, getCrypto, getExecutionTime, getRegistrationAuthData, getWebAuthnAuthenticationAssertion, getWebAuthnRegistrationCredential, helpers, importCryptoKey, isInstanceOf, isNumber, isObject, messageDecryptFromChunks, messageEncryptToChunks, normalize, pickKeys, pushLogMessage, regexDigitsOnly, regexLettersOnly, regexReplaceTrim, removeDuplicatedStrings, setConditionBetweenDates, setConditionBetweenValues, setConditionStringLike, sleep, split, stringCompress, stringDecompress, stringToDate, stringToDateToFormat, stringToFormat, stringZLibCompress, stringZLibDecompress, throttle, timestamp, toString, uint8ArrayFromString, uint8ArrayToString, utils, validateAuthentication, validateCADICMSPR, validateCEP, validateCNH, validateCNPJ, validateCPF, validateChavePix, validateEmail, validatePISPASEPNIT, validateRG, validateRPID, validateRegistration, validateRENAVAM as validateRenavam, validateTituloEleitor, validators, verifySignature, WP as waitPlugin };
+export { JSONFrom, JSONTo, assign, auth, base64From, base64FromBase64URLSafe, base64FromBuffer, base64To, base64ToBuffer, base64URLEncode, bufferCompare, bufferConcatenate, bufferFromString, bufferToString, BulkProcessor as bulkProcessor, calculateSecondsInTime, cleanObject, constants, convertECDSAASN1Signature, copyObject, crypto$1 as crypto, currencyBRToFloat, custom, dateCompareAsc, dateCompareDesc, dateFirstHourOfDay, dateLastHourOfDay, dateToFormat, debouncer, decrypt, decryptBuffer, miscHelpers as default, defaultNumeric, defaultValue, deleteKeys, digest, encrypt, encryptBuffer, generateRandomString, generateSimpleId, getAuthenticationAuthData, getCrypto, getExecutionTime, getRegistrationAuthData, getWebAuthnAuthenticationAssertion, getWebAuthnRegistrationCredential, helpers, importCryptoKey, isInstanceOf, isNumber, isObject, messageDecryptFromChunks, messageEncryptToChunks, normalize, pickKeys, pushLogMessage, regexDigitsOnly, regexLettersOnly, regexReplaceTrim, removeDuplicatedStrings, setConditionBetweenDates, setConditionBetweenValues, setConditionStringLike, sleep, split, stringCompress, stringDecompress, stringToDate, stringToDateToFormat, stringToFormat, stringZLibCompress, stringZLibDecompress, throttle, timestamp, toString, uint8ArrayFromString, uint8ArrayToString, utils, validateAuthentication, validateCADICMSPR, validateCEP, validateCNH, validateCNPJ, validateCPF, validateChavePix, validateEmail, validatePISPASEPNIT, validateRG, validateRPID, validateRegistration, validateRENAVAM as validateRenavam, validateTituloEleitor, validators, verifySignature, WP as waitPlugin };

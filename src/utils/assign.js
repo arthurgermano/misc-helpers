@@ -1,135 +1,127 @@
 /**
- * @file Módulo para mesclar objetos de forma imutável.
+ * @file Módulo utilitário para mesclagem profunda e imutável de objetos.
+ * @summary Fornece uma função `assign` robusta, implementada com as utilidades do Lodash para máxima confiabilidade e tratamento de casos extremos.
  */
 
+import cloneDeep from "lodash.clonedeep";
+import mergewith from "lodash.mergewith";
+
 /**
- * Cria uma cópia profunda (deep clone) de um valor.
- * Esta função auxiliar é a base para garantir a imutabilidade.
- * Ela lida com objetos, arrays e referências circulares.
- *
- * @param {*} source - O valor a ser clonado.
- * @param {WeakMap} [map=new WeakMap()] - Usado internamente para rastrear
- * referências e evitar loops infinitos em estruturas circulares.
- * @returns {*} Uma cópia profunda do valor de entrada.
  * @private
+ * @summary Função customizadora para `lodash.mergewith`.
+ * @description Garante que valores do tipo Array ou TypedArray (ex: Uint8Array) do objeto `source`
+ * substituam completamente os valores do `target`, em vez de serem mesclados. Para outros tipos,
+ * retorna `undefined` para que o `mergewith` utilize seu comportamento padrão de mesclagem.
+ * @param {*} objValue - O valor do objeto de destino (não utilizado neste customizer).
+ * @param {*} srcValue - O valor do objeto de origem que está sendo mesclado.
+ * @returns {*|undefined} O valor de origem (`srcValue`) se for um array/TypedArray, ou `undefined`.
  */
-function deepClone(source, map = new WeakMap()) {
-  // Retorna valores primitivos e nulos, que não precisam ser clonados.
-  if (source === null || typeof source !== 'object') {
-    return source;
+const customizer = (objValue, srcValue) => {
+  if (Array.isArray(srcValue) || ArrayBuffer.isView(srcValue)) {
+    return srcValue;
   }
-
-  // Se este objeto já foi clonado (em caso de referência circular),
-  // retorna a referência do clone já existente para evitar recursão infinita.
-  if (map.has(source)) {
-    return map.get(source);
-  }
-
-  // Lida com Arrays.
-  if (Array.isArray(source)) {
-    const clone = [];
-    // Armazena o clone no mapa antes da recursão para lidar com
-    // arrays que contenham referências a si mesmos.
-    map.set(source, clone);
-    for (let i = 0; i < source.length; i++) {
-      clone[i] = deepClone(source[i], map);
-    }
-    return clone;
-  }
-
-  // Lida com Objetos.
-  const clone = {};
-  // Armazena o clone no mapa antes da recursão para lidar com
-  // objetos que contenham referências a si mesmos.
-  map.set(source, clone);
-  for (const key in source) {
-    // Garante que estamos copiando apenas as propriedades do próprio objeto.
-    if (Object.prototype.hasOwnProperty.call(source, key)) {
-      clone[key] = deepClone(source[key], map);
-    }
-  }
-
-  return clone;
-}
-
+};
 
 /**
- * Realiza uma clonagem profunda de dois objetos e, em seguida, mescla as propriedades
- * do objeto `source` no objeto `target`.
+ * @summary Realiza a mesclagem profunda (deep merge) e imutável de dois objetos.
  *
  * @description
- * Esta função garante imutabilidade, pois opera em clones dos objetos de entrada,
- * deixando os originais intactos. A mesclagem em si é superficial (similar ao
- * `Object.assign`), o que significa que se uma propriedade existir em ambos os objetos,
- * a propriedade do `source` substituirá completamente a do `target`.
+ * Combina as propriedades de um objeto `source` em um `target`, retornando um objeto inteiramente novo.
+ * A função é projetada para ser robusta, utilizando `lodash.mergewith` e `lodash.clonedeep`
+ * para garantir performance, imutabilidade e tratamento correto de casos extremos como
+ * dependências circulares.
  *
- * @param {object} [target={}] - O objeto de destino. Suas propriedades serão a base
- * para o novo objeto.
- * @param {object} [source={}] - O objeto de origem. Suas propriedades serão mescladas
- * e irão sobrescrever as propriedades do `target` em caso de conflito.
- * @param {boolean} [throwsError=true] - Se `true`, a função lançará exceções em caso
- * de parâmetros inválidos. Se `false`, retornará `null`.
+ * Principais Comportamentos:
+ * - **Imutabilidade:** Os objetos `target` and `source` originais nunca são modificados.
+ * - **Mesclagem Profunda:** Objetos aninhados são mesclados recursivamente.
+ * - **Tratamento de Arrays:** Arrays e TypedArrays (ex: `Uint8Array`) do `source` substituem os do `target`.
+ * - **Tratamento de Symbols:** Propriedades com chaves do tipo `Symbol` são corretamente copiadas do `source`.
  *
- * @returns {object | null} Um novo objeto resultante da mesclagem ou `null` se
- * `throwsError` for `false` e ocorrer um erro.
+ * @param {object} target - O objeto base sobre o qual a mesclagem será aplicada.
+ * @param {object} source - O objeto cujas propriedades serão mescladas no `target`.
+ * @param {object} [options={}] - Objeto de configuração para a operação de mesclagem.
+ * @param {(string|symbol)[]} [options.exclude=[]] - Um array de chaves que devem ser completamente omitidas.
+ * Note: As chaves listadas aqui serão removidas tanto do `target` quanto do `source` antes da mesclagem.
+ * @param {boolean} [options.throwsError=true] - Se `true`, a função lançará exceções em caso de
+ * parâmetros inválidos. Se `false`, retornará `null` silenciosamente.
  *
- * @throws {TypeError} Lançado se `target` ou `source` não forem objetos.
- * @throws {Error} Lançado se ocorrer um erro durante a operação (ex: stack overflow
- * em objetos excessivamente aninhados).
+ * @returns {object | null} Retorna um **novo** objeto contendo o resultado da mesclagem,
+ * ou `null` se `throwsError` for `false` e ocorrer um erro.
+ *
+ * @throws {TypeError} Lança um erro se `target` ou `source` não forem objetos.
  *
  * @example
- * const defaults = { settings: { theme: 'dark', notifications: true }, user: 'admin' };
- * const userConfig = { settings: { notifications: false, timezone: 'UTC-3' } };
+ * // Mesclagem profunda de configurações
+ * const defaultConfig = { api: { host: 'api.example.com', port: 443 }, user: { theme: 'dark' } };
+ * const userConfig = { api: { port: 8080 }, user: { name: 'Admin', theme: 'light' } };
+ * const finalConfig = assign(defaultConfig, userConfig);
+ * // finalConfig -> { api: { host: 'api.example.com', port: 8080 }, user: { name: 'Admin', theme: 'light' } }
  *
- * const merged = assign(defaults, userConfig);
- * // Resultado:
- * // {
- * //   settings: { notifications: false, timezone: 'UTC-3' },
- * //   user: 'admin'
- * // }
- *
- * console.log(defaults.settings.theme); // 'dark' (original não foi modificado)
+ * @example
+ * // Usando a opção 'exclude' para remover chaves do resultado final
+ * const userData = { id: 123, name: 'John', role: 'user' };
+ * const updatePayload = { name: 'John Doe', role: 'admin' };
+ * const safeUpdate = assign(userData, updatePayload, { exclude: ['role'] });
+ * // safeUpdate -> { id: 123, name: 'John Doe' }
+ * // A chave 'role' foi removida do resultado.
  */
-function assign(target = {}, source = {}, throwsError = true) {
-  // Validação rigorosa dos parâmetros de entrada.
-  // A verificação `param === null` é crucial, pois `typeof null` retorna 'object'.
-  if (target === null || typeof target !== 'object') {
-    if (throwsError) {
-      throw new TypeError("Assign Function: The target provided is not an object");
-    }
+function assign(target = {}, source = {}, options = {}) {
+  let { exclude = [], throwsError = true } = options;
+
+  // Bloco de validação para garantir a integridade dos parâmetros.
+  if (target === null || typeof target !== "object" || Array.isArray(target)) {
+    if (throwsError)
+      throw new TypeError("assign: O parâmetro 'target' deve ser um objeto.");
     return null;
   }
-
-  if (source === null || typeof source !== 'object') {
-    if (throwsError) {
-      throw new TypeError("Assign Function: The source provided is not an object");
-    }
+  if (source === null || typeof source !== "object" || Array.isArray(source)) {
+    if (throwsError)
+      throw new TypeError("assign: O parâmetro 'source' deve ser um objeto.");
     return null;
+  }
+  // Garante que 'exclude' seja sempre um array para evitar erros posteriores.
+  if (!Array.isArray(exclude)) {
+    exclude = [];
   }
 
   try {
-    // Utiliza nossa implementação de clonagem profunda customizada e compatível.
-    // Isso garante que os objetos originais (`target` e `source`) não sejam modificados (imutabilidade).
-    const clonedTarget = deepClone(target);
-    const clonedSource = deepClone(source);
+    // Etapa 1: Clonar ambos os objetos para garantir a imutabilidade dos originais.
+    const sourceToMerge = cloneDeep(source);
+    const targetToMerge = cloneDeep(target);
 
-    // `Object.assign` realiza a mesclagem superficial das propriedades do clone
-    // de `source` para o clone de `target`. Esta é a forma mais eficiente de
-    // combinar as propriedades no nível superior dos objetos.
-    return Object.assign(clonedTarget, clonedSource);
+    // Etapa 2: Aplicar a lógica de exclusão, se aplicável.
+    if (exclude.length > 0) {
+      for (const key of exclude) {
+        // Remove as chaves especificadas de ambas as cópias.
+        // Isso garante que a chave não existirá no resultado final.
+        delete sourceToMerge[key];
+        delete targetToMerge[key];
+      }
+    }
+
+    // Etapa 3: Realizar a mesclagem profunda.
+    // O `mergewith` modifica o primeiro argumento, por isso operamos sobre a cópia `targetToMerge`.
+    const result = mergewith(targetToMerge, sourceToMerge, customizer);
+
+    // Etapa 4: Tratamento explícito para propriedades com chave Symbol.
+    // Esta etapa corrige uma limitação do `lodash.merge` que não copia Symbols do `source`.
+    const sourceSymbols = Object.getOwnPropertySymbols(source);
+    for (const symbolKey of sourceSymbols) {
+      // A chave de Símbolo só é copiada se não estiver na lista de exclusão.
+      if (!exclude.includes(symbolKey)) {
+        // O valor é clonado para manter a consistência da imutabilidade.
+        result[symbolKey] = cloneDeep(source[symbolKey]);
+      }
+    }
+
+    return result;
   } catch (error) {
+    // Captura de erro para respeitar a opção `throwsError`.
     if (throwsError) {
-      // Repassa o erro original para fornecer um contexto de depuração mais rico.
       throw error;
     }
-    // Retorna null se a captura de erros estiver desativada e ocorrer uma falha.
     return null;
   }
 }
 
-// ------------------------------------------------------------------------------------------------
-
-// Garante compatibilidade com o sistema de módulos CommonJS (Node.js).
 export default assign;
-
-// ------------------------------------------------------------------------------------------------

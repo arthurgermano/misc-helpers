@@ -218,44 +218,22 @@ __export(utils_exports, {
 
 // src/utils/assign.js
 import cloneDeep from "lodash.clonedeep";
-import mergewith from "lodash.mergewith";
-var customizer = (objValue, srcValue) => {
-  if (Array.isArray(srcValue) || ArrayBuffer.isView(srcValue)) {
-    return srcValue;
-  }
-};
 function assign(target = {}, source = {}, options = {}) {
-  let { exclude = [], throwsError = true } = options;
-  if (target === null || typeof target !== "object" || Array.isArray(target)) {
-    if (throwsError)
-      throw new TypeError("assign: O par\xE2metro 'target' deve ser um objeto.");
+  const { throwsError = true } = options;
+  if (target === null || typeof target !== "object") {
+    if (throwsError) {
+      throw new Error("assign: O par\xE2metro 'target' deve ser um objeto.");
+    }
     return null;
   }
-  if (source === null || typeof source !== "object" || Array.isArray(source)) {
-    if (throwsError)
-      throw new TypeError("assign: O par\xE2metro 'source' deve ser um objeto.");
+  if (source === null || typeof source !== "object") {
+    if (throwsError) {
+      throw new Error("assign: O par\xE2metro 'source' deve ser um objeto.");
+    }
     return null;
-  }
-  if (!Array.isArray(exclude)) {
-    exclude = [];
   }
   try {
-    const sourceToMerge = cloneDeep(source);
-    const targetToMerge = cloneDeep(target);
-    if (exclude.length > 0) {
-      for (const key of exclude) {
-        delete sourceToMerge[key];
-        delete targetToMerge[key];
-      }
-    }
-    const result = mergewith(targetToMerge, sourceToMerge, customizer);
-    const sourceSymbols = Object.getOwnPropertySymbols(source);
-    for (const symbolKey of sourceSymbols) {
-      if (!exclude.includes(symbolKey)) {
-        result[symbolKey] = cloneDeep(source[symbolKey]);
-      }
-    }
-    return result;
+    return Object.assign(cloneDeep(target), cloneDeep(source));
   } catch (error) {
     if (throwsError) {
       throw error;
@@ -2569,7 +2547,7 @@ var BulkProcessor = class {
   #retryDelayMs;
   /** @private @type {number} */
   #flushTimeoutMs;
-  /** @private @type {{onAdd?: Function, onFlush?: Function, onEnd?: Function, onBackpressure?: Function, onFlushFailure?: Function}} */
+  /** @private @type {{onAdd?: Function, onFlush?: Function, onEnd?: Function, onBackpressure?: Function, onFlushFailure?: Function, onFinished?: Function}} */
   #callbacks;
   /**
    * Constrói e configura uma nova instância do BulkProcessor.
@@ -2592,7 +2570,8 @@ var BulkProcessor = class {
         payload: otherOptions.payload || payload2,
         onAdd: otherOptions.onAdd || callbackFunctions.onAddCallback,
         onFlush: otherOptions.onFlush || callbackFunctions.onFlushCallback,
-        onEnd: otherOptions.onEnd || callbackFunctions.onEndCallback
+        onEnd: otherOptions.onEnd || callbackFunctions.onEndCallback,
+        onFinished: otherOptions.onFinished || callbackFunctions.onFinishedCallback
       };
     } else {
       options = arg1;
@@ -2620,7 +2599,8 @@ var BulkProcessor = class {
       onAdd,
       onEnd,
       onBackpressure,
-      onFlushFailure
+      onFlushFailure,
+      onFinished
     } = options;
     this.#limit = Math.max(defaultNumeric_default(userLimit, 1), 1);
     this.#maxBufferSize = Math.max(
@@ -2637,7 +2617,14 @@ var BulkProcessor = class {
     this.#logger = logger;
     this.#payload = payload;
     this.#serviceContext = serviceContext;
-    this.#callbacks = { onFlush, onAdd, onEnd, onBackpressure, onFlushFailure };
+    this.#callbacks = {
+      onFlush,
+      onAdd,
+      onEnd,
+      onBackpressure,
+      onFlushFailure,
+      onFinished
+    };
     this.#logger.info(`BulkProcessor inicializado.`, {
       limit: this.#limit,
       maxBufferSize: this.#maxBufferSize,
@@ -2862,7 +2849,9 @@ var BulkProcessor = class {
     if (this.#callbacks.onEnd) {
       try {
         await this.#callbacks.onEnd({
-          /* ... */
+          payload: this.#payload,
+          serviceContext: this.#serviceContext,
+          logger: this.#logger
         });
       } catch (error) {
         this.#logger.error(`Erro no callback onEnd.`, {
@@ -2884,6 +2873,19 @@ var BulkProcessor = class {
       );
     }
     this.#logger.info("Processador finalizado.");
+    if (this.#callbacks.onFinished) {
+      try {
+        await this.#callbacks.onFinished({
+          payload: this.#payload,
+          logger: this.#logger,
+          serviceContext: this.#serviceContext
+        });
+      } catch (error) {
+        this.#logger.error(`Erro no callback onFinished.`, {
+          errorMessage: error.message
+        });
+      }
+    }
   }
 };
 var bulkProcessor_default = BulkProcessor;

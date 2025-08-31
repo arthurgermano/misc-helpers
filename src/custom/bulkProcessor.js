@@ -71,7 +71,7 @@ class BulkProcessor {
   #retryDelayMs;
   /** @private @type {number} */
   #flushTimeoutMs;
-  /** @private @type {{onAdd?: Function, onFlush?: Function, onEnd?: Function, onBackpressure?: Function, onFlushFailure?: Function}} */
+  /** @private @type {{onAdd?: Function, onFlush?: Function, onEnd?: Function, onBackpressure?: Function, onFlushFailure?: Function, onFinished?: Function}} */
   #callbacks;
 
   /**
@@ -100,6 +100,8 @@ class BulkProcessor {
         onAdd: otherOptions.onAdd || callbackFunctions.onAddCallback,
         onFlush: otherOptions.onFlush || callbackFunctions.onFlushCallback,
         onEnd: otherOptions.onEnd || callbackFunctions.onEndCallback,
+        onFinished:
+          otherOptions.onFinished || callbackFunctions.onFinishedCallback,
       };
     } else {
       options = arg1;
@@ -126,6 +128,7 @@ class BulkProcessor {
       onEnd,
       onBackpressure,
       onFlushFailure,
+      onFinished,
     } = options;
 
     // --- Sanitização e Validação dos Parâmetros ---
@@ -153,7 +156,14 @@ class BulkProcessor {
     this.#logger = logger;
     this.#payload = payload;
     this.#serviceContext = serviceContext;
-    this.#callbacks = { onFlush, onAdd, onEnd, onBackpressure, onFlushFailure };
+    this.#callbacks = {
+      onFlush,
+      onAdd,
+      onEnd,
+      onBackpressure,
+      onFlushFailure,
+      onFinished,
+    };
 
     // Log de inicialização para observabilidade, registrando a configuração final aplicada.
     this.#logger.info(`BulkProcessor inicializado.`, {
@@ -447,7 +457,9 @@ class BulkProcessor {
     if (this.#callbacks.onEnd) {
       try {
         await this.#callbacks.onEnd({
-          /* ... */
+          payload: this.#payload,
+          serviceContext: this.#serviceContext,
+          logger: this.#logger,
         });
       } catch (error) {
         this.#logger.error(`Erro no callback onEnd.`, {
@@ -480,6 +492,19 @@ class BulkProcessor {
     }
 
     this.#logger.info("Processador finalizado.");
+    if (this.#callbacks.onFinished) {
+      try {
+        await this.#callbacks.onFinished({
+          payload: this.#payload,
+          logger: this.#logger,
+          serviceContext: this.#serviceContext,
+        });
+      } catch (error) {
+        this.#logger.error(`Erro no callback onFinished.`, {
+          errorMessage: error.message,
+        });
+      }
+    }
   }
 }
 

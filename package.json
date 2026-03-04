@@ -1,6 +1,6 @@
 {
   "name": "misc-helpers",
-  "version": "2.0.21",
+  "version": "2.1.0",
   "author": "Arthur José Germano",
   "license": "MIT",
   "description": "Uma coleção robusta de helpers, validadores e classes de alta performance para JavaScript/Node.js, incluindo processamento em lote (bulk), validadores de documentos brasileiros e utilitários de criptografia.",
@@ -30,6 +30,8 @@
     "testWebAuthn3": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/webauthn3.test.js",
     "testBulkProcessor": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/bulkProcessor.test.js",
     "testCrypto": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/crypto.test.js",
+    "testCrypto2": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/crypto2.test.js",
+    "testCrypto3": "NODE_OPTIONS='--expose-gc' vitest --run --reporter verbose --globals ./tests/crypto3.test.js",
     "build": "tsup",
     "build:debug": "tsup --minify false --sourcemap",
     "dev": "tsup --watch",

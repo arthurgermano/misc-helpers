@@ -1,4 +1,5 @@
 import getCrypto from "./getCrypto.js";
+import { setCrypto } from "./getCrypto.js";
 import decrypt from "./decrypt.js";
 import encrypt from "./encrypt.js";
 import decryptBuffer from "./decryptBuffer.js";
@@ -10,6 +11,7 @@ import verifySignature from "./verifySignature.js";
 // Named exports para importação individual
 export {
   getCrypto,
+  setCrypto,
   decrypt,
   encrypt,
   decryptBuffer,
@@ -22,6 +24,7 @@ export {
 // Default export para compatibilidade
 export default {
   getCrypto,
+  setCrypto,
   decrypt,
   encrypt,
   decryptBuffer,

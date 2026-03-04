@@ -92,6 +92,7 @@ __export(index_exports, {
   setConditionBetweenDates: () => setConditionsBetweenDates_default,
   setConditionBetweenValues: () => setConditionsBetweenValues_default,
   setConditionStringLike: () => setConditionStringLike_default,
+  setCrypto: () => setCrypto,
   sleep: () => sleep_default,
   split: () => split_default,
   stringCompress: () => stringCompress_default,
@@ -978,7 +979,19 @@ function JSONTo(object = {}, throwsError = true) {
 var JSONTo_default = JSONTo;
 
 // src/crypto/getCrypto.js
+var _injectedCrypto = null;
+function setCrypto(cryptoModule) {
+  if (cryptoModule !== null && typeof cryptoModule !== "object") {
+    throw new Error(
+      `setCrypto: expected a crypto module object or null, received ${typeof cryptoModule}`
+    );
+  }
+  _injectedCrypto = cryptoModule;
+}
 function getCrypto() {
+  if (_injectedCrypto !== null) {
+    return _injectedCrypto;
+  }
   if (typeof window !== "undefined" && typeof window.crypto !== "undefined") {
     return window.crypto;
   }
@@ -990,7 +1003,9 @@ function getCrypto() {
       const require2 = module.createRequire(importMetaUrl);
       return require2("crypto");
     }
-    throw new Error("No method available to load crypto module in current environment");
+    throw new Error(
+      "No method available to load crypto module in current environment \u2014 call setCrypto(crypto) before using this module in ESM environments"
+    );
   } catch (error) {
     throw new Error(`Failed to load crypto module: ${error.message}`);
   }
@@ -1929,6 +1944,7 @@ __export(crypto_exports, {
   encryptBuffer: () => encryptBuffer_default,
   getCrypto: () => getCrypto_default,
   importCryptoKey: () => importCryptoKey_default,
+  setCrypto: () => setCrypto,
   verifySignature: () => verifySignature_default
 });
 
@@ -2027,6 +2043,7 @@ var verifySignature_default = verifySignature;
 // src/crypto/index.js
 var crypto_default = {
   getCrypto: getCrypto_default,
+  setCrypto,
   decrypt: decrypt_default,
   encrypt: encrypt_default,
   decryptBuffer: decryptBuffer_default,
@@ -3198,6 +3215,7 @@ var index_default = miscHelpers;
   setConditionBetweenDates,
   setConditionBetweenValues,
   setConditionStringLike,
+  setCrypto,
   sleep,
   split,
   stringCompress,

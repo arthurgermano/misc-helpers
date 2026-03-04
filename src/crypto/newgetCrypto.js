@@ -1,4 +1,67 @@
-import { _injectedCrypto } from "./setCrypto.js";
+// ------------------------------------------------------------------------------------------------
+// Internal state — holds the injected crypto module when set externally.
+// Initialized as null to indicate no override has been provided.
+// Shared exclusively within this module — never exported directly.
+let _injectedCrypto = null;
+
+// ------------------------------------------------------------------------------------------------
+
+/**
+ * Injects an external cryptographic module to override the automatic environment
+ * detection performed by {@link getCrypto}.
+ *
+ * This function is intended for environments where dynamic module loading is
+ * unavailable or unreliable — such as ESM contexts in Node.js where `require`
+ * is not defined. By injecting the native `crypto` module explicitly, the caller
+ * bypasses the internal detection logic entirely.
+ *
+ * Once set, any subsequent call to {@link getCrypto} will return the injected
+ * module instead of performing environment detection.
+ *
+ * Pass `null` to clear the injection and restore automatic detection behavior.
+ *
+ * @param {Crypto|Object|null} cryptoModule - The cryptographic module to inject.
+ *                                            Must expose the same interface expected
+ *                                            by the consuming functions (e.g. createHash,
+ *                                            publicEncrypt, privateDecrypt for Node.js,
+ *                                            or subtle for browser Web Crypto API).
+ *                                            Pass `null` to reset to automatic detection.
+ * @returns {void}
+ *
+ * @throws {Error} When the provided value is neither a non-null object nor null —
+ *                 prevents silent failures from invalid injections such as strings
+ *                 or numeric values.
+ *
+ * @example
+ * // Node.js ESM — inject native crypto to avoid dynamic require issues
+ * import crypto from "crypto";
+ * import { setCrypto } from "misc-helpers";
+ *
+ * setCrypto(crypto);
+ *
+ * @example
+ * // Browser — inject Web Crypto API explicitly
+ * import { setCrypto } from "misc-helpers";
+ *
+ * setCrypto(window.crypto);
+ *
+ * @example
+ * // Reset to automatic detection
+ * import { setCrypto } from "misc-helpers";
+ *
+ * setCrypto(null);
+ */
+function setCrypto(cryptoModule) {
+  if (cryptoModule !== null && typeof cryptoModule !== "object") {
+    throw new Error(
+      `setCrypto: expected a crypto module object or null, received ${typeof cryptoModule}`,
+    );
+  }
+
+  _injectedCrypto = cryptoModule;
+}
+
+// ------------------------------------------------------------------------------------------------
 
 /**
  * Retrieves the appropriate cryptographic module for the current environment.
@@ -10,7 +73,8 @@ import { _injectedCrypto } from "./setCrypto.js";
  *
  * When no injection is present, environment detection is performed automatically:
  * browser environments are identified by the presence of `window.crypto`, while
- * Node.js environments fall back to dynamic loading of the native `crypto` module.
+ * Node.js environments fall back to dynamic loading of the native `crypto` module
+ * through multiple compatibility strategies.
  *
  * @returns {Crypto|Object} The cryptographic module appropriate for the current environment:
  *                          - Injected: Returns the module provided via {@link setCrypto}
@@ -19,14 +83,13 @@ import { _injectedCrypto } from "./setCrypto.js";
  *
  * @throws {Error} When cryptographic capabilities are unavailable:
  *                 - Browser: When `window.crypto` is undefined (typically HTTP contexts)
- *                 - Node.js: When the `crypto` module cannot be loaded and no
- *                            injection has been provided via {@link setCrypto}
+ *                 - Node.js: When all loading strategies fail and no injection has been
+ *                            provided via {@link setCrypto}
  *
  * @example
  * // Recommended — Node.js ESM, inject before calling getCrypto
  * import crypto from "crypto";
- * import { setCrypto } from "./setCrypto.js";
- * import getCrypto from "./getCrypto.js";
+ * import { setCrypto, getCrypto } from "misc-helpers";
  *
  * setCrypto(crypto);
  * const cryptoModule = getCrypto(); // returns the injected module
@@ -66,7 +129,6 @@ function getCrypto() {
 
   // Check for browser environment by testing window object availability
   if (typeof window !== "undefined" && typeof window.crypto !== "undefined") {
-    // Return browser's Web Crypto API
     return window.crypto;
   }
 
@@ -97,4 +159,5 @@ function getCrypto() {
 
 // ------------------------------------------------------------------------------------------------
 // Export for ESM
+export { getCrypto, setCrypto };
 export default getCrypto;

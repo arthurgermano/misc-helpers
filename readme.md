@@ -55,6 +55,8 @@ const { defaultNumeric, validateCPF } = require('misc-helpers');
     - [`encrypt`](#encrypt)
   - [`encryptBuffer`](#encryptbuffer)
     - [`getCrypto`](#getcrypto)
+    - [`setCrypto`](#setcrypto)
+    - [Sobre `_injectedCrypto`](#sobre-_injectedcrypto)
     - [`importCryptoKey`](#importcryptokey)
     - [`verifySignature`](#verifysignature)
   - [Custom](#custom)
@@ -444,17 +446,80 @@ encryptBuffer(publicKeyPEM, messageBuffer)
 ---
 
 ### `getCrypto`
-Obtém o objeto `crypto` nativo para operações da Web Crypto API, garantindo compatibilidade entre Node.js e navegadores.
+
+Obtém o módulo `crypto` adequado para o ambiente atual, garantindo compatibilidade entre Node.js e navegadores. A função verifica automaticamente se há um módulo injetado via `setCrypto`, depois tenta `window.crypto` (browser), e por fim carrega o módulo nativo do Node.js.
 
 **Assinatura:** `getCrypto()`
 
+**Retorna:** O módulo crypto do ambiente — `window.crypto` no browser ou o módulo nativo `crypto` do Node.js.
+
+**Lança:** `Error` se nenhuma estratégia de carregamento funcionar e nenhum módulo tiver sido injetado via `setCrypto`.
+
 **Exemplo:**
 ```javascript
-const { getCrypto } = require('misc-helpers');
+import { getCrypto } from 'misc-helpers';
 
-// Acesso direto à API de criptografia do ambiente
 const crypto = getCrypto();
-console.log(crypto.subtle); // Acessa as funções criptográficas
+
+// Browser — Web Crypto API
+const hash = await crypto.subtle.digest('SHA-256', data);
+
+// Node.js — módulo nativo
+const hash = crypto.createHash('sha256').update('hello').digest('hex');
+```
+
+---
+
+### `setCrypto`
+
+Injeta um módulo crypto externo, substituindo completamente a detecção automática de ambiente feita por `getCrypto`. Qualquer chamada subsequente a `getCrypto` retornará o módulo injetado, ignorando `window.crypto` e o `require` do Node.js.
+
+Passe `null` para limpar a injeção e restaurar o comportamento automático.
+
+**Assinatura:** `setCrypto(cryptoModule)`
+
+| Parâmetro | Tipo | Descrição |
+|---|---|---|
+| `cryptoModule` | `Object \| null` | Módulo crypto a injetar, ou `null` para resetar. |
+
+**Lança:** `Error` se o valor fornecido não for um objeto nem `null` — strings, números, booleanos e outros primitivos são rejeitados.
+
+**Quando usar:**
+- Ambientes **ESM no Node.js** onde `require` não está disponível
+- Testes que precisam **mockar** o módulo crypto
+- Ambientes customizados com implementação própria de crypto
+
+**Exemplo:**
+```javascript
+import crypto from 'crypto';
+import { setCrypto, getCrypto } from 'misc-helpers';
+
+// Node.js ESM — injeta antes de qualquer chamada a getCrypto
+setCrypto(crypto);
+
+const resolvedCrypto = getCrypto(); // retorna o módulo injetado
+
+// Resetar para detecção automática
+setCrypto(null);
+```
+
+---
+
+### Sobre `_injectedCrypto`
+
+`_injectedCrypto` é a variável interna do módulo que armazena o valor passado por `setCrypto`. Ela começa como `null`, indicando que nenhuma injeção foi feita. Quando `getCrypto` é chamado, a primeira coisa que ele verifica é se `_injectedCrypto !== null` — se for o caso, retorna esse valor imediatamente, sem executar nenhuma lógica de detecção de ambiente.
+
+Você nunca acessa ou modifica `_injectedCrypto` diretamente. A interface pública é exclusivamente `setCrypto` e `getCrypto`. A variável existe apenas dentro do escopo do módulo e nunca é exportada — ela é um detalhe de implementação que viabiliza o padrão de injeção de dependência sem precisar de classes ou singletons explícitos.
+
+O fluxo completo é:
+```
+getCrypto()
+    │
+    ├── _injectedCrypto !== null?  →  retorna _injectedCrypto   ← setCrypto() alimenta isso
+    │
+    ├── window.crypto existe?      →  retorna window.crypto
+    │
+    └── Node.js require            →  retorna require('crypto')
 ```
 
 ---
